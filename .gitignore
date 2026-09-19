@@ -15,3 +15,6 @@ Thumbs.db
 # logs de la herramienta de diseño
 design/pre-log.json
 design/post-log.json
+
+# espacio de trabajo de los agentes
+.superpowers/
