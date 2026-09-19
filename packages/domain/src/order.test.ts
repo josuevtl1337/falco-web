@@ -105,6 +105,22 @@ describe("setQty y removeItem", () => {
   it("quitar una línea que no existe devuelve el mismo pedido", () => {
     expect(removeItem(base, { productId: 42 }, T0)).toBe(base);
   });
+
+  it("con cantidad fraccionaria menor a 1 quita la línea", () => {
+    expect(setQty(base, { productId: 1 }, 0.5, T0).items).toEqual([]);
+  });
+
+  it("con cantidad no finita (NaN) devuelve el mismo pedido", () => {
+    expect(setQty(base, { productId: 1 }, NaN, T0)).toBe(base);
+  });
+
+  it("con cantidad infinita devuelve el mismo pedido", () => {
+    expect(setQty(base, { productId: 1 }, Infinity, T0)).toBe(base);
+  });
+
+  it("si la cantidad no cambia, devuelve el mismo pedido", () => {
+    expect(setQty(base, { productId: 1 }, 1, later(1000))).toBe(base);
+  });
 });
 
 describe("setCustomer", () => {
@@ -116,6 +132,20 @@ describe("setCustomer", () => {
     );
     expect(order.customerName).toBe("Sofía");
     expect(order.note).toBeUndefined();
+  });
+
+  it("si el nombre y la nota no cambian (ignorando espacios), devuelve el mismo pedido", () => {
+    const original = setCustomer(
+      createOrder("F-7K2Q", T0),
+      { customerName: "Sofía" },
+      T0,
+    );
+    const result = setCustomer(
+      original,
+      { customerName: "  Sofía " },
+      later(1000),
+    );
+    expect(result).toBe(original);
   });
 });
 

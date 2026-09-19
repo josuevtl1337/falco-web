@@ -76,9 +76,13 @@ export function setQty(
   qty: number,
   now: Date,
 ): Order {
-  if (!order.items.some((line) => sameLine(line, key))) return order;
-  if (qty <= 0) return removeItem(order, key, now);
-  const clamped = Math.min(Math.floor(qty), ORDER_LIMITS.maxUnitsPerLine);
+  const existing = order.items.find((line) => sameLine(line, key));
+  if (!existing) return order;
+  if (!Number.isFinite(qty)) return order;
+  const floored = Math.floor(qty);
+  if (floored < 1) return removeItem(order, key, now);
+  const clamped = Math.min(floored, ORDER_LIMITS.maxUnitsPerLine);
+  if (clamped === existing.qty) return order;
   const items = order.items.map((line) =>
     sameLine(line, key) ? { ...line, qty: clamped } : line,
   );
@@ -92,6 +96,7 @@ export function setCustomer(
 ): Order {
   const customerName = fields.customerName?.trim() || undefined;
   const note = fields.note?.trim() || undefined;
+  if (customerName === order.customerName && note === order.note) return order;
   return touch(order, now, { customerName, note });
 }
 
