@@ -45,7 +45,7 @@ export function clearOrder(storage: KeyValueStorage | null): void {
   try {
     storage?.removeItem(ORDER_STORAGE_KEY);
   } catch {
-    // El navegador bloquea el almacenamiento: no hay nada que borrar.
+    // Storage is blocked by the browser: nothing to remove.
   }
 }
 
@@ -66,7 +66,7 @@ export function loadOrder(
     const parsed: unknown = JSON.parse(raw);
     if (isOrder(parsed) && !isExpired(parsed, now)) return parsed;
   } catch {
-    // JSON roto: se borra abajo.
+    // Corrupt JSON: cleared below.
   }
   clearOrder(storage);
   return null;
