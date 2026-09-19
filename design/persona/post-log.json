@@ -1,0 +1,26 @@
+{
+  "session_id": "a346d054-bbdd-4114-8ff9-41686ce061a6",
+  "transcript_path": "/Users/josue/.claude/projects/-Users-josue-Documents-Repositorios-falco-app/a346d054-bbdd-4114-8ff9-41686ce061a6.jsonl",
+  "cwd": "/Users/josue/Documents/Repositorios/falco-web/design/persona",
+  "scratchpad_dir": "/private/tmp/claude-501/-Users-josue-Documents-Repositorios-falco-app/a346d054-bbdd-4114-8ff9-41686ce061a6/scratchpad",
+  "prompt_id": "9c021547-8a9a-4d92-956b-7b4c77a510db",
+  "permission_mode": "acceptEdits",
+  "effort": {
+    "level": "high"
+  },
+  "hook_event_name": "PostToolUse",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "rg -n -i 'arcano|pc-back|El Sol|La Luna' wireframes.html | cut -c1-220",
+    "description": "Show remaining arcana lines"
+  },
+  "tool_response": {
+    "stdout": "853:  .pc-back {\n920:  .pc-back {",
+    "stderr": "",
+    "interrupted": false,
+    "isImage": false,
+    "noOutputExpected": false
+  },
+  "tool_use_id": "toolu_01PHSK3hKtHBzHu7mSgiaWEz",
+  "duration_ms": 27
+}

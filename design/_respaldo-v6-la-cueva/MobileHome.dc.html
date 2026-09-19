@@ -1,0 +1,543 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Instrument+Sans:wght@400;500;600&family=Martian+Mono:wght@300;400;600&family=Grand+Hotel&display=swap"
+        />
+        <style>
+          body {
+            margin: 0;
+            background: #292a2c;
+            color: #e8e2d0;
+            font-family: "Instrument Sans", system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+          }
+          .mono {
+            font-family: "Martian Mono", ui-monospace, monospace;
+          }
+          .ck {
+            font-family: "Martian Mono", ui-monospace, monospace;
+            font-size: 8px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #885333;
+          }
+          .cv {
+            margin-top: 5px;
+            font-size: 14px;
+            line-height: 1.35;
+            color: #e8e2d0;
+          }
+          @keyframes rise {
+            from {
+              opacity: 0;
+              transform: translateY(16px);
+              filter: blur(6px);
+            }
+            to {
+              opacity: 1;
+              transform: none;
+              filter: blur(0);
+            }
+          }
+          @keyframes wipe {
+            from {
+              clip-path: inset(0 100% 0 0);
+            }
+            to {
+              clip-path: inset(0 0 0 0);
+            }
+          }
+          @keyframes breathe {
+            0%,
+            100% {
+              opacity: 0.72;
+              transform: translateX(-50%) scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: translateX(-50%) scale(1.05);
+            }
+          }
+          @keyframes pulse {
+            0%,
+            100% {
+              box-shadow: 0 0 11px 3px rgba(242, 196, 139, 0.6);
+            }
+            50% {
+              box-shadow: 0 0 4px 1px rgba(242, 196, 139, 0.25);
+            }
+          }
+          @keyframes bob {
+            0%,
+            100% {
+              transform: translateY(0);
+            }
+            50% {
+              transform: translateY(-3px);
+            }
+          }
+          @keyframes grain {
+            0% {
+              background-position: 0 0;
+            }
+            100% {
+              background-position: 3px 3px;
+            }
+          }
+          @keyframes settle {
+            0%,
+            100% {
+              transform: translateY(0) rotate(0deg);
+            }
+            50% {
+              transform: translateY(-3px) rotate(2.5deg);
+            }
+          }
+          @keyframes drop {
+            0% {
+              transform: translateY(-46px) rotate(-30deg);
+              opacity: 0;
+            }
+            12% {
+              opacity: 1;
+            }
+            72% {
+              transform: translateY(0) rotate(8deg);
+            }
+            82% {
+              transform: translateY(-4px) rotate(4deg);
+            }
+            100% {
+              transform: translateY(0) rotate(6deg);
+              opacity: 1;
+            }
+          }
+          @keyframes grind {
+            0% {
+              transform: translateY(-4px);
+              opacity: 0;
+            }
+            20% {
+              opacity: 1;
+            }
+            100% {
+              transform: translateY(30px);
+              opacity: 0;
+            }
+          }
+          .sv {
+            transform-box: fill-box;
+            transform-origin: center;
+          }
+          .r {
+            animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+          }
+          .w {
+            animation: wipe 1.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+          }
+        </style>
+      </helmet>
+
+      <div
+        style="
+          position: relative;
+          width: 390px;
+          height: 940px;
+          overflow: hidden;
+          background: #292a2c;
+        "
+      >
+        <div
+          style="
+            position: absolute;
+            left: 50%;
+            top: -220px;
+            width: 520px;
+            height: 520px;
+            transform: translateX(-50%);
+            background: radial-gradient(
+              closest-side,
+              rgba(242, 196, 139, 0.15),
+              rgba(242, 196, 139, 0) 72%
+            );
+            pointer-events: none;
+            animation: breathe 9s ease-in-out infinite;
+          "
+        ></div>
+        <div
+          style="
+            position: absolute;
+            inset: -4px;
+            opacity: 0.55;
+            pointer-events: none;
+            background-image: radial-gradient(
+              rgba(232, 226, 208, 0.055) 1px,
+              transparent 1px
+            );
+            background-size: 3px 3px;
+            animation: grain 0.9s steps(3) infinite;
+          "
+        ></div>
+
+        <!-- NAV -->
+        <div
+          style="
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 66px;
+            padding: 0 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(232, 226, 208, 0.1);
+            box-sizing: border-box;
+          "
+        >
+          <div
+            style="
+              font-family: &quot;Grand Hotel&quot;, cursive;
+              font-size: 30px;
+              line-height: 1;
+              color: #e8e2d0;
+            "
+          >
+            Falco
+          </div>
+          <div
+            style="
+              width: 46px;
+              height: 46px;
+              margin-right: -11px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              gap: 6px;
+            "
+          >
+            <div style="width: 21px; height: 1.5px; background: #e8e2d0"></div>
+            <div style="width: 21px; height: 1.5px; background: #e8e2d0"></div>
+          </div>
+        </div>
+
+        <div style="position: absolute; left: 22px; right: 22px; top: 96px">
+          <div
+            class="mono r"
+            style="
+              font-size: 9px;
+              letter-spacing: 0.22em;
+              text-transform: uppercase;
+              color: #885333;
+              animation-delay: 0.15s;
+            "
+          >
+            Iriondo 2153 · Santo Tomé
+          </div>
+          <div
+            style="
+              margin-top: 20px;
+              font-family: &quot;Bricolage Grotesque&quot;, sans-serif;
+              font-weight: 500;
+              font-size: 54px;
+              line-height: 0.9;
+              letter-spacing: -0.045em;
+              color: #e8e2d0;
+            "
+          >
+            <div class="w" style="animation-delay: 0.3s">café de</div>
+            <div class="w" style="animation-delay: 0.45s">santoto</div>
+          </div>
+          <div
+            class="r"
+            style="
+              margin-top: 20px;
+              font-size: 15px;
+              line-height: 1.6;
+              color: #a8aaac;
+              animation-delay: 0.7s;
+            "
+          >
+            Cafetería de especialidad en una esquina de Santo Tomé. Tostamos con
+            <span style="color: #e8e2d0">Puerto Blest</span>.
+          </div>
+
+          <div
+            class="r"
+            style="
+              margin-top: 24px;
+              padding-left: 16px;
+              border-left: 2px solid #885333;
+              font-family: &quot;Bricolage Grotesque&quot;, sans-serif;
+              font-size: 18px;
+              line-height: 1.4;
+              color: #e8e2d0;
+              animation-delay: 0.85s;
+            "
+          >
+            Nuestra misión siempre fue la misma: traer el mundo del café a Santo
+            Tomé.
+          </div>
+
+          <div
+            class="r"
+            style="
+              margin-top: 24px;
+              display: inline-flex;
+              align-items: center;
+              gap: 9px;
+              min-height: 44px;
+              box-sizing: border-box;
+              padding: 13px 18px;
+              border: 1px solid rgba(232, 226, 208, 0.22);
+              background: #313335;
+              animation-delay: 1s;
+            "
+          >
+            <div
+              style="
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #f2c48b;
+                animation: pulse 2.6s ease-in-out infinite;
+              "
+            ></div>
+            <div
+              class="mono"
+              style="
+                font-size: 9px;
+                letter-spacing: 0.16em;
+                text-transform: uppercase;
+                color: #e8e2d0;
+              "
+            >
+              Abierto · cierra [20:00]
+            </div>
+          </div>
+        </div>
+
+        <!-- TOLVA: el panel derecho del desktop, hecho card -->
+        <div
+          class="r"
+          style="
+            position: absolute;
+            left: 22px;
+            right: 22px;
+            top: 550px;
+            height: 300px;
+            box-sizing: border-box;
+            padding: 20px;
+            background: linear-gradient(165deg, #313335 0%, #232426 100%);
+            border: 1px solid rgba(232, 226, 208, 0.12);
+            border-top: 1px solid rgba(136, 83, 51, 0.85);
+            overflow: hidden;
+            animation-delay: 1.15s;
+          "
+        >
+          <!-- el E65S de marca de agua a la derecha -->
+          <svg
+            viewBox="0 0 240 560"
+            style="
+              position: absolute;
+              right: -26px;
+              top: 8px;
+              width: 142px;
+              opacity: 0.5;
+            "
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <clipPath id="mcone">
+                <path d="M46,46 L194,46 L146,206 L94,206 Z"></path>
+              </clipPath>
+            </defs>
+            <g
+              stroke="rgba(232,226,208,0.62)"
+              stroke-width="2.8"
+              fill="none"
+              stroke-linejoin="round"
+            >
+              <path d="M46,46 L194,46 L146,206 L94,206 Z" fill="rgba(232,226,208,0.05)"></path>
+              <path d="M44,38 Q44,24 120,24 Q196,24 196,38 L196,46 Q196,58 120,58 Q44,58 44,46 Z"></path>
+              <path d="M94,206 L146,206 L146,224 L94,224 Z"></path>
+              <path d="M56,262 L56,244 Q56,224 84,224 L156,224 Q184,224 184,244 L184,262 Z"></path>
+              <path d="M56,262 L184,262 L184,286 L56,286 Z"></path>
+              <path d="M58,286 L182,286 L182,486 Q182,496 172,496 L68,496 Q58,496 58,486 Z"></path>
+              <rect x="64" y="290" width="56" height="32" rx="2.5"></rect>
+              <path d="M100,342 Q142,338 148,352 Q152,364 138,374 L114,382 Q100,384 98,372 Z"></path>
+              <path d="M74,418 L166,418 M74,458 L166,458 M74,412 L74,462 M166,412 L166,462"></path>
+              <ellipse cx="116" cy="516" rx="88" ry="26"></ellipse>
+            </g>
+            <g clip-path="url(#mcone)" fill="#885333">
+              <ellipse class="sv" cx="104" cy="196" rx="11" ry="7.5"
+                style="animation: settle 4.2s ease-in-out infinite"></ellipse>
+              <ellipse class="sv" cx="128" cy="198" rx="11" ry="7.5"
+                style="animation: settle 5.1s ease-in-out infinite 0.5s"></ellipse>
+              <ellipse class="sv" cx="115" cy="182" rx="11" ry="7.5"
+                style="animation: settle 4.6s ease-in-out infinite 1s"></ellipse>
+              <ellipse class="sv" cx="139" cy="182" rx="11" ry="7.5"
+                style="animation: settle 5.4s ease-in-out infinite 0.3s"></ellipse>
+              <ellipse class="sv" cx="92" cy="180" rx="11" ry="7.5"
+                style="animation: settle 4.9s ease-in-out infinite 1.4s"></ellipse>
+              <ellipse class="sv" cx="105" cy="166" rx="11" ry="7.5"
+                style="animation: settle 5.6s ease-in-out infinite 0.8s"></ellipse>
+              <ellipse class="sv" cx="129" cy="166" rx="11" ry="7.5"
+                style="animation: settle 4.4s ease-in-out infinite 1.7s"></ellipse>
+              <ellipse class="sv" cx="117" cy="150" rx="11" ry="7.5"
+                style="animation: settle 5.2s ease-in-out infinite 0.2s"></ellipse>
+              <ellipse class="sv" cx="110" cy="128" rx="11" ry="7.5"
+                style="animation: drop 4.4s cubic-bezier(0.45, 0, 0.55, 1) infinite"></ellipse>
+              <ellipse class="sv" cx="136" cy="126" rx="11" ry="7.5"
+                style="animation: drop 4.4s cubic-bezier(0.45, 0, 0.55, 1) infinite 2.2s"></ellipse>
+            </g>
+            <g stroke="#f2c48b" stroke-width="2.2" fill="none" stroke-linecap="round">
+              <path class="sv" d="M113,384 L112,396"
+                style="animation: grind 1.5s linear infinite"></path>
+              <path class="sv" d="M126,384 L127,396"
+                style="animation: grind 1.5s linear infinite 0.5s"></path>
+            </g>
+            <text x="120" y="480" text-anchor="middle" fill="#885333"
+              font-family="Martian Mono, monospace" font-size="12" letter-spacing="2">E65S</text>
+          </svg>
+
+          <div style="display: flex; align-items: center; gap: 10px">
+            <div
+              style="
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #f2c48b;
+                animation: pulse 2.6s ease-in-out infinite;
+              "
+            ></div>
+            <div
+              class="mono"
+              style="
+                font-size: 9px;
+                letter-spacing: 0.22em;
+                text-transform: uppercase;
+                color: #e8e2d0;
+              "
+            >
+              En tolva ahora
+            </div>
+          </div>
+
+          <div style="margin-top: 20px; width: 216px">
+            <div class="ck">Origen</div>
+            <div class="cv">[Finca La Esperanza] · [Huila]</div>
+          </div>
+          <div style="margin-top: 16px; width: 216px">
+            <div class="ck">A qué sabe</div>
+            <div class="cv">[Durazno, panela, cítrico]</div>
+            <div
+              style="
+                margin-top: 6px;
+                font-size: 12px;
+                line-height: 1.45;
+                color: #9a9c9e;
+              "
+            >
+              Como un té de durazno dulce. No amarga.
+            </div>
+          </div>
+          <div style="margin-top: 16px; width: 216px">
+            <div class="ck">Tostado</div>
+            <div class="cv">Hace [6] días · Puerto Blest</div>
+          </div>
+        </div>
+
+        <!-- FALCO FM · barra -->
+        <div
+          style="
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 76px;
+            box-sizing: border-box;
+            padding: 0 18px;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            background: #232426;
+            border-top: 1px solid rgba(232, 226, 208, 0.12);
+          "
+        >
+          <div
+            style="
+              width: 42px;
+              height: 42px;
+              flex: none;
+              background: linear-gradient(150deg, #3b2519, #292a2c);
+              border: 1px solid rgba(232, 226, 208, 0.16);
+            "
+          ></div>
+          <div style="flex: 1; min-width: 0">
+            <div
+              class="mono"
+              style="
+                font-size: 8px;
+                letter-spacing: 0.2em;
+                text-transform: uppercase;
+                color: #8d8f91;
+              "
+            >
+              Falco FM
+            </div>
+            <div
+              style="
+                margin-top: 5px;
+                font-size: 13px;
+                color: #e8e2d0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              "
+            >
+              [Tema] — [Artista]
+            </div>
+          </div>
+          <div
+            style="
+              width: 44px;
+              height: 44px;
+              flex: none;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <div
+              style="
+                width: 34px;
+                height: 34px;
+                border-radius: 50%;
+                background: #e8e2d0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <svg viewBox="0 0 24 24" style="width: 13px" fill="#292a2c">
+                <path d="M8 5v14l11-7z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </x-dc>
+  </body>
+</html>

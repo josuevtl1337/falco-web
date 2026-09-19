@@ -1,0 +1,18 @@
+{
+  "session_id": "a346d054-bbdd-4114-8ff9-41686ce061a6",
+  "transcript_path": "/Users/josue/.claude/projects/-Users-josue-Documents-Repositorios-falco-app/a346d054-bbdd-4114-8ff9-41686ce061a6.jsonl",
+  "cwd": "/Users/josue/Documents/Repositorios/falco-web/design/persona",
+  "scratchpad_dir": "/private/tmp/claude-501/-Users-josue-Documents-Repositorios-falco-app/a346d054-bbdd-4114-8ff9-41686ce061a6/scratchpad",
+  "prompt_id": "9c021547-8a9a-4d92-956b-7b4c77a510db",
+  "permission_mode": "acceptEdits",
+  "effort": {
+    "level": "high"
+  },
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "cd /Users/josue/Documents/Repositorios/falco-web/docs && python3 - <<'PY'\nfrom pathlib import Path\ntpl = Path('spec.html').read_text()\na = tpl.index('<script type=\"text/markdown\" id=\"src\">') + len('<script type=\"text/markdown\" id=\"src\">')\nb = tpl.index('</script>\\n<script src=\"https://cdnjs')\nhead, tail = tpl[:a], tpl[b:]\nfor md, out, title in (('superpowers/specs/2026-09-18-falco-web-design.md', 'spec.html', 'Spec de Falco Web'), ('../HANDOFF.md', 'handoff.html', 'Handoff de Falco Web')):\n    text = Path(md).read_text(); assert '</script' not in text\n    Path(out).write_text(head.replace('<title>Spec de Falco Web</title>', f'<title>{title}</title>') + '\\n' + text + '\\n' + tail)\nprint('ok')\nPY",
+    "description": "Regenerate spec and handoff pages"
+  },
+  "tool_use_id": "toolu_019LeHYDXuvimr5wCUxury3n"
+}

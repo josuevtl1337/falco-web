@@ -1,0 +1,612 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Instrument+Sans:wght@400;500;600&family=Martian+Mono:wght@300;400;600&family=Grand+Hotel&display=swap"
+        />
+        <style>
+          body {
+            margin: 0;
+            background: #292a2c;
+            color: #e8e2d0;
+            font-family: "Instrument Sans", system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+          }
+          .mono {
+            font-family: "Martian Mono", ui-monospace, monospace;
+          }
+          @keyframes rise {
+            from {
+              opacity: 0;
+              transform: translateY(16px);
+              filter: blur(6px);
+            }
+            to {
+              opacity: 1;
+              transform: none;
+              filter: blur(0);
+            }
+          }
+          @keyframes wipe {
+            from {
+              clip-path: inset(0 100% 0 0);
+            }
+            to {
+              clip-path: inset(0 0 0 0);
+            }
+          }
+          @keyframes grain {
+            0% {
+              background-position: 0 0;
+            }
+            100% {
+              background-position: 3px 3px;
+            }
+          }
+          @keyframes slide-l {
+            from {
+              transform: translateX(0);
+            }
+            to {
+              transform: translateX(-50%);
+            }
+          }
+          @keyframes slide-r {
+            from {
+              transform: translateX(-50%);
+            }
+            to {
+              transform: translateX(0);
+            }
+          }
+          .r {
+            animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+          }
+          .w {
+            animation: wipe 1.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+          }
+          .track {
+            display: flex;
+            gap: 14px;
+            width: max-content;
+            padding-left: 22px;
+          }
+          .t-l {
+            animation: slide-l 34s linear infinite;
+          }
+          .t-r {
+            animation: slide-r 40s linear infinite;
+          }
+          .card {
+            width: 208px;
+            flex: none;
+            border: 1px solid rgba(232, 226, 208, 0.12);
+            background: linear-gradient(168deg, #313335 0%, #232426 100%);
+          }
+          .shot {
+            height: 128px;
+            border-bottom: 1px solid rgba(232, 226, 208, 0.1);
+            background: linear-gradient(150deg, #3b2519 0%, #232426 100%);
+            position: relative;
+            overflow: hidden;
+          }
+          .glow {
+            position: absolute;
+            left: 50%;
+            top: -46px;
+            width: 170px;
+            height: 170px;
+            transform: translateX(-50%);
+            background: radial-gradient(
+              closest-side,
+              rgba(242, 196, 139, 0.26),
+              rgba(242, 196, 139, 0) 72%
+            );
+          }
+          .body {
+            padding: 14px 15px 13px;
+          }
+          .code {
+            font-family: "Martian Mono", ui-monospace, monospace;
+            font-size: 8px;
+            letter-spacing: 0.2em;
+            color: #885333;
+          }
+          .name {
+            margin-top: 7px;
+            font-family: "Bricolage Grotesque", sans-serif;
+            font-weight: 500;
+            font-size: 17px;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            color: #e8e2d0;
+          }
+          .sub {
+            margin-top: 6px;
+            font-size: 11.5px;
+            line-height: 1.45;
+            color: #9a9c9e;
+          }
+          .foot {
+            margin-top: 11px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(232, 226, 208, 0.09);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          }
+          .price {
+            font-family: "Martian Mono", ui-monospace, monospace;
+            font-size: 11px;
+            color: #e8e2d0;
+          }
+          .dm {
+            font-family: "Martian Mono", ui-monospace, monospace;
+            font-size: 8px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #9a9c9e;
+          }
+          .seclbl {
+            font-family: "Martian Mono", ui-monospace, monospace;
+            font-size: 9px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #885333;
+          }
+        </style>
+      </helmet>
+
+      <div
+        style="
+          position: relative;
+          width: 390px;
+          height: 940px;
+          overflow: hidden;
+          background: #292a2c;
+        "
+      >
+        <div
+          style="
+            position: absolute;
+            left: 50%;
+            top: -190px;
+            width: 500px;
+            height: 460px;
+            transform: translateX(-50%);
+            background: radial-gradient(
+              closest-side,
+              rgba(242, 196, 139, 0.11),
+              rgba(242, 196, 139, 0) 72%
+            );
+            pointer-events: none;
+          "
+        ></div>
+        <div
+          style="
+            position: absolute;
+            inset: -4px;
+            opacity: 0.55;
+            pointer-events: none;
+            background-image: radial-gradient(
+              rgba(232, 226, 208, 0.055) 1px,
+              transparent 1px
+            );
+            background-size: 3px 3px;
+            animation: grain 0.9s steps(3) infinite;
+            z-index: 3;
+          "
+        ></div>
+
+        <!-- NAV -->
+        <div
+          style="
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 66px;
+            padding: 0 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(232, 226, 208, 0.1);
+            box-sizing: border-box;
+          "
+        >
+          <div
+            style="
+              font-family: &quot;Grand Hotel&quot;, cursive;
+              font-size: 30px;
+              line-height: 1;
+              color: #e8e2d0;
+            "
+          >
+            Falco
+          </div>
+          <div
+            style="
+              width: 46px;
+              height: 46px;
+              margin-right: -11px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              gap: 6px;
+            "
+          >
+            <div style="width: 21px; height: 1.5px; background: #e8e2d0"></div>
+            <div style="width: 21px; height: 1.5px; background: #e8e2d0"></div>
+          </div>
+        </div>
+
+        <div style="position: absolute; left: 22px; right: 22px; top: 96px">
+          <div class="seclbl r">02 · La tienda</div>
+          <div
+            style="
+              margin-top: 16px;
+              font-family: &quot;Bricolage Grotesque&quot;, sans-serif;
+              font-weight: 500;
+              font-size: 46px;
+              line-height: 0.94;
+              letter-spacing: -0.04em;
+              color: #e8e2d0;
+            "
+          >
+            <div class="w" style="animation-delay: 0.15s">Llevate</div>
+            <div class="w" style="animation-delay: 0.3s">Falco a casa</div>
+          </div>
+          <div
+            class="r"
+            style="
+              margin-top: 18px;
+              font-size: 15px;
+              line-height: 1.6;
+              color: #a8aaac;
+              animation-delay: 0.55s;
+            "
+          >
+            Café en grano o molido, y todo lo que necesitás para prepararlo. No
+            hay carrito: escribinos por DM y lo arreglamos.
+          </div>
+        </div>
+
+        <!-- FILA 1 · CAFÉ -->
+        <div
+          class="r"
+          style="
+            position: absolute;
+            left: 22px;
+            right: 22px;
+            top: 336px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            animation-delay: 0.7s;
+          "
+        >
+          <div class="seclbl">Café</div>
+          <div
+            style="flex: 1; height: 1px; background: rgba(232, 226, 208, 0.12)"
+          ></div>
+        </div>
+        <div
+          style="
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 366px;
+            overflow: hidden;
+          "
+        >
+          <div class="track t-l">
+            <div class="card">
+              <div class="shot"><div class="glow"></div></div>
+              <div class="body">
+                <div class="code">FA—01</div>
+                <div class="name">[Huila] · Colombia</div>
+                <div class="sub">
+                  250 g · grano o molido<br />Durazno, panela
+                </div>
+                <div class="foot">
+                  <div class="price">$ [00.000]</div>
+                  <div class="dm">DM</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="shot"><div class="glow"></div></div>
+              <div class="body">
+                <div class="code">FA—02</div>
+                <div class="name">[Cerrado] · Brasil</div>
+                <div class="sub">
+                  250 g · grano o molido<br />Chocolate, nuez
+                </div>
+                <div class="foot">
+                  <div class="price">$ [00.000]</div>
+                  <div class="dm">DM</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="shot"><div class="glow"></div></div>
+              <div class="body">
+                <div class="code">FA—03</div>
+                <div class="name">Blend de casa</div>
+                <div class="sub">500 g · grano o molido<br />El del local</div>
+                <div class="foot">
+                  <div class="price">$ [00.000]</div>
+                  <div class="dm">DM</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="shot"><div class="glow"></div></div>
+              <div class="body">
+                <div class="code">FA—04</div>
+                <div class="name">[Etiopía] natural</div>
+                <div class="sub">
+                  250 g · grano o molido<br />Frutal, floral
+                </div>
+                <div class="foot">
+                  <div class="price">$ [00.000]</div>
+                  <div class="dm">DM</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="shot"><div class="glow"></div></div>
+              <div class="body">
+                <div class="code">FA—01</div>
+                <div class="name">[Huila] · Colombia</div>
+                <div class="sub">
+                  250 g · grano o molido<br />Durazno, panela
+                </div>
+                <div class="foot">
+                  <div class="price">$ [00.000]</div>
+                  <div class="dm">DM</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="shot"><div class="glow"></div></div>
+              <div class="body">
+                <div class="code">FA—02</div>
+                <div class="name">[Cerrado] · Brasil</div>
+                <div class="sub">
+                  250 g · grano o molido<br />Chocolate, nuez
+                </div>
+                <div class="foot">
+                  <div class="price">$ [00.000]</div>
+                  <div class="dm">DM</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="shot"><div class="glow"></div></div>
+              <div class="body">
+                <div class="code">FA—03</div>
+                <div class="name">Blend de casa</div>
+                <div class="sub">500 g · grano o molido<br />El del local</div>
+                <div class="foot">
+                  <div class="price">$ [00.000]</div>
+                  <div class="dm">DM</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="shot"><div class="glow"></div></div>
+              <div class="body">
+                <div class="code">FA—04</div>
+                <div class="name">[Etiopía] natural</div>
+                <div class="sub">
+                  250 g · grano o molido<br />Frutal, floral
+                </div>
+                <div class="foot">
+                  <div class="price">$ [00.000]</div>
+                  <div class="dm">DM</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FILA 2 · KITS -->
+        <div
+          class="r"
+          style="
+            position: absolute;
+            left: 22px;
+            right: 22px;
+            top: 660px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            animation-delay: 0.85s;
+          "
+        >
+          <div class="seclbl">Kits y accesorios</div>
+          <div
+            style="flex: 1; height: 1px; background: rgba(232, 226, 208, 0.12)"
+          ></div>
+        </div>
+        <div
+          style="
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 690px;
+            overflow: hidden;
+          "
+        >
+          <div class="track t-r">
+            <div class="card">
+              <div class="shot" style="height: 94px">
+                <div class="glow"></div>
+              </div>
+              <div class="body">
+                <div class="code">FA—11</div>
+                <div class="name">Kit V60 completo</div>
+                <div class="sub">Cono, filtros, jarra y café</div>
+                <div class="foot">
+                  <div class="price">$ [00.000]</div>
+                  <div class="dm">DM</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="shot" style="height: 94px">
+                <div class="glow"></div>
+              </div>
+              <div class="body">
+                <div class="code">FA—12</div>
+                <div class="name">Aeropress</div>
+                <div class="sub">Con 100 filtros de papel</div>
+                <div class="foot">
+                  <div class="price">$ [00.000]</div>
+                  <div class="dm">DM</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="shot" style="height: 94px">
+                <div class="glow"></div>
+              </div>
+              <div class="body">
+                <div class="code">FA—13</div>
+                <div class="name">Filtros V60 · 02</div>
+                <div class="sub">Caja de 100 · blancos</div>
+                <div class="foot">
+                  <div class="price">$ [00.000]</div>
+                  <div class="dm">DM</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="shot" style="height: 94px">
+                <div class="glow"></div>
+              </div>
+              <div class="body">
+                <div class="code">FA—14</div>
+                <div class="name">Remera Falco</div>
+                <div class="sub">Algodón · S al XL</div>
+                <div class="foot">
+                  <div class="price">$ [00.000]</div>
+                  <div class="dm">DM</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="shot" style="height: 94px">
+                <div class="glow"></div>
+              </div>
+              <div class="body">
+                <div class="code">FA—11</div>
+                <div class="name">Kit V60 completo</div>
+                <div class="sub">Cono, filtros, jarra y café</div>
+                <div class="foot">
+                  <div class="price">$ [00.000]</div>
+                  <div class="dm">DM</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="shot" style="height: 94px">
+                <div class="glow"></div>
+              </div>
+              <div class="body">
+                <div class="code">FA—12</div>
+                <div class="name">Aeropress</div>
+                <div class="sub">Con 100 filtros de papel</div>
+                <div class="foot">
+                  <div class="price">$ [00.000]</div>
+                  <div class="dm">DM</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="shot" style="height: 94px">
+                <div class="glow"></div>
+              </div>
+              <div class="body">
+                <div class="code">FA—13</div>
+                <div class="name">Filtros V60 · 02</div>
+                <div class="sub">Caja de 100 · blancos</div>
+                <div class="foot">
+                  <div class="price">$ [00.000]</div>
+                  <div class="dm">DM</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="shot" style="height: 94px">
+                <div class="glow"></div>
+              </div>
+              <div class="body">
+                <div class="code">FA—14</div>
+                <div class="name">Remera Falco</div>
+                <div class="sub">Algodón · S al XL</div>
+                <div class="foot">
+                  <div class="price">$ [00.000]</div>
+                  <div class="dm">DM</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="mono"
+          style="
+            position: absolute;
+            left: 22px;
+            right: 22px;
+            bottom: 24px;
+            font-size: 9px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #75777a;
+            text-align: center;
+          "
+        >
+          Deslizá para ver más →
+        </div>
+
+        <div
+          style="
+            position: absolute;
+            left: 0;
+            top: 366px;
+            bottom: 60px;
+            width: 40px;
+            background: linear-gradient(90deg, #292a2c, rgba(41, 42, 44, 0));
+            pointer-events: none;
+            z-index: 2;
+          "
+        ></div>
+        <div
+          style="
+            position: absolute;
+            right: 0;
+            top: 366px;
+            bottom: 60px;
+            width: 40px;
+            background: linear-gradient(270deg, #292a2c, rgba(41, 42, 44, 0));
+            pointer-events: none;
+            z-index: 2;
+          "
+        ></div>
+      </div>
+    </x-dc>
+  </body>
+</html>

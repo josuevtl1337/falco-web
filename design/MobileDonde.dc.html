@@ -1,0 +1,563 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Instrument+Sans:wght@400;500;600&family=Martian+Mono:wght@300;400;600&family=Grand+Hotel&display=swap"
+        />
+        <style>
+          body {
+            margin: 0;
+            background: #292a2c;
+            color: #e8e2d0;
+            font-family: "Instrument Sans", system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+          }
+          .mono {
+            font-family: "Martian Mono", ui-monospace, monospace;
+          }
+          @keyframes rise {
+            from {
+              opacity: 0;
+              transform: translateY(16px);
+              filter: blur(6px);
+            }
+            to {
+              opacity: 1;
+              transform: none;
+              filter: blur(0);
+            }
+          }
+          @keyframes wipe {
+            from {
+              clip-path: inset(0 100% 0 0);
+            }
+            to {
+              clip-path: inset(0 0 0 0);
+            }
+          }
+          @keyframes grain {
+            0% {
+              background-position: 0 0;
+            }
+            100% {
+              background-position: 3px 3px;
+            }
+          }
+          @keyframes sonar {
+            0% {
+              transform: scale(0.18);
+              opacity: 0.9;
+            }
+            100% {
+              transform: scale(1);
+              opacity: 0;
+            }
+          }
+          @keyframes eq {
+            0%,
+            100% {
+              transform: scaleY(0.3);
+            }
+            50% {
+              transform: scaleY(1);
+            }
+          }
+          @keyframes prog {
+            from {
+              width: 6%;
+            }
+            to {
+              width: 94%;
+            }
+          }
+          .r {
+            animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+          }
+          .w {
+            animation: wipe 1.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+          }
+          .ping {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: sonar 3.6s ease-out infinite;
+          }
+          .bar {
+            width: 2px;
+            height: 11px;
+            background: #f2c48b;
+            transform-origin: bottom;
+            animation: eq 0.9s ease-in-out infinite;
+          }
+          .row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            padding: 13px 0;
+            border-bottom: 1px solid rgba(232, 226, 208, 0.09);
+          }
+          .k {
+            font-family: "Martian Mono", ui-monospace, monospace;
+            font-size: 9px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #885333;
+          }
+          .v {
+            font-size: 14px;
+            color: #e8e2d0;
+          }
+          .btn {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            box-sizing: border-box;
+            font-family: "Martian Mono", ui-monospace, monospace;
+            font-size: 9px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            text-decoration: none;
+          }
+          .btn-a {
+            background: #e8e2d0;
+            color: #292a2c;
+          }
+          .btn-b {
+            border: 1px solid rgba(232, 226, 208, 0.28);
+            color: #e8e2d0;
+          }
+        </style>
+      </helmet>
+
+      <div
+        style="
+          position: relative;
+          width: 390px;
+          height: 940px;
+          overflow: hidden;
+          background: #292a2c;
+        "
+      >
+        <div
+          style="
+            position: absolute;
+            left: 50%;
+            top: -190px;
+            width: 500px;
+            height: 460px;
+            transform: translateX(-50%);
+            background: radial-gradient(
+              closest-side,
+              rgba(242, 196, 139, 0.11),
+              rgba(242, 196, 139, 0) 72%
+            );
+            pointer-events: none;
+          "
+        ></div>
+        <div
+          style="
+            position: absolute;
+            inset: -4px;
+            opacity: 0.55;
+            pointer-events: none;
+            background-image: radial-gradient(
+              rgba(232, 226, 208, 0.055) 1px,
+              transparent 1px
+            );
+            background-size: 3px 3px;
+            animation: grain 0.9s steps(3) infinite;
+            z-index: 3;
+          "
+        ></div>
+
+        <!-- NAV -->
+        <div
+          style="
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 66px;
+            padding: 0 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(232, 226, 208, 0.1);
+            box-sizing: border-box;
+          "
+        >
+          <div
+            style="
+              font-family: &quot;Grand Hotel&quot;, cursive;
+              font-size: 30px;
+              line-height: 1;
+              color: #e8e2d0;
+            "
+          >
+            Falco
+          </div>
+          <div
+            style="
+              width: 46px;
+              height: 46px;
+              margin-right: -11px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              gap: 6px;
+            "
+          >
+            <div style="width: 21px; height: 1.5px; background: #e8e2d0"></div>
+            <div style="width: 21px; height: 1.5px; background: #e8e2d0"></div>
+          </div>
+        </div>
+
+        <div style="position: absolute; left: 22px; right: 22px; top: 94px">
+          <div
+            class="mono r"
+            style="
+              font-size: 9px;
+              letter-spacing: 0.2em;
+              text-transform: uppercase;
+              color: #885333;
+            "
+          >
+            03 · Dónde estamos
+          </div>
+          <div
+            class="w"
+            style="
+              margin-top: 16px;
+              font-family: &quot;Bricolage Grotesque&quot;, sans-serif;
+              font-weight: 500;
+              font-size: 46px;
+              line-height: 0.94;
+              letter-spacing: -0.04em;
+              color: #e8e2d0;
+              animation-delay: 0.15s;
+            "
+          >
+            Iriondo 2153
+          </div>
+          <div
+            class="r"
+            style="
+              margin-top: 14px;
+              font-size: 15px;
+              line-height: 1.6;
+              color: #a8aaac;
+              animation-delay: 0.4s;
+            "
+          >
+            Una esquina de Santo Tomé. Si nunca probaste café de especialidad,
+            este es un buen lugar para empezar.
+          </div>
+        </div>
+
+        <!-- MAPA -->
+        <div
+          class="r"
+          style="
+            position: absolute;
+            left: 22px;
+            right: 22px;
+            top: 262px;
+            height: 220px;
+            background: #1e1f21;
+            border: 1px solid rgba(232, 226, 208, 0.12);
+            overflow: hidden;
+            animation-delay: 0.55s;
+          "
+        >
+          <svg
+            viewBox="0 0 346 220"
+            style="position: absolute; inset: 0"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect width="346" height="220" fill="#1e1f21"></rect>
+            <g stroke="rgba(232,226,208,0.10)" stroke-width="1" fill="none">
+              <path d="M0,44 L346,30"></path>
+              <path d="M0,176 L346,162"></path>
+              <path d="M70,0 L58,220"></path>
+              <path d="M262,0 L250,220"></path>
+            </g>
+            <g stroke="rgba(232,226,208,0.24)" stroke-width="2" fill="none">
+              <path d="M0,124 L346,110"></path>
+              <path d="M158,0 L146,220"></path>
+            </g>
+            <g fill="rgba(59,37,25,0.55)">
+              <rect x="76" y="52" width="66" height="52"></rect>
+              <rect x="168" y="48" width="70" height="52"></rect>
+              <rect x="76" y="128" width="66" height="54"></rect>
+              <rect x="168" y="124" width="70" height="54"></rect>
+            </g>
+            <circle
+              class="ping"
+              cx="152"
+              cy="116"
+              r="48"
+              fill="none"
+              stroke="rgba(242,196,139,0.5)"
+              stroke-width="1.5"
+            ></circle>
+            <circle
+              class="ping"
+              cx="152"
+              cy="116"
+              r="48"
+              fill="none"
+              stroke="rgba(242,196,139,0.5)"
+              stroke-width="1.5"
+              style="animation-delay: 1.2s"
+            ></circle>
+            <circle
+              class="ping"
+              cx="152"
+              cy="116"
+              r="48"
+              fill="none"
+              stroke="rgba(242,196,139,0.5)"
+              stroke-width="1.5"
+              style="animation-delay: 2.4s"
+            ></circle>
+            <circle
+              cx="152"
+              cy="116"
+              r="16"
+              fill="rgba(242,196,139,0.12)"
+            ></circle>
+            <circle cx="152" cy="116" r="6" fill="#f2c48b"></circle>
+            <text
+              x="174"
+              y="112"
+              fill="#e8e2d0"
+              font-family="Martian Mono, monospace"
+              font-size="10"
+              letter-spacing="1.6"
+            >
+              FALCO
+            </text>
+          </svg>
+        </div>
+
+        <!-- DATOS -->
+        <div
+          class="r"
+          style="
+            position: absolute;
+            left: 22px;
+            right: 22px;
+            top: 506px;
+            animation-delay: 0.7s;
+          "
+        >
+          <div
+            class="row"
+            style="border-top: 1px solid rgba(232, 226, 208, 0.09)"
+          >
+            <div class="k">Lun a Sáb</div>
+            <div class="v">[08:00] — [20:00]</div>
+          </div>
+          <div class="row">
+            <div class="k">Domingo</div>
+            <div class="v">[15:00] — [20:00]</div>
+          </div>
+          <div class="row">
+            <div class="k">Tostador</div>
+            <div class="v">Puerto Blest</div>
+          </div>
+
+          <div style="margin-top: 22px; display: flex; gap: 10px">
+            <a class="btn btn-a" href="#">Cómo llegar</a>
+            <a class="btn btn-b" href="#">Escribir por DM</a>
+          </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div
+          style="
+            position: absolute;
+            left: 22px;
+            right: 22px;
+            bottom: 108px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(232, 226, 208, 0.09);
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+          "
+        >
+          <div
+            style="
+              font-family: &quot;Grand Hotel&quot;, cursive;
+              font-size: 26px;
+              line-height: 1;
+              color: #e8e2d0;
+            "
+          >
+            Falco
+          </div>
+          <a
+            class="mono"
+            href="#"
+            style="
+              display: flex;
+              align-items: center;
+              min-height: 44px;
+              margin: -14px -8px;
+              padding: 0 8px;
+              font-size: 9px;
+              letter-spacing: 0.16em;
+              text-transform: uppercase;
+              color: #885333;
+              text-decoration: none;
+            "
+            >@falco.cafe</a
+          >
+        </div>
+
+        <!-- FALCO FM -->
+        <div
+          style="
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 84px;
+            box-sizing: border-box;
+            padding: 0 18px;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            background: #232426;
+            border-top: 1px solid rgba(232, 226, 208, 0.12);
+          "
+        >
+          <div
+            style="
+              width: 44px;
+              height: 44px;
+              flex: none;
+              background: linear-gradient(150deg, #3b2519, #292a2c);
+              border: 1px solid rgba(232, 226, 208, 0.16);
+              position: relative;
+              overflow: hidden;
+            "
+          >
+            <div
+              style="
+                position: absolute;
+                left: 50%;
+                top: -14px;
+                width: 58px;
+                height: 58px;
+                transform: translateX(-50%);
+                background: radial-gradient(
+                  closest-side,
+                  rgba(242, 196, 139, 0.3),
+                  rgba(242, 196, 139, 0) 72%
+                );
+              "
+            ></div>
+          </div>
+          <div style="flex: 1; min-width: 0">
+            <div style="display: flex; align-items: center; gap: 8px">
+              <div
+                style="
+                  display: flex;
+                  align-items: flex-end;
+                  gap: 2px;
+                  height: 11px;
+                "
+              >
+                <div class="bar"></div>
+                <div class="bar" style="animation-delay: 0.28s"></div>
+                <div class="bar" style="animation-delay: 0.14s"></div>
+              </div>
+              <div
+                class="mono"
+                style="
+                  font-size: 8px;
+                  letter-spacing: 0.18em;
+                  text-transform: uppercase;
+                  color: #8d8f91;
+                "
+              >
+                Falco FM
+              </div>
+            </div>
+            <div
+              style="
+                margin-top: 5px;
+                font-size: 13px;
+                color: #e8e2d0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              "
+            >
+              [Tema] — [Artista]
+            </div>
+            <div
+              style="
+                margin-top: 7px;
+                height: 2px;
+                background: rgba(232, 226, 208, 0.14);
+                position: relative;
+              "
+            >
+              <div
+                style="
+                  position: absolute;
+                  left: 0;
+                  top: 0;
+                  bottom: 0;
+                  width: 38%;
+                  background: #f2c48b;
+                  animation: prog 42s linear infinite;
+                "
+              ></div>
+            </div>
+          </div>
+          <div
+            style="
+              width: 44px;
+              height: 44px;
+              flex: none;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <div
+              style="
+                width: 34px;
+                height: 34px;
+                border-radius: 50%;
+                background: #e8e2d0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <svg viewBox="0 0 24 24" style="width: 13px" fill="#292a2c">
+                <path d="M8 5v14l11-7z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </x-dc>
+  </body>
+</html>

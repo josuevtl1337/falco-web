@@ -1,0 +1,1238 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Instrument+Sans:wght@400;500;600&family=Martian+Mono:wght@300;400;600&family=Grand+Hotel&display=swap"
+        />
+        <style>
+          body {
+            margin: 0;
+            background: #292a2c;
+            color: #e8e2d0;
+            font-family: "Instrument Sans", system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+          }
+          .mono {
+            font-family: "Martian Mono", ui-monospace, monospace;
+          }
+
+          /* ---------- MOVIMIENTO ---------- */
+          @keyframes rise {
+            from {
+              opacity: 0;
+              transform: translateY(20px);
+              filter: blur(7px);
+            }
+            to {
+              opacity: 1;
+              transform: none;
+              filter: blur(0);
+            }
+          }
+          @keyframes wipe {
+            from {
+              clip-path: inset(0 100% 0 0);
+            }
+            to {
+              clip-path: inset(0 0 0 0);
+            }
+          }
+          @keyframes breathe {
+            0%,
+            100% {
+              opacity: 0.72;
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(1.05);
+            }
+          }
+          @keyframes pulse {
+            0%,
+            100% {
+              box-shadow: 0 0 13px 3px rgba(242, 196, 139, 0.6);
+            }
+            50% {
+              box-shadow: 0 0 5px 1px rgba(242, 196, 139, 0.25);
+            }
+          }
+          @keyframes leadgrow {
+            from {
+              width: 0;
+            }
+            to {
+              width: 58px;
+            }
+          }
+          @keyframes grain {
+            0% {
+              background-position: 0 0;
+            }
+            100% {
+              background-position: 3px 3px;
+            }
+          }
+          @keyframes ticker {
+            from {
+              transform: translateX(0);
+            }
+            to {
+              transform: translateX(-50%);
+            }
+          }
+          @keyframes blink {
+            0%,
+            93%,
+            100% {
+              transform: scaleY(1);
+            }
+            96% {
+              transform: scaleY(0.08);
+            }
+          }
+          @keyframes hang {
+            0%,
+            100% {
+              transform: rotate(-1.4deg);
+            }
+            50% {
+              transform: rotate(1.4deg);
+            }
+          }
+
+          /* ---------- EL E65S ---------- */
+          @keyframes drop {
+            0% {
+              transform: translateY(-58px) rotate(-30deg);
+              opacity: 0;
+            }
+            12% {
+              opacity: 1;
+            }
+            74% {
+              transform: translateY(0) rotate(8deg);
+            }
+            84% {
+              transform: translateY(-4px) rotate(4deg);
+            }
+            100% {
+              transform: translateY(0) rotate(6deg);
+              opacity: 1;
+            }
+          }
+          @keyframes settle {
+            0%,
+            100% {
+              transform: translateY(0) rotate(0deg);
+            }
+            50% {
+              transform: translateY(-3px) rotate(2.5deg);
+            }
+          }
+          @keyframes grind {
+            0% {
+              transform: translateY(-4px) translateX(0);
+              opacity: 0;
+            }
+            20% {
+              opacity: 1;
+            }
+            100% {
+              transform: translateY(34px) translateX(-5px);
+              opacity: 0;
+            }
+          }
+          /* el collar de molienda se ajusta */
+          @keyframes collar {
+            0%,
+            46% {
+              transform: rotate(0deg);
+            }
+            54%,
+            100% {
+              transform: rotate(-7deg);
+            }
+          }
+          /* el display cuenta el tiempo de molienda del E65S */
+          @keyframes shot {
+            to {
+              transform: translateY(-196px);
+            }
+          }
+          @keyframes aroma {
+            0% {
+              transform: translateY(6px) scaleX(0.8);
+              opacity: 0;
+            }
+            25% {
+              opacity: 0.55;
+            }
+            100% {
+              transform: translateY(-44px) scaleX(1.25);
+              opacity: 0;
+            }
+          }
+          @keyframes led {
+            0%,
+            100% {
+              opacity: 1;
+            }
+            50% {
+              opacity: 0.25;
+            }
+          }
+
+          .r {
+            animation: rise 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+          }
+          .w {
+            animation: wipe 1.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+          }
+          .lead {
+            position: absolute;
+            height: 1px;
+            width: 58px;
+            background: linear-gradient(
+              90deg,
+              rgba(136, 83, 51, 0.95),
+              rgba(136, 83, 51, 0.12)
+            );
+            animation: leadgrow 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+          }
+          .sv {
+            transform-box: fill-box;
+            transform-origin: center;
+          }
+
+          .navlink {
+            font-family: "Martian Mono", ui-monospace, monospace;
+            font-size: 10px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #9a9c9e;
+            text-decoration: none;
+          }
+          .navlink:hover {
+            color: #e8e2d0;
+          }
+          .callout-k {
+            font-family: "Martian Mono", ui-monospace, monospace;
+            font-size: 9px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #885333;
+            margin-bottom: 7px;
+          }
+          .callout-v {
+            font-size: 16px;
+            line-height: 1.35;
+            color: #e8e2d0;
+          }
+          .callout-s {
+            font-size: 13px;
+            line-height: 1.45;
+            color: #9a9c9e;
+            margin-top: 5px;
+          }
+          .tk {
+            font-family: "Martian Mono", ui-monospace, monospace;
+            font-size: 11px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #9a9c9e;
+            white-space: nowrap;
+          }
+          .tk b {
+            color: #e8e2d0;
+            font-weight: 400;
+          }
+          .tk i {
+            color: #885333;
+            font-style: normal;
+            padding: 0 22px;
+          }
+        </style>
+      </helmet>
+
+      <div
+        style="
+          position: relative;
+          width: 1440px;
+          height: 1040px;
+          overflow: hidden;
+          background: #292a2c;
+        "
+      >
+        <div
+          style="
+            position: absolute;
+            left: -120px;
+            top: -320px;
+            width: 1100px;
+            height: 860px;
+            background: radial-gradient(
+              closest-side,
+              rgba(242, 196, 139, 0.16),
+              rgba(242, 196, 139, 0.04) 55%,
+              rgba(242, 196, 139, 0) 78%
+            );
+            pointer-events: none;
+            animation: breathe 9s ease-in-out infinite;
+          "
+        ></div>
+        <div
+          style="
+            position: absolute;
+            inset: -4px;
+            opacity: 0.55;
+            pointer-events: none;
+            z-index: 5;
+            background-image: radial-gradient(
+              rgba(232, 226, 208, 0.055) 1px,
+              transparent 1px
+            );
+            background-size: 3px 3px;
+            animation: grain 0.9s steps(3) infinite;
+          "
+        ></div>
+
+        <!-- NAV -->
+        <div
+          class="r"
+          style="
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 92px;
+            padding: 0 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(232, 226, 208, 0.11);
+            box-sizing: border-box;
+          "
+        >
+          <div style="display: flex; align-items: baseline; gap: 14px">
+            <div
+              style="
+                font-family: &quot;Grand Hotel&quot;, cursive;
+                font-size: 42px;
+                line-height: 1;
+                color: #e8e2d0;
+              "
+            >
+              Falco
+            </div>
+            <div
+              class="mono"
+              style="font-size: 9px; letter-spacing: 0.34em; color: #8d8f91"
+            >
+              café de santoto
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 40px">
+            <a class="navlink" href="#">La tienda</a>
+            <a class="navlink" href="#">Dónde estamos</a>
+            <a class="navlink" href="#">Falco FM</a>
+            <a
+              class="navlink"
+              href="#"
+              style="
+                color: #e8e2d0;
+                border: 1px solid rgba(136, 83, 51, 0.75);
+                padding: 11px 18px;
+              "
+              >@falco.cafe</a
+            >
+          </div>
+        </div>
+
+        <!-- el murciélago cuelga del nav, se hamaca y parpadea -->
+        <svg
+          viewBox="0 0 60 54"
+          style="
+            position: absolute;
+            left: 1128px;
+            top: 91px;
+            width: 44px;
+            transform-origin: 50% 0;
+            animation: hang 6.5s ease-in-out infinite;
+          "
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g fill="#3a3c3e">
+            <path d="M8,0 C4,14 6,26 14,32 C10,20 10,8 12,0 Z"></path>
+            <path d="M52,0 C56,14 54,26 46,32 C50,20 50,8 48,0 Z"></path>
+            <ellipse cx="30" cy="26" rx="20" ry="19"></ellipse>
+            <path d="M18,44 C22,52 38,52 42,44 C36,49 24,49 18,44 Z"></path>
+          </g>
+          <g fill="#292a2c">
+            <ellipse
+              class="sv"
+              cx="23"
+              cy="24"
+              rx="5"
+              ry="7"
+              style="animation: blink 6s ease-in-out infinite"
+            ></ellipse>
+            <ellipse
+              class="sv"
+              cx="37"
+              cy="24"
+              rx="5"
+              ry="7"
+              style="animation: blink 6s ease-in-out infinite"
+            ></ellipse>
+          </g>
+        </svg>
+
+        <!-- COLUMNA IZQUIERDA -->
+        <div style="position: absolute; left: 72px; top: 172px; width: 600px">
+          <div
+            class="mono r"
+            style="
+              font-size: 10px;
+              letter-spacing: 0.24em;
+              text-transform: uppercase;
+              color: #885333;
+              animation-delay: 0.15s;
+            "
+          >
+            Iriondo 2153 · Santo Tomé, Santa Fe
+          </div>
+
+          <div
+            style="
+              margin-top: 28px;
+              font-family: &quot;Bricolage Grotesque&quot;, sans-serif;
+              font-weight: 500;
+              font-size: 104px;
+              line-height: 0.9;
+              letter-spacing: -0.045em;
+              color: #e8e2d0;
+            "
+          >
+            <div class="w" style="animation-delay: 0.3s">café de</div>
+            <div class="w" style="animation-delay: 0.45s">santoto</div>
+          </div>
+
+          <div
+            class="r"
+            style="
+              margin-top: 32px;
+              font-size: 20px;
+              line-height: 1.62;
+              color: #a8aaac;
+              max-width: 520px;
+              animation-delay: 0.7s;
+            "
+          >
+            Somos una cafetería de especialidad en una esquina de Santo Tomé.
+            Tostamos con <span style="color: #e8e2d0">Puerto Blest</span> y
+            servimos café que se puede entender sin saber nada de café.
+          </div>
+
+          <div
+            class="r"
+            style="
+              margin-top: 36px;
+              padding-left: 26px;
+              border-left: 2px solid #885333;
+              animation-delay: 0.85s;
+            "
+          >
+            <div
+              style="
+                font-family: &quot;Bricolage Grotesque&quot;, sans-serif;
+                font-weight: 400;
+                font-size: 25px;
+                line-height: 1.42;
+                color: #e8e2d0;
+                max-width: 500px;
+              "
+            >
+              Nuestra misión siempre fue la misma: traer el mundo del café a
+              Santo Tomé.
+            </div>
+          </div>
+
+          <div
+            class="r"
+            style="
+              margin-top: 40px;
+              display: flex;
+              align-items: center;
+              gap: 18px;
+              animation-delay: 1s;
+            "
+          >
+            <div
+              style="
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                min-height: 44px;
+                box-sizing: border-box;
+                padding: 13px 20px;
+                border: 1px solid rgba(232, 226, 208, 0.2);
+                background: #313335;
+              "
+            >
+              <div
+                style="
+                  width: 7px;
+                  height: 7px;
+                  border-radius: 50%;
+                  background: #f2c48b;
+                  animation: pulse 2.6s ease-in-out infinite;
+                "
+              ></div>
+              <div
+                class="mono"
+                style="
+                  font-size: 10px;
+                  letter-spacing: 0.16em;
+                  text-transform: uppercase;
+                  color: #e8e2d0;
+                "
+              >
+                Abierto · cierra [20:00]
+              </div>
+            </div>
+            <div
+              class="mono"
+              style="
+                font-size: 10px;
+                letter-spacing: 0.16em;
+                text-transform: uppercase;
+                color: #8d8f91;
+              "
+            >
+              Lun a Sáb · Dom de tarde
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= PANEL: EL E65S ================= -->
+        <div
+          class="r"
+          style="
+            position: absolute;
+            left: 764px;
+            top: 172px;
+            width: 604px;
+            height: 726px;
+            background: linear-gradient(168deg, #313335 0%, #232426 100%);
+            border: 1px solid rgba(232, 226, 208, 0.1);
+            border-top: 1px solid rgba(136, 83, 51, 0.85);
+            overflow: hidden;
+            animation-delay: 0.55s;
+          "
+        >
+          <div
+            style="
+              position: absolute;
+              right: -70px;
+              top: -130px;
+              width: 460px;
+              height: 460px;
+              background: radial-gradient(
+                closest-side,
+                rgba(242, 196, 139, 0.22),
+                rgba(242, 196, 139, 0) 72%
+              );
+              animation: breathe 7s ease-in-out infinite;
+            "
+          ></div>
+
+          <div
+            style="
+              position: absolute;
+              left: 30px;
+              top: 26px;
+              display: flex;
+              align-items: center;
+              gap: 12px;
+            "
+          >
+            <div
+              style="
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #f2c48b;
+                animation: pulse 2.6s ease-in-out infinite;
+              "
+            ></div>
+            <div
+              class="mono"
+              style="
+                font-size: 10px;
+                letter-spacing: 0.24em;
+                text-transform: uppercase;
+                color: #e8e2d0;
+              "
+            >
+              En tolva ahora
+            </div>
+          </div>
+
+          <!-- ===== MAHLKÖNIG E65S ===== -->
+          <svg
+            viewBox="0 0 240 560"
+            style="position: absolute; right: 18px; top: 62px; width: 246px"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="rgba(232,226,208,0.03)" />
+                <stop offset="30%" stop-color="rgba(232,226,208,0.13)" />
+                <stop offset="55%" stop-color="rgba(232,226,208,0.03)" />
+                <stop offset="100%" stop-color="rgba(232,226,208,0.09)" />
+              </linearGradient>
+              <linearGradient id="bodyg" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="rgba(232,226,208,0.03)" />
+                <stop offset="38%" stop-color="rgba(232,226,208,0.12)" />
+                <stop offset="100%" stop-color="rgba(232,226,208,0.02)" />
+              </linearGradient>
+              <linearGradient id="chrome" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="rgba(232,226,208,0.25)" />
+                <stop offset="35%" stop-color="rgba(232,226,208,0.62)" />
+                <stop offset="70%" stop-color="rgba(232,226,208,0.2)" />
+                <stop offset="100%" stop-color="rgba(232,226,208,0.45)" />
+              </linearGradient>
+              <clipPath id="cone">
+                <path d="M46,46 L194,46 L146,206 L94,206 Z"></path>
+              </clipPath>
+              <clipPath id="scr">
+                <rect x="66" y="292" width="52" height="28"></rect>
+              </clipPath>
+            </defs>
+
+            <!-- ===== BASE / BANDEJA ===== -->
+            <ellipse
+              cx="116"
+              cy="516"
+              rx="88"
+              ry="26"
+              fill="#2b2d30"
+              stroke="rgba(232,226,208,0.34)"
+              stroke-width="1.5"
+            ></ellipse>
+            <ellipse
+              cx="116"
+              cy="512"
+              rx="70"
+              ry="18"
+              fill="none"
+              stroke="rgba(232,226,208,0.18)"
+              stroke-width="1.2"
+            ></ellipse>
+
+            <!-- ===== TOLVA CÓNICA (vidrio) ===== -->
+            <path
+              d="M46,46 L194,46 L146,206 L94,206 Z"
+              fill="url(#glass)"
+              stroke="rgba(232,226,208,0.46)"
+              stroke-width="1.6"
+              stroke-linejoin="round"
+            ></path>
+
+            <!-- granos dentro del cono -->
+            <g clip-path="url(#cone)" fill="#885333">
+              <g>
+                <ellipse
+                  class="sv"
+                  cx="104"
+                  cy="196"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 4.2s ease-in-out infinite"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="126"
+                  cy="198"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 5.1s ease-in-out infinite 0.5s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="115"
+                  cy="184"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 4.6s ease-in-out infinite 1s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="136"
+                  cy="184"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 5.4s ease-in-out infinite 0.3s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="94"
+                  cy="182"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 4.9s ease-in-out infinite 1.4s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="105"
+                  cy="170"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 5.6s ease-in-out infinite 0.8s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="127"
+                  cy="170"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 4.4s ease-in-out infinite 1.7s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="148"
+                  cy="172"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 5.2s ease-in-out infinite 0.2s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="84"
+                  cy="168"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 4.8s ease-in-out infinite 2.1s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="116"
+                  cy="156"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 5.8s ease-in-out infinite 1.2s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="94"
+                  cy="154"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 4.5s ease-in-out infinite 0.6s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="139"
+                  cy="156"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 5.3s ease-in-out infinite 1.9s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="106"
+                  cy="142"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 5s ease-in-out infinite 2.4s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="128"
+                  cy="142"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 4.7s ease-in-out infinite 0.9s"
+                ></ellipse>
+              </g>
+              <!-- granos nuevos cayendo -->
+              <ellipse
+                class="sv"
+                cx="110"
+                cy="130"
+                rx="10"
+                ry="6.8"
+                style="
+                  animation: drop 4.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+                "
+              ></ellipse>
+              <ellipse
+                class="sv"
+                cx="134"
+                cy="128"
+                rx="10"
+                ry="6.8"
+                style="
+                  animation: drop 4.4s cubic-bezier(0.45, 0, 0.55, 1) infinite
+                    1.5s;
+                "
+              ></ellipse>
+              <ellipse
+                class="sv"
+                cx="90"
+                cy="132"
+                rx="10"
+                ry="6.8"
+                style="
+                  animation: drop 4.4s cubic-bezier(0.45, 0, 0.55, 1) infinite
+                    3s;
+                "
+              ></ellipse>
+            </g>
+
+            <!-- borde superior + tapa -->
+            <ellipse
+              cx="120"
+              cy="46"
+              rx="74"
+              ry="13"
+              fill="none"
+              stroke="rgba(232,226,208,0.46)"
+              stroke-width="1.6"
+            ></ellipse>
+            <path
+              d="M44,38 Q44,24 120,24 Q196,24 196,38 L196,46 Q196,58 120,58 Q44,58 44,46 Z"
+              fill="#33353a"
+              stroke="rgba(232,226,208,0.46)"
+              stroke-width="1.6"
+            ></path>
+            <ellipse
+              cx="120"
+              cy="30"
+              rx="16"
+              ry="4.5"
+              fill="rgba(232,226,208,0.22)"
+            ></ellipse>
+            <!-- compuerta de la tolva -->
+            <path
+              d="M104,58 L136,58 L130,86 L110,86 Z"
+              fill="#33353a"
+              stroke="rgba(232,226,208,0.4)"
+              stroke-width="1.4"
+            ></path>
+
+            <!-- ===== CUELLO + COLLAR DE MOLIENDA ===== -->
+            <path
+              d="M94,206 L146,206 L146,224 L94,224 Z"
+              fill="#33353a"
+              stroke="rgba(232,226,208,0.42)"
+              stroke-width="1.5"
+            ></path>
+            <!-- hombro negro redondeado -->
+            <path
+              d="M56,262 L56,244 Q56,224 84,224 L156,224 Q184,224 184,244 L184,262 Z"
+              fill="#33353a"
+              stroke="rgba(232,226,208,0.44)"
+              stroke-width="1.5"
+              stroke-linejoin="round"
+            ></path>
+            <!-- anillo cromado: el ajuste stepless -->
+            <g
+              class="sv"
+              style="animation: collar 9s cubic-bezier(0.7, 0, 0.3, 1) infinite"
+            >
+              <path
+                d="M56,262 L184,262 L184,286 L56,286 Z"
+                fill="url(#chrome)"
+                stroke="rgba(232,226,208,0.5)"
+                stroke-width="1.5"
+              ></path>
+              <g stroke="rgba(41,42,44,0.45)" stroke-width="1.2">
+                <path d="M78,266 L78,282"></path>
+                <path d="M100,266 L100,282"></path>
+                <path d="M122,266 L122,282"></path>
+                <path d="M144,266 L144,282"></path>
+                <path d="M166,266 L166,282"></path>
+              </g>
+            </g>
+
+            <!-- ===== CUERPO ===== -->
+            <path
+              d="M58,286 L182,286 L182,486 Q182,496 172,496 L68,496 Q58,496 58,486 Z"
+              fill="url(#bodyg)"
+              stroke="rgba(232,226,208,0.44)"
+              stroke-width="1.5"
+              stroke-linejoin="round"
+            ></path>
+
+            <!-- display arriba a la izquierda, como el real -->
+            <rect
+              x="64"
+              y="290"
+              width="56"
+              height="32"
+              rx="2.5"
+              fill="#17191b"
+              stroke="rgba(232,226,208,0.3)"
+              stroke-width="1.2"
+            ></rect>
+            <g clip-path="url(#scr)">
+              <g style="animation: shot 5s steps(7) infinite">
+                <text
+                  x="92"
+                  y="312"
+                  text-anchor="middle"
+                  fill="#f2c48b"
+                  font-family="Martian Mono, monospace"
+                  font-size="15"
+                >
+                  0.0
+                </text>
+                <text
+                  x="92"
+                  y="340"
+                  text-anchor="middle"
+                  fill="#f2c48b"
+                  font-family="Martian Mono, monospace"
+                  font-size="15"
+                >
+                  1.2
+                </text>
+                <text
+                  x="92"
+                  y="368"
+                  text-anchor="middle"
+                  fill="#f2c48b"
+                  font-family="Martian Mono, monospace"
+                  font-size="15"
+                >
+                  2.6
+                </text>
+                <text
+                  x="92"
+                  y="396"
+                  text-anchor="middle"
+                  fill="#f2c48b"
+                  font-family="Martian Mono, monospace"
+                  font-size="15"
+                >
+                  3.9
+                </text>
+                <text
+                  x="92"
+                  y="424"
+                  text-anchor="middle"
+                  fill="#f2c48b"
+                  font-family="Martian Mono, monospace"
+                  font-size="15"
+                >
+                  5.1
+                </text>
+                <text
+                  x="92"
+                  y="452"
+                  text-anchor="middle"
+                  fill="#f2c48b"
+                  font-family="Martian Mono, monospace"
+                  font-size="15"
+                >
+                  6.3
+                </text>
+                <text
+                  x="92"
+                  y="480"
+                  text-anchor="middle"
+                  fill="#f2c48b"
+                  font-family="Martian Mono, monospace"
+                  font-size="15"
+                >
+                  6.8
+                </text>
+                <text
+                  x="92"
+                  y="508"
+                  text-anchor="middle"
+                  fill="#f2c48b"
+                  font-family="Martian Mono, monospace"
+                  font-size="15"
+                >
+                  6.8
+                </text>
+              </g>
+            </g>
+            <text
+              x="115"
+              y="318"
+              text-anchor="end"
+              fill="rgba(242,196,139,0.55)"
+              font-family="Martian Mono, monospace"
+              font-size="8"
+            >
+              s
+            </text>
+            <circle
+              cx="132"
+              cy="306"
+              r="2.6"
+              fill="#f2c48b"
+              style="animation: led 1.6s ease-in-out infinite"
+            ></circle>
+
+            <!-- ===== SALIDA / CHUTE ===== -->
+            <path
+              d="M100,342 Q142,338 148,352 Q152,364 138,374 L114,382 Q100,384 98,372 Z"
+              fill="#3a3c40"
+              stroke="rgba(232,226,208,0.44)"
+              stroke-width="1.5"
+              stroke-linejoin="round"
+            ></path>
+            <ellipse
+              cx="123"
+              cy="350"
+              rx="20"
+              ry="7"
+              transform="rotate(-6 123 350)"
+              fill="#1d1f21"
+              stroke="rgba(232,226,208,0.34)"
+              stroke-width="1.2"
+            ></ellipse>
+
+            <!-- molido cayendo -->
+            <g
+              stroke="#f2c48b"
+              stroke-width="1.6"
+              fill="none"
+              stroke-linecap="round"
+            >
+              <path
+                class="sv"
+                d="M112,384 L111,396"
+                style="animation: grind 1.5s linear infinite"
+              ></path>
+              <path
+                class="sv"
+                d="M120,384 L120,398"
+                style="animation: grind 1.5s linear infinite 0.42s"
+              ></path>
+              <path
+                class="sv"
+                d="M128,384 L129,396"
+                style="animation: grind 1.5s linear infinite 0.84s"
+              ></path>
+            </g>
+
+            <!-- aroma -->
+            <g stroke="rgba(242,196,139,0.55)" stroke-width="1.2" fill="none">
+              <path
+                class="sv"
+                d="M104,430 C98,418 110,412 104,400"
+                style="animation: aroma 5s ease-out infinite"
+              ></path>
+              <path
+                class="sv"
+                d="M136,430 C142,418 130,412 136,400"
+                style="animation: aroma 5s ease-out infinite 2.5s"
+              ></path>
+            </g>
+
+            <!-- ===== HORQUILLA CROMADA DEL PORTAFILTRO ===== -->
+            <g
+              stroke="url(#chrome)"
+              stroke-width="4"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M74,412 L74,462"></path>
+              <path d="M166,412 L166,462"></path>
+              <path d="M74,418 L166,418"></path>
+              <path d="M74,458 L166,458"></path>
+              <path d="M96,418 L96,458"></path>
+              <path d="M144,418 L144,458"></path>
+            </g>
+            <circle
+              cx="120"
+              cy="438"
+              r="7"
+              fill="#3a3c40"
+              stroke="rgba(232,226,208,0.45)"
+              stroke-width="1.4"
+            ></circle>
+            <!-- palanca lateral -->
+            <g
+              stroke="url(#chrome)"
+              stroke-width="3.5"
+              fill="none"
+              stroke-linecap="round"
+            >
+              <path d="M74,440 L52,452 L52,474"></path>
+            </g>
+
+            <!-- marca -->
+            <text
+              x="120"
+              y="480"
+              text-anchor="middle"
+              fill="rgba(232,226,208,0.5)"
+              font-family="Martian Mono, monospace"
+              font-size="8.5"
+              letter-spacing="2.2"
+            >
+              MAHLKÖNIG E65S
+            </text>
+          </svg>
+
+          <!-- CALLOUTS -->
+          <div
+            class="r"
+            style="
+              position: absolute;
+              left: 28px;
+              top: 96px;
+              width: 226px;
+              animation-delay: 1.1s;
+            "
+          >
+            <div class="callout-k">Origen</div>
+            <div class="callout-v">
+              [Finca La Esperanza]<br />[Huila, Colombia]
+            </div>
+            <div class="callout-s">[Caturra] · [Lavado] · [1.750 msnm]</div>
+          </div>
+          <div
+            class="lead"
+            style="left: 254px; top: 120px; animation-delay: 1.3s"
+          ></div>
+
+          <div
+            class="r"
+            style="
+              position: absolute;
+              left: 28px;
+              top: 254px;
+              width: 226px;
+              animation-delay: 1.25s;
+            "
+          >
+            <div class="callout-k">A qué sabe</div>
+            <div class="callout-v">[Durazno, panela, cítrico]</div>
+            <div class="callout-s">
+              Si nunca tomaste café de especialidad: se parece a un té de
+              durazno con un final dulce. No amarga.
+            </div>
+          </div>
+          <div
+            class="lead"
+            style="left: 254px; top: 278px; animation-delay: 1.45s"
+          ></div>
+
+          <div
+            class="r"
+            style="
+              position: absolute;
+              left: 28px;
+              top: 420px;
+              width: 226px;
+              animation-delay: 1.4s;
+            "
+          >
+            <div class="callout-k">Tostado</div>
+            <div class="callout-v">Hace [6] días</div>
+            <div class="callout-s">por Puerto Blest, en [Rosario]</div>
+          </div>
+          <div
+            class="lead"
+            style="left: 254px; top: 444px; animation-delay: 1.6s"
+          ></div>
+
+          <div
+            style="
+              position: absolute;
+              left: 30px;
+              right: 30px;
+              bottom: 26px;
+              padding-top: 18px;
+              border-top: 1px solid rgba(232, 226, 208, 0.11);
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+            "
+          >
+            <div
+              class="mono"
+              style="
+                font-size: 9px;
+                letter-spacing: 0.18em;
+                text-transform: uppercase;
+                color: #8d8f91;
+              "
+            >
+              Cambia cada vez que cambiamos el grano
+            </div>
+            <a
+              class="mono"
+              href="#"
+              style="
+                font-size: 10px;
+                letter-spacing: 0.18em;
+                text-transform: uppercase;
+                color: #e8e2d0;
+                text-decoration: none;
+                border-bottom: 1px solid #885333;
+                padding-bottom: 3px;
+              "
+              >Llevate un cuarto →</a
+            >
+          </div>
+        </div>
+
+        <!-- ============ TICKER ============ -->
+        <div
+          style="
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 68px;
+            border-top: 1px solid rgba(232, 226, 208, 0.11);
+            background: #232426;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+          "
+        >
+          <div
+            style="
+              display: flex;
+              width: max-content;
+              animation: ticker 38s linear infinite;
+            "
+          >
+            <div class="tk">
+              En tolva <b>[Huila, Colombia]</b><i>◆</i>Tostado hace
+              <b>[6] días</b><i>◆</i>Molemos en <b>Mahlkönig E65S</b
+              ><i>◆</i>Sonando <b>[Tema — Artista]</b><i>◆</i>Iriondo 2153 ·
+              Santo Tomé<i>◆</i>
+            </div>
+            <div class="tk">
+              En tolva <b>[Huila, Colombia]</b><i>◆</i>Tostado hace
+              <b>[6] días</b><i>◆</i>Molemos en <b>Mahlkönig E65S</b
+              ><i>◆</i>Sonando <b>[Tema — Artista]</b><i>◆</i>Iriondo 2153 ·
+              Santo Tomé<i>◆</i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </x-dc>
+  </body>
+</html>

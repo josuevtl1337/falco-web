@@ -1,0 +1,2279 @@
+<title>Falco × Persona</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Martian+Mono:wght@300;400;600&display=swap"
+/>
+<style>
+  :root {
+    --carbon: #292a2c;
+    --sombra: #1e1f21;
+    --piedra: #313335;
+    --tostado: #885333;
+    --hueso: #e8e2d0;
+    --ceniza: #9a9c9e;
+    --brasa: #f2c48b;
+    --display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+    --body: "Instrument Sans", system-ui, sans-serif;
+    --serif: "Instrument Serif", Georgia, serif;
+    --mono: "Martian Mono", ui-monospace, "SFMono-Regular", monospace;
+    color-scheme: dark;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: var(--carbon);
+    color: var(--hueso);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding-inline: 24px;
+    padding-block: 48px 96px;
+  }
+  @media (max-width: 600px) {
+    .wrap {
+      padding-inline: 16px;
+    }
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--display);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+    margin: 0;
+  }
+  p {
+    margin: 0;
+  }
+  .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--brasa);
+  }
+  button {
+    font: inherit;
+    color: inherit;
+  }
+  :focus-visible {
+    outline: 2px solid var(--brasa);
+    outline-offset: 3px;
+  }
+
+  /* ---------- CABECERA DE LA PÁGINA ---------- */
+  .intro {
+    display: grid;
+    gap: 20px;
+    max-width: 760px;
+    margin-bottom: 44px;
+  }
+  .intro h1 {
+    font-size: clamp(44px, 7vw, 84px);
+    line-height: 0.92;
+    font-variation-settings: "wdth" 82;
+    font-weight: 700;
+  }
+  .intro h1 .x {
+    display: inline-block;
+    background: var(--tostado);
+    color: var(--hueso);
+    padding: 0 0.16em;
+    transform: rotate(-6deg);
+    box-shadow: 6px 6px 0 var(--hueso);
+    margin: 0 0.08em;
+  }
+  .intro p {
+    color: #b8b9ba;
+    font-size: 18px;
+    max-width: 62ch;
+  }
+  .rule {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    border-left: 2px solid var(--tostado);
+    padding-left: 16px;
+    color: var(--hueso);
+    max-width: 62ch;
+  }
+
+  .sec {
+    margin-top: 88px;
+    display: grid;
+    gap: 28px;
+  }
+  .sec-head {
+    display: grid;
+    gap: 10px;
+    max-width: 720px;
+  }
+  .sec-head h2 {
+    font-size: clamp(30px, 4vw, 44px);
+    line-height: 1;
+  }
+  .sec-head p {
+    color: #b8b9ba;
+    max-width: 64ch;
+  }
+
+  /* ---------- PLACA PERSONA ---------- */
+  .plate {
+    display: inline-block;
+    background: var(--tostado);
+    color: var(--hueso);
+    font-family: var(--display);
+    font-weight: 700;
+    font-variation-settings: "wdth" 78;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-size: 14px;
+    line-height: 1;
+    padding: 7px 14px 6px;
+    transform: skewX(-14deg);
+    box-shadow: 4px 4px 0 var(--sombra);
+  }
+  .plate > span {
+    display: inline-block;
+    transform: skewX(14deg);
+  }
+  .plate.hi {
+    box-shadow: 5px 5px 0 var(--hueso);
+  }
+
+  /* ---------- MOCKUP DE LA HOME ---------- */
+  .toggle {
+    display: inline-flex;
+    background: var(--sombra);
+    border: 1px solid rgba(232, 226, 208, 0.16);
+    padding: 4px;
+    gap: 4px;
+  }
+  .toggle button {
+    background: none;
+    border: 0;
+    cursor: pointer;
+    padding: 10px 16px;
+    min-height: 44px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ceniza);
+  }
+  .toggle button[aria-pressed="true"] {
+    background: var(--hueso);
+    color: var(--carbon);
+  }
+
+  .mock {
+    background: var(--carbon);
+    border: 1px solid rgba(232, 226, 208, 0.14);
+    position: relative;
+    overflow: hidden;
+  }
+  .mock-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: var(--sombra);
+    border-bottom: 1px solid rgba(232, 226, 208, 0.1);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ceniza);
+  }
+  .mock-bar i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #3d3f42;
+    display: inline-block;
+  }
+  .mock-bar .url {
+    margin-left: 10px;
+    background: var(--carbon);
+    padding: 5px 12px;
+    flex: 1;
+    max-width: 360px;
+  }
+
+  .mock-glow {
+    position: absolute;
+    left: -10%;
+    top: -30%;
+    width: 75%;
+    height: 90%;
+    pointer-events: none;
+    background: radial-gradient(
+      closest-side,
+      rgba(242, 196, 139, 0.15),
+      rgba(242, 196, 139, 0) 75%
+    );
+  }
+  .mock-nav {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 20px clamp(16px, 4vw, 48px);
+    border-bottom: 1px solid rgba(232, 226, 208, 0.1);
+  }
+  .logo {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .logo b {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 34px;
+    line-height: 1;
+  }
+  .logo span {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: #8d8f91;
+  }
+  .mock-nav nav {
+    display: flex;
+    gap: 26px;
+    flex-wrap: wrap;
+  }
+  .mock-nav nav a {
+    position: relative;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ceniza);
+    text-decoration: none;
+    padding: 6px 2px;
+    z-index: 0;
+  }
+  .is-p5 .mock-nav nav a::before {
+    content: "";
+    position: absolute;
+    inset: -2px -12px;
+    z-index: -1;
+    background: var(--tostado);
+    transform: skewX(-16deg) scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.28s cubic-bezier(0.2, 1.3, 0.4, 1);
+    box-shadow: 4px 4px 0 var(--hueso);
+  }
+  .is-p5 .mock-nav nav a:hover::before,
+  .is-p5 .mock-nav nav a.on::before {
+    transform: skewX(-16deg) scaleX(1);
+  }
+  .is-p5 .mock-nav nav a:hover,
+  .is-p5 .mock-nav nav a.on {
+    color: var(--hueso);
+  }
+
+  .mock-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: clamp(24px, 4vw, 56px);
+    padding: clamp(24px, 4vw, 48px);
+  }
+  @media (max-width: 880px) {
+    .mock-hero {
+      grid-template-columns: 1fr;
+    }
+  }
+  .left {
+    display: grid;
+    gap: 26px;
+    align-content: start;
+  }
+
+  /* estado: qué se ve en cada versión */
+  .mock:not(.is-p5) .p5 {
+    display: none !important;
+  }
+  .mock.is-p5 .cueva {
+    display: none !important;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--brasa);
+  }
+
+  /* ---------- 1 · HUD DE CALENDARIO ---------- */
+  .hud {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 2px 14px;
+    align-items: end;
+    justify-content: start;
+  }
+  .hud-date {
+    grid-row: span 2;
+    font-family: var(--display);
+    font-weight: 800;
+    font-variation-settings: "wdth" 76;
+    font-size: 64px;
+    line-height: 0.82;
+    letter-spacing: -0.04em;
+    color: var(--hueso);
+    transform: skewX(-10deg);
+    text-shadow: 4px 4px 0 var(--tostado);
+    font-variant-numeric: tabular-nums;
+  }
+  .hud-date small {
+    font-size: 34px;
+    color: var(--ceniza);
+    text-shadow: none;
+  }
+  .hud-wd {
+    justify-self: start;
+  }
+  .hud-tod {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--hueso);
+  }
+  .hud-state {
+    grid-column: 1 / -1;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ceniza);
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--brasa);
+    box-shadow: 0 0 10px 2px rgba(242, 196, 139, 0.55);
+    animation: pulse 2.6s ease-in-out infinite;
+  }
+  .dot.off {
+    background: #6b6d70;
+    box-shadow: none;
+    animation: none;
+  }
+
+  /* ---------- 2 · TITULAR RECORTADO ---------- */
+  .title {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: clamp(52px, 7.4vw, 100px);
+    line-height: 0.9;
+    letter-spacing: -0.045em;
+  }
+  .ransom {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+  .rl {
+    --r: 0deg;
+    display: inline-block;
+    line-height: 0.9;
+    padding: 0.06em 0.1em 0.02em;
+    transform: rotate(var(--r));
+    animation: snap 0.55s cubic-bezier(0.2, 1.2, 0.4, 1) both;
+    animation-delay: calc(var(--i) * 70ms + 200ms);
+  }
+  .r1 {
+    --r: -5deg;
+    background: var(--hueso);
+    color: var(--carbon);
+    font-family: var(--display);
+    font-weight: 800;
+    font-variation-settings: "wdth" 75;
+  }
+  .r2 {
+    --r: 4deg;
+    background: var(--tostado);
+    color: var(--hueso);
+    font-family: var(--serif);
+    font-style: italic;
+  }
+  .r3 {
+    --r: -2deg;
+    border: 3px solid var(--hueso);
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 0.82em;
+    align-self: center;
+  }
+  .r4 {
+    --r: 6deg;
+    background: var(--sombra);
+    color: var(--brasa);
+    font-family: var(--display);
+    font-weight: 300;
+    box-shadow: 4px 4px 0 var(--tostado);
+  }
+  .r5 {
+    --r: -7deg;
+    background: var(--hueso);
+    color: var(--carbon);
+    font-family: var(--serif);
+  }
+  .r6 {
+    --r: 3deg;
+    background: var(--tostado);
+    color: var(--hueso);
+    font-family: var(--display);
+    font-weight: 800;
+  }
+  .r7 {
+    --r: -3deg;
+    border: 3px solid var(--tostado);
+    color: var(--hueso);
+    font-family: var(--mono);
+    font-size: 0.82em;
+    align-self: center;
+  }
+  .plain-word {
+    display: block;
+  }
+
+  .lede {
+    color: #b8b9ba;
+    font-size: 18px;
+    max-width: 46ch;
+  }
+
+  /* ---------- 3 · CAJA DE DIÁLOGO ---------- */
+  .dlg {
+    position: relative;
+    padding-top: 18px;
+    max-width: 520px;
+  }
+  .dlg-tag {
+    position: absolute;
+    left: 18px;
+    top: 0;
+    z-index: 2;
+    transform: rotate(-5deg);
+  }
+  .dlg-box {
+    position: relative;
+    background: var(--sombra);
+    border: 2px solid var(--hueso);
+    transform: skewX(-6deg);
+    padding: 26px 34px 26px 26px;
+  }
+  .dlg-box::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translate(9px, 9px);
+    background: var(--tostado);
+    z-index: -1;
+  }
+  .dlg-text {
+    transform: skewX(6deg);
+    font-family: var(--display);
+    font-size: 21px;
+    line-height: 1.4;
+    min-height: 2.8em;
+  }
+  .dlg-next {
+    position: absolute;
+    right: 16px;
+    bottom: 10px;
+    color: var(--brasa);
+    font-size: 12px;
+    animation: nudge 1s ease-in-out infinite;
+  }
+  .mission-plain {
+    border-left: 2px solid var(--tostado);
+    padding-left: 22px;
+    font-family: var(--display);
+    font-size: 22px;
+    line-height: 1.42;
+    max-width: 500px;
+  }
+
+  /* ---------- PANEL TOLVA ---------- */
+  .tolva {
+    position: relative;
+    background: linear-gradient(168deg, var(--piedra), #232426);
+    border: 1px solid rgba(232, 226, 208, 0.1);
+    border-top: 1px solid rgba(136, 83, 51, 0.85);
+    padding: 22px;
+    display: grid;
+    gap: 18px;
+    align-content: start;
+    overflow: hidden;
+  }
+  .tolva::before {
+    content: "";
+    position: absolute;
+    right: -20%;
+    top: -30%;
+    width: 80%;
+    height: 70%;
+    pointer-events: none;
+    background: radial-gradient(
+      closest-side,
+      rgba(242, 196, 139, 0.2),
+      rgba(242, 196, 139, 0) 72%
+    );
+  }
+  .tolva-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 220px);
+    gap: 16px;
+    align-items: start;
+  }
+  @media (max-width: 520px) {
+    .tolva-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .e65s {
+    width: 100%;
+    max-width: 230px;
+    height: auto;
+    display: block;
+    justify-self: center;
+  }
+  .info {
+    display: grid;
+    gap: 18px;
+  }
+  .info-v {
+    font-size: 16px;
+    line-height: 1.35;
+    margin-top: 8px;
+  }
+  .info-s {
+    font-size: 13px;
+    color: var(--ceniza);
+    margin-top: 4px;
+  }
+  .mock:not(.is-p5) .plate {
+    background: none;
+    box-shadow: none;
+    transform: none;
+    padding: 0;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    color: var(--brasa);
+  }
+  .mock:not(.is-p5) .plate > span {
+    transform: none;
+  }
+  .tolva-foot {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    border-top: 1px solid rgba(232, 226, 208, 0.11);
+    padding-top: 14px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #8d8f91;
+  }
+  .tolva-foot a {
+    color: var(--hueso);
+    text-decoration: none;
+    border-bottom: 1px solid var(--tostado);
+    padding-bottom: 2px;
+  }
+
+  /* ---------- 4 · PENTÁGONO ---------- */
+  .penta {
+    width: 100%;
+    max-width: 250px;
+    height: auto;
+    display: block;
+  }
+  .penta .grid {
+    fill: none;
+    stroke: rgba(232, 226, 208, 0.18);
+    stroke-width: 1;
+  }
+  .penta .val {
+    fill: rgba(136, 83, 51, 0.78);
+    stroke: var(--hueso);
+    stroke-width: 2;
+    stroke-linejoin: round;
+    transform-origin: 110px 105px;
+    animation: grow 0.9s cubic-bezier(0.2, 1.3, 0.4, 1) both 0.5s;
+  }
+  .penta text {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 1px;
+    fill: var(--hueso);
+  }
+  .penta text tspan {
+    fill: var(--brasa);
+  }
+
+  /* ---------- TICKER ---------- */
+  .ticker {
+    position: relative;
+    overflow: hidden;
+    border-top: 1px solid rgba(232, 226, 208, 0.11);
+    background: var(--sombra);
+  }
+  .ticker-track {
+    display: flex;
+    width: max-content;
+    animation: slide 36s linear infinite;
+    padding-block: 18px;
+  }
+  .ticker-track span {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--ceniza);
+    padding-right: 40px;
+  }
+  .ticker-track b {
+    color: var(--hueso);
+    font-weight: 400;
+  }
+  .is-p5 .ticker {
+    background: transparent;
+    border: 0;
+    padding-block: 22px 30px;
+  }
+  .is-p5 .ticker-band {
+    margin-inline: -40px;
+    transform: rotate(-1.6deg);
+    background: var(--tostado);
+    box-shadow: 0 6px 0 var(--sombra);
+  }
+  .is-p5 .ticker-track span {
+    color: rgba(232, 226, 208, 0.72);
+  }
+  .is-p5 .ticker-track b {
+    color: var(--hueso);
+    font-weight: 600;
+  }
+
+  /* ---------- CATÁLOGO DE DETALLES ---------- */
+  .kit {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    gap: 20px;
+  }
+  .card {
+    background: var(--sombra);
+    border: 1px solid rgba(232, 226, 208, 0.12);
+    display: grid;
+    grid-template-rows: 250px auto;
+  }
+  .demo {
+    position: relative;
+    overflow: hidden;
+    background: var(--carbon);
+    border-bottom: 1px solid rgba(232, 226, 208, 0.1);
+    display: grid;
+    place-items: center;
+    padding: 20px;
+  }
+  .card-body {
+    padding: 20px 22px 22px;
+    display: grid;
+    gap: 10px;
+    align-content: start;
+  }
+  .card-body h3 {
+    font-size: 22px;
+    line-height: 1.1;
+  }
+  .card-body p {
+    color: #b8b9ba;
+    font-size: 14px;
+  }
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(232, 226, 208, 0.09);
+  }
+  .where {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ceniza);
+  }
+  .lvl {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    color: var(--ceniza);
+    text-transform: uppercase;
+  }
+  .lvl i {
+    width: 14px;
+    height: 6px;
+    background: rgba(232, 226, 208, 0.16);
+    transform: skewX(-20deg);
+    display: inline-block;
+  }
+  .lvl i.on {
+    background: var(--brasa);
+  }
+  .replay {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    background: var(--piedra);
+    border: 1px solid rgba(232, 226, 208, 0.2);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0 12px;
+    min-height: 32px;
+    cursor: pointer;
+    color: var(--hueso);
+  }
+  .replay:hover {
+    background: var(--tostado);
+  }
+  .ref {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--brasa);
+    text-transform: uppercase;
+  }
+
+  /* mini menú */
+  .menu-mini {
+    display: grid;
+    gap: 10px;
+    justify-items: start;
+  }
+  .menu-mini a {
+    position: relative;
+    z-index: 0;
+    font-family: var(--display);
+    font-weight: 800;
+    font-variation-settings: "wdth" 76;
+    text-transform: uppercase;
+    font-size: 26px;
+    line-height: 1;
+    color: var(--hueso);
+    text-decoration: none;
+    transform: rotate(-6deg);
+    padding: 4px 12px;
+  }
+  .menu-mini a:nth-child(2) {
+    margin-left: 26px;
+  }
+  .menu-mini a:nth-child(3) {
+    margin-left: 10px;
+  }
+  .menu-mini a::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--hueso);
+    transform: skewX(-14deg) scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s cubic-bezier(0.2, 1.3, 0.4, 1);
+    box-shadow: 5px 5px 0 var(--tostado);
+  }
+  .menu-mini a:hover::before,
+  .menu-mini a.on::before {
+    transform: skewX(-14deg) scaleX(1);
+  }
+  .menu-mini a:hover,
+  .menu-mini a.on {
+    color: var(--carbon);
+  }
+
+  /* corte diagonal */
+  .slash-stage {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .slash-word {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 34px;
+    letter-spacing: -0.03em;
+  }
+  .slash-band {
+    position: absolute;
+    top: -20%;
+    bottom: -20%;
+    left: 0;
+    width: 70%;
+    background: var(--tostado);
+    transform: translateX(-160%) skewX(-18deg);
+    box-shadow:
+      18px 0 0 var(--hueso),
+      30px 0 0 var(--sombra);
+  }
+  .slash-band.go {
+    animation: cut 0.8s cubic-bezier(0.7, 0, 0.3, 1) both;
+  }
+
+  /* cargando */
+  .load {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .load-stripe {
+    position: absolute;
+    left: -10%;
+    right: -10%;
+    bottom: 44px;
+    height: 54px;
+    background: var(--tostado);
+    transform: rotate(-4deg);
+  }
+  .load-word {
+    position: absolute;
+    right: 18px;
+    bottom: 50px;
+    font-family: var(--display);
+    font-weight: 800;
+    font-variation-settings: "wdth" 75;
+    font-size: 36px;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    color: var(--hueso);
+    transform: rotate(-4deg) skewX(-10deg);
+  }
+  .load-word span {
+    animation: blinkdot 1.2s steps(1) infinite;
+  }
+  .load-word span:nth-child(2) {
+    animation-delay: 0.3s;
+  }
+  .load-word span:nth-child(3) {
+    animation-delay: 0.6s;
+  }
+  .bat-fly {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    width: 64px;
+    animation: fly 3.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+  .wing {
+    transform-box: fill-box;
+    animation: flap 0.32s ease-in-out infinite alternate;
+  }
+  .wing.l {
+    transform-origin: right center;
+  }
+  .wing.r {
+    transform-origin: left center;
+  }
+
+  /* ---------- ARCANOS ---------- */
+  .rail {
+    overflow-x: auto;
+    padding-block: 36px 30px;
+    margin-inline: -8px;
+    padding-inline: 8px;
+    scrollbar-color: var(--tostado) var(--sombra);
+  }
+  .arcs {
+    display: flex;
+    gap: 22px;
+    width: max-content;
+  }
+  .arc {
+    --r: -2deg;
+    width: 212px;
+    flex: none;
+    position: relative;
+    background: var(--sombra);
+    border: 2px solid var(--hueso);
+    padding: 10px;
+    transform: rotate(var(--r));
+    transition:
+      transform 0.35s cubic-bezier(0.2, 1.3, 0.4, 1),
+      box-shadow 0.35s;
+    box-shadow: 7px 7px 0 var(--tostado);
+  }
+  .arc:hover,
+  .arc:focus-within,
+  .arc.lift {
+    transform: rotate(0) translateY(-10px);
+    box-shadow: 10px 12px 0 var(--tostado);
+  }
+  .arc-in {
+    border: 1px solid rgba(136, 83, 51, 0.9);
+    padding: 12px 12px 14px;
+    display: grid;
+    gap: 10px;
+  }
+  .arc-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .arc-num {
+    font-family: var(--display);
+    font-weight: 800;
+    font-variation-settings: "wdth" 76;
+    font-size: 30px;
+    line-height: 1;
+  }
+  .arc-name {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: var(--brasa);
+    text-transform: uppercase;
+    text-align: right;
+  }
+  .arc-art {
+    height: 132px;
+    position: relative;
+    display: grid;
+    place-items: center;
+    background: var(--carbon);
+    overflow: hidden;
+  }
+  .arc-art::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, var(--brasa) 1.3px, transparent 1.7px) 0
+      0 / 7px 7px;
+    -webkit-mask-image: radial-gradient(
+      circle at 50% 45%,
+      #000 18%,
+      transparent 68%
+    );
+    mask-image: radial-gradient(circle at 50% 45%, #000 18%, transparent 68%);
+    opacity: 0.6;
+  }
+  .arc-art svg {
+    position: relative;
+    width: 64px;
+    height: 64px;
+  }
+  .arc-plate {
+    justify-self: start;
+    font-size: 13px;
+  }
+  .arc-meta {
+    font-size: 12px;
+    color: var(--ceniza);
+  }
+  .arc-foot {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    padding-top: 10px;
+    border-top: 1px solid rgba(232, 226, 208, 0.1);
+  }
+  .arc-foot a {
+    color: var(--hueso);
+    text-decoration: none;
+  }
+  .burst {
+    position: absolute;
+    right: -18px;
+    top: -22px;
+    width: 74px;
+    height: 74px;
+    background: var(--hueso);
+    color: var(--carbon);
+    display: grid;
+    place-items: center;
+    transform: rotate(12deg);
+    z-index: 2;
+    font-family: var(--display);
+    font-weight: 800;
+    font-variation-settings: "wdth" 75;
+    font-size: 14px;
+    text-transform: uppercase;
+    animation: wobble 2.4s ease-in-out infinite;
+  }
+  .rail-note {
+    color: #b8b9ba;
+    max-width: 64ch;
+  }
+
+  /* ---------- MENÚ MOBILE ---------- */
+  .phone-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 40px;
+    align-items: center;
+  }
+  @media (max-width: 760px) {
+    .phone-row {
+      grid-template-columns: 1fr;
+      justify-items: center;
+    }
+  }
+  .phone {
+    width: 300px;
+    max-width: 100%;
+    height: 600px;
+    border: 2px solid #3d3f42;
+    border-radius: 34px;
+    padding: 10px;
+    background: #111214;
+  }
+  .screen {
+    position: relative;
+    height: 100%;
+    border-radius: 26px;
+    overflow: hidden;
+    background: var(--carbon);
+  }
+  .scr-top {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 18px 0;
+  }
+  .scr-top b {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 26px;
+  }
+  .burger {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    cursor: pointer;
+    background: var(--hueso);
+    color: var(--carbon);
+    transform: skewX(-12deg);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+  .scr-home {
+    position: absolute;
+    inset: 70px 18px 18px;
+    display: grid;
+    gap: 14px;
+    align-content: start;
+  }
+  .scr-home .title {
+    font-size: 46px;
+  }
+  .scr-home p {
+    font-size: 13px;
+    color: var(--ceniza);
+  }
+  .menu-full {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: var(--carbon);
+    clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+    transition: clip-path 0.45s cubic-bezier(0.7, 0, 0.3, 1);
+  }
+  .menu-full.open {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+  .menu-slab {
+    position: absolute;
+    left: -30%;
+    right: -30%;
+    top: 36%;
+    height: 38%;
+    background: var(--tostado);
+    transform: rotate(-18deg);
+  }
+  .menu-dots {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        circle,
+        rgba(232, 226, 208, 0.12) 1.2px,
+        transparent 1.6px
+      )
+      0 0 / 8px 8px;
+  }
+  .menu-list {
+    position: absolute;
+    left: 22px;
+    right: 18px;
+    top: 96px;
+    display: grid;
+    gap: 14px;
+    justify-items: start;
+  }
+  .menu-list a {
+    position: relative;
+    z-index: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--display);
+    font-weight: 800;
+    font-variation-settings: "wdth" 75;
+    text-transform: uppercase;
+    font-size: 40px;
+    line-height: 1;
+    color: var(--hueso);
+    text-decoration: none;
+    padding: 4px 12px;
+    transform: rotate(-8deg) translateX(120%);
+    opacity: 0;
+    transition:
+      transform 0.45s cubic-bezier(0.2, 1.2, 0.4, 1),
+      opacity 0.3s;
+  }
+  .menu-list a small {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    color: var(--brasa);
+  }
+  .menu-full.open .menu-list a {
+    transform: rotate(-8deg) translateX(0);
+    opacity: 1;
+  }
+  .menu-list a:nth-child(2) {
+    margin-left: 22px;
+  }
+  .menu-list a:nth-child(3) {
+    margin-left: 8px;
+  }
+  .menu-list a:nth-child(4) {
+    margin-left: 30px;
+  }
+  .menu-full.open .menu-list a:nth-child(1) {
+    transition-delay: 0.15s;
+  }
+  .menu-full.open .menu-list a:nth-child(2) {
+    transition-delay: 0.21s;
+  }
+  .menu-full.open .menu-list a:nth-child(3) {
+    transition-delay: 0.27s;
+  }
+  .menu-full.open .menu-list a:nth-child(4) {
+    transition-delay: 0.33s;
+  }
+  .menu-list a.on {
+    color: var(--carbon);
+  }
+  .menu-list a.on::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--hueso);
+    transform: skewX(-14deg);
+    box-shadow: 6px 6px 0 var(--sombra);
+  }
+  .menu-list a.on small {
+    color: var(--tostado);
+  }
+  .menu-hud {
+    position: absolute;
+    left: 22px;
+    bottom: 26px;
+    z-index: 1;
+  }
+  .menu-hud .hud-date {
+    font-size: 44px;
+  }
+  .menu-hud .hud-date small {
+    font-size: 24px;
+  }
+  .phone-notes {
+    display: grid;
+    gap: 14px;
+    color: #b8b9ba;
+    max-width: 52ch;
+  }
+  .phone-notes strong {
+    color: var(--hueso);
+    font-weight: 600;
+  }
+  .cta {
+    justify-self: start;
+    background: var(--hueso);
+    color: var(--carbon);
+    border: 0;
+    cursor: pointer;
+    min-height: 48px;
+    padding: 0 24px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transform: skewX(-12deg);
+    box-shadow: 5px 5px 0 var(--tostado);
+  }
+  .cta > span {
+    display: inline-block;
+    transform: skewX(12deg);
+  }
+
+  /* ---------- RECOMENDACIÓN ---------- */
+  .pick {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 16px;
+  }
+  .pick-item {
+    background: var(--sombra);
+    border: 1px solid rgba(232, 226, 208, 0.12);
+    padding: 20px;
+    display: grid;
+    gap: 8px;
+    align-content: start;
+  }
+  .pick-item.bold {
+    border-color: var(--tostado);
+    box-shadow: 6px 6px 0 var(--tostado);
+  }
+  .pick-item p {
+    color: #b8b9ba;
+    font-size: 14px;
+  }
+  .pick-item h3 {
+    font-size: 20px;
+  }
+
+  /* ---------- ESTADO EN EL CATÁLOGO ---------- */
+  .st-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .status { font-family: var(--mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; padding: 5px 10px; transform: skewX(-12deg); }
+  .status.in { background: var(--hueso); color: var(--carbon); }
+  .status.out { border: 1px solid rgba(232,226,208,.3); color: var(--ceniza); text-decoration: line-through; }
+  .status.maybe { border: 1px dashed var(--brasa); color: var(--brasa); }
+  .card.out { opacity: .5; }
+  .card.out:hover { opacity: .85; }
+
+  /* ---------- TIENDA CON FICHA QUE SE DA VUELTA ---------- */
+  .shop { display: grid; gap: 16px; }
+  .shop-row { display: flex; align-items: center; gap: 16px; margin-top: 8px; }
+  .shop-row i { flex: 1; height: 1px; background: rgba(232,226,208,.12); }
+  .rail2 {
+    overflow: hidden; padding-block: 28px 20px;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  }
+  .track2 { display: flex; gap: 22px; width: max-content; }
+  .to-l { animation: slide 48s linear infinite; }
+  .to-r { animation: slide 54s linear infinite reverse; }
+  .rail2:hover .track2, .rail2:focus-within .track2 { animation-play-state: paused; }
+  .pc { width: 250px; flex: none; position: relative; perspective: 900px; outline: none; }
+  .pc-in { display: grid; transition: transform .7s cubic-bezier(.2,1,.3,1); transform-style: preserve-3d; }
+  .pc:hover .pc-in, .pc:focus .pc-in, .pc.flip .pc-in { transform: rotateY(180deg); }
+  .pc:focus-visible { outline: 2px solid var(--brasa); outline-offset: 4px; }
+  .pc-front, .pc-back { grid-area: 1 / 1; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+  .pc-front { background: linear-gradient(168deg, var(--piedra), #232426); border: 1px solid rgba(232,226,208,.12); }
+  .pc-shot { height: 150px; position: relative; overflow: hidden; background: linear-gradient(150deg, #3b2519, #232426); border-bottom: 1px solid rgba(232,226,208,.1); }
+  .pc-shot::before { content: ""; position: absolute; left: 50%; top: -60px; width: 220px; height: 220px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(242,196,139,.26), rgba(242,196,139,0) 72%); }
+  .pc-body { padding: 16px 18px 14px; display: grid; gap: 6px; }
+  .pc-code { font-family: var(--mono); font-size: 9px; letter-spacing: .18em; color: var(--brasa); text-transform: uppercase; }
+  .pc-name { font-family: var(--display); font-weight: 500; font-size: 20px; line-height: 1.15; letter-spacing: -.02em; }
+  .pc-sub { font-size: 13px; color: var(--ceniza); }
+  .pc-foot { display: flex; justify-content: space-between; margin-top: 8px; padding-top: 11px; border-top: 1px solid rgba(232,226,208,.09); font-family: var(--mono); font-size: 11px; }
+  .pc-foot span:last-child { font-size: 9px; letter-spacing: .16em; color: var(--ceniza); }
+  .pc-back {
+    transform: rotateY(180deg); background: var(--sombra); border: 2px solid var(--hueso); padding: 10px;
+    box-shadow: 7px 7px 0 var(--tostado); display: grid;
+  }
+  .pc-back .arc-in { height: 100%; align-content: start; }
+  .pc-back .arc-art { height: 110px; }
+  .pc-why { font-family: var(--display); font-size: 15px; line-height: 1.35; }
+  .pc .burst { right: -14px; top: -20px; width: 66px; height: 66px; font-size: 13px; }
+  @media (hover: none) { .pc:hover .pc-in { transform: none; } .pc.flip .pc-in { transform: rotateY(180deg); } }
+
+  /* ---------- KEYFRAMES ---------- */
+  @keyframes pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 12px 3px rgba(242, 196, 139, 0.6);
+    }
+    50% {
+      box-shadow: 0 0 4px 1px rgba(242, 196, 139, 0.2);
+    }
+  }
+  @keyframes snap {
+    0% {
+      opacity: 0;
+      transform: translateY(-26px) rotate(calc(var(--r) + 28deg)) scale(1.5);
+    }
+    60% {
+      opacity: 1;
+      transform: rotate(calc(var(--r) - 5deg)) scale(0.94);
+    }
+    100% {
+      opacity: 1;
+      transform: rotate(var(--r)) scale(1);
+    }
+  }
+  @keyframes nudge {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(4px);
+    }
+  }
+  @keyframes grow {
+    from {
+      transform: scale(0) rotate(-40deg);
+    }
+    to {
+      transform: scale(1) rotate(0);
+    }
+  }
+  @keyframes slide {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes cut {
+    0% {
+      transform: translateX(-160%) skewX(-18deg);
+    }
+    100% {
+      transform: translateX(260%) skewX(-18deg);
+    }
+  }
+  @keyframes blinkdot {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
+  }
+  @keyframes fly {
+    0% {
+      transform: translate(-80px, 30px) rotate(8deg);
+    }
+    50% {
+      transform: translate(140px, -6px) rotate(-6deg);
+    }
+    100% {
+      transform: translate(420px, 24px) rotate(8deg);
+    }
+  }
+  @keyframes flap {
+    from {
+      transform: scaleY(1);
+    }
+    to {
+      transform: scaleY(0.25);
+    }
+  }
+  @keyframes wobble {
+    0%,
+    100% {
+      transform: rotate(12deg) scale(1);
+    }
+    50% {
+      transform: rotate(4deg) scale(1.08);
+    }
+  }
+
+  /* ---------- E65S (del diseño actual) ---------- */
+  .sv {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  @keyframes drop {
+    0% {
+      transform: translateY(-58px) rotate(-30deg);
+      opacity: 0;
+    }
+    12% {
+      opacity: 1;
+    }
+    74% {
+      transform: translateY(0) rotate(8deg);
+    }
+    84% {
+      transform: translateY(-4px) rotate(4deg);
+    }
+    100% {
+      transform: translateY(0) rotate(6deg);
+      opacity: 1;
+    }
+  }
+  @keyframes settle {
+    0%,
+    100% {
+      transform: translateY(0) rotate(0);
+    }
+    50% {
+      transform: translateY(-3px) rotate(2.5deg);
+    }
+  }
+  @keyframes grind {
+    0% {
+      transform: translateY(-4px);
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(34px) translateX(-5px);
+      opacity: 0;
+    }
+  }
+  @keyframes collar {
+    0%,
+    46% {
+      transform: rotate(0);
+    }
+    54%,
+    100% {
+      transform: rotate(-7deg);
+    }
+  }
+  @keyframes shot {
+    to {
+      transform: translateY(-196px);
+    }
+  }
+  @keyframes aroma {
+    0% {
+      transform: translateY(6px) scaleX(0.8);
+      opacity: 0;
+    }
+    25% {
+      opacity: 0.55;
+    }
+    100% {
+      transform: translateY(-44px) scaleX(1.25);
+      opacity: 0;
+    }
+  }
+  @keyframes led {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.25;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+    .ticker-track {
+      animation: none;
+    }
+  }
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <div class="label">Exploración · no reemplaza al diseño actual</div>
+    <h1>Falco <span class="x">×</span> Persona</h1>
+    <p>
+      La misma cueva: el mismo carbón, el mismo tostado, el mismo E65S. Encima,
+      detalles sacados de la interfaz de Persona: placas inclinadas, recortes,
+      cartas de arcanos, el calendario de la esquina. Sin el rojo de Persona 5.
+      El que manda es el tostado de la gota.
+    </p>
+    <p class="rule">
+      La regla para que no se vuelva un disfraz:
+      <strong>máximo tres de estos detalles por pantalla</strong>, y uno solo
+      que grite. Persona funciona porque todo lo demás queda quieto.
+    </p>
+  </header>
+
+  <!-- ================= LA HOME ================= -->
+  <section class="sec" aria-labelledby="h-home">
+    <div class="sec-head">
+      <div class="label">La home</div>
+      <h2 id="h-home">Misma home, con acento Persona</h2>
+      <p>
+        Cambiá entre las dos versiones. La estructura no se mueve: cambian el
+        encabezado, el titular, la misión, las etiquetas de la tolva y el
+        ticker.
+      </p>
+    </div>
+    <div class="toggle" role="group" aria-label="Versión de la home">
+      <button type="button" id="v-cueva" aria-pressed="false">
+        La Cueva (actual)
+      </button>
+      <button type="button" id="v-p5" aria-pressed="true">Con Persona</button>
+    </div>
+
+    <div class="mock is-p5" id="mock">
+      <div class="mock-bar">
+        <i></i><i></i><i></i><span class="url">falco.cafe</span>
+      </div>
+      <div class="mock-glow"></div>
+      <div class="mock-nav">
+        <div class="logo"><b>Falco</b><span>café de santoto</span></div>
+        <nav aria-label="Navegación de ejemplo">
+          <a href="#h-tienda" class="on">La tienda</a>
+          <a href="#h-home">Dónde estamos</a>
+          <a href="#h-home">Falco FM</a>
+          <a href="#h-home">@falco.cafe</a>
+        </nav>
+      </div>
+
+      <div class="mock-hero">
+        <div class="left">
+          <div class="eyebrow cueva">Iriondo 2153 · Santo Tomé, Santa Fe</div>
+          <div class="hud p5" data-hud>
+            <div class="hud-date">
+              <span data-d>18</span><small>/<span data-m>9</span></small>
+            </div>
+            <div class="hud-wd">
+              <span class="plate hi"><span data-wd>JUE</span></span>
+            </div>
+            <div class="hud-tod" data-tod>Tarde</div>
+            <div class="hud-state">
+              <span class="dot" data-dot></span
+              ><span data-state>Abierto · cierra 20:00</span>
+            </div>
+          </div>
+
+          <div class="title">
+            café de
+            <span class="plain-word">santoto</span>
+            </span>
+                <p class="info-v">[Finca La Esperanza] · [Huila, Colombia]</p>
+                <p class="info-s">[Caturra] · [Lavado] · [1.750 msnm]</p>
+              </div>
+              <div>
+                <span class="plate"><span>A qué sabe</span></span>
+                <p class="info-v cueva">[Durazno, panela, cítrico]</p>
+                <p class="info-s cueva">
+                  Se parece a un té de durazno con un final dulce. No amarga.
+                </p>
+                <svg
+                  class="penta p5"
+                  viewBox="-44 -12 308 214"
+                  role="img"
+                  aria-label="Perfil: acidez 4, dulzor 5, cuerpo 2, aroma 4, final 3, sobre 5"
+                >
+                  <polygon
+                    class="grid"
+                    points="110,25 186.1,80.3 157,169.7 63,169.7 33.9,80.3"
+                  ></polygon>
+                  <polygon
+                    class="grid"
+                    points="110,65 148,92.6 133.5,137.4 86.5,137.4 72,92.6"
+                  ></polygon>
+                  <g class="grid">
+                    <path
+                      d="M110,105 L110,25 M110,105 L186.1,80.3 M110,105 L157,169.7 M110,105 L63,169.7 M110,105 L33.9,80.3"
+                    ></path>
+                  </g>
+                  <polygon
+                    class="val"
+                    points="110,41 186.1,80.3 128.8,130.9 72.4,156.8 64.3,90.2"
+                  ></polygon>
+                  <text x="110" y="12" text-anchor="middle">
+                    ACIDEZ
+                    <tspan>4</tspan>
+                  </text>
+                  <text x="196" y="74" text-anchor="start">
+                    DULZOR
+                    <tspan>5</tspan>
+                  </text>
+                  <text x="162" y="188" text-anchor="start">
+                    CUERPO
+                    <tspan>2</tspan>
+                  </text>
+                  <text x="58" y="188" text-anchor="end">
+                    AROMA
+                    <tspan>4</tspan>
+                  </text>
+                  <text x="24" y="74" text-anchor="end">
+                    FINAL
+                    <tspan>3</tspan>
+                  </text>
+                </svg>
+              </div>
+              <div>
+                <span class="plate"><span>Tostado</span></span>
+                <p class="info-v">Hace [6] días · Puerto Blest</p>
+              </div>
+            </div>
+            %%E65S%%
+          </div>
+          <div class="tolva-foot">
+            <span>Cambia cada vez que cambiamos el grano</span
+            ><a href="#h-tienda">Llevate un cuarto →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="ticker">
+        <div class="ticker-band">
+          <div class="ticker-track">
+            <span
+              >En tolva <b>[Huila, Colombia]</b> ◆ Tostado hace
+              <b>[6] días</b> ◆ Molemos en <b>Mahlkönig E65S</b> ◆ Sonando
+              <b>[Tema — Artista]</b> ◆ Iriondo 2153 ◆</span
+            >
+            <span
+              >En tolva <b>[Huila, Colombia]</b> ◆ Tostado hace
+              <b>[6] días</b> ◆ Molemos en <b>Mahlkönig E65S</b> ◆ Sonando
+              <b>[Tema — Artista]</b> ◆ Iriondo 2153 ◆</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CATÁLOGO ================= -->
+  <section class="sec" aria-labelledby="h-kit">
+    <div class="sec-head">
+      <div class="label">A la carta</div>
+      <h2 id="h-kit">Ocho detalles, cada uno por separado</h2>
+      <p>
+        Cada tarjeta es un detalle que funciona solo. Elegí cuáles van y cuáles
+        no. La intensidad dice cuánto llama la atención; con tres barras ya es
+        el protagonista de la pantalla.
+      </p>
+    </div>
+
+    <div class="kit">
+      <article class="card">
+        <div class="demo">
+          <div class="hud" data-hud>
+            <div class="hud-date">
+              <span data-d>18</span><small>/<span data-m>9</span></small>
+            </div>
+            <div class="hud-wd">
+              <span class="plate hi"><span data-wd>JUE</span></span>
+            </div>
+            <div class="hud-tod" data-tod>Tarde</div>
+            <div class="hud-state">
+              <span class="dot" data-dot></span><span data-state>Abierto</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="ref"
+            >Persona 5 · el calendario de arriba a la izquierda</span
+          >
+          <div class="st-row"><h3>Calendario del día</h3><span class="status in">Va</span></div>
+          <p>
+            Es real: usa la fecha y la hora de quien entra, y de ahí saca si
+            Falco está abierto. Pasada la medianoche no dice "noche", dice
+            <strong>Hora oscura</strong>. Ese guiño lo agarran los que jugaron
+            Persona 3.
+          </p>
+          <div class="meta">
+            <span class="where">Va en · encabezado de la home</span
+            ><span class="lvl" aria-label="Intensidad 2 de 3"
+              ><i class="on"></i><i class="on"></i><i></i
+            ></span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card out">
+        <div class="demo">
+          <div class="title" style="font-size: 56px">
+            <span class="ransom" data-ransom role="img" aria-label="santoto">
+              <span class="rl r1" style="--i: 0">s</span
+              ><span class="rl r2" style="--i: 1">a</span
+              ><span class="rl r3" style="--i: 2">n</span
+              ><span class="rl r4" style="--i: 3">t</span
+              ><span class="rl r5" style="--i: 4">o</span
+              ><span class="rl r6" style="--i: 5">t</span
+              ><span class="rl r7" style="--i: 6">o</span>
+            </span>
+          </div>
+          <button class="replay" type="button" data-replay-ransom>
+            Repetir
+          </button>
+        </div>
+        <div class="card-body">
+          <span class="ref"
+            >Persona 5 · la tarjeta de aviso de los Ladrones Fantasma</span
+          >
+          <div class="st-row"><h3>Titular recortado</h3><span class="status out">Afuera</span></div>
+          <p>
+            Cada letra de "santoto" recortada de un papel distinto, pegada
+            torcida. Entran de a una, con un golpe. Es la pieza más ruidosa de
+            todas: una sola palabra en todo el sitio.
+          </p>
+          <div class="meta">
+            <span class="where">Va en · titular de la home</span
+            ><span class="lvl" aria-label="Intensidad 3 de 3"
+              ><i class="on"></i><i class="on"></i><i class="on"></i
+            ></span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="demo">
+          <div class="dlg" style="width: 100%">
+            <span class="dlg-tag plate hi"><span>Barista</span></span>
+            <div class="dlg-box">
+              <p
+                class="dlg-text"
+                data-type="¿Primera vez? Pedite un filtrado. Es más suave que un espresso y se siente la fruta."
+              >
+                ¿Primera vez? Pedite un filtrado. Es más suave que un espresso y
+                se siente la fruta.
+              </p>
+              <span class="dlg-next" aria-hidden="true">▼</span>
+            </div>
+          </div>
+          <button class="replay" type="button" data-replay-type>Repetir</button>
+        </div>
+        <div class="card-body">
+          <span class="ref">Persona · las cajas de diálogo</span>
+          <div class="st-row"><h3>Caja de diálogo</h3><span class="status in">Va</span></div>
+          <p>
+            Para las traducciones para principiantes. En lugar de una nota al
+            pie, te habla alguien de la barra. Es el detalle que mejor cumple la
+            misión: explica el café como lo explicarías en el mostrador.
+          </p>
+          <div class="meta">
+            <span class="where">Va en · misión, "a qué sabe", tienda</span
+            ><span class="lvl" aria-label="Intensidad 2 de 3"
+              ><i class="on"></i><i class="on"></i><i></i
+            ></span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="demo">
+          <svg
+            class="penta"
+            viewBox="-44 -12 308 214"
+            role="img"
+            aria-label="Perfil: acidez 4, dulzor 5, cuerpo 2, aroma 4, final 3, sobre 5"
+          >
+            <polygon
+              class="grid"
+              points="110,25 186.1,80.3 157,169.7 63,169.7 33.9,80.3"
+            ></polygon>
+            <polygon
+              class="grid"
+              points="110,65 148,92.6 133.5,137.4 86.5,137.4 72,92.6"
+            ></polygon>
+            <g class="grid">
+              <path
+                d="M110,105 L110,25 M110,105 L186.1,80.3 M110,105 L157,169.7 M110,105 L63,169.7 M110,105 L33.9,80.3"
+              ></path>
+            </g>
+            <polygon
+              class="val"
+              points="110,41 186.1,80.3 128.8,130.9 72.4,156.8 64.3,90.2"
+            ></polygon>
+            <text x="110" y="12" text-anchor="middle">
+              ACIDEZ
+              <tspan>4</tspan>
+            </text>
+            <text x="196" y="74" text-anchor="start">
+              DULZOR
+              <tspan>5</tspan>
+            </text>
+            <text x="162" y="188" text-anchor="start">
+              CUERPO
+              <tspan>2</tspan>
+            </text>
+            <text x="58" y="188" text-anchor="end">
+              AROMA
+              <tspan>4</tspan>
+            </text>
+            <text x="24" y="74" text-anchor="end">
+              FINAL
+              <tspan>3</tspan>
+            </text>
+          </svg>
+        </div>
+        <div class="card-body">
+          <span class="ref"
+            >Persona 5 · el pentágono de atributos sociales</span
+          >
+          <div class="st-row"><h3>Pentágono de cata</h3><span class="status in">Va</span></div>
+          <p>
+            En Persona mide conocimiento, coraje, destreza, amabilidad y
+            encanto. Acá: acidez, dulzor, cuerpo, aroma y final, del 1 al 5.
+            Alguien que nunca probó especialidad entiende la forma antes que las
+            palabras.
+          </p>
+          <div class="meta">
+            <span class="where">Va en · la tolva y cada café</span
+            ><span class="lvl" aria-label="Intensidad 1 de 3"
+              ><i class="on"></i><i></i><i></i
+            ></span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="demo">
+          <article class="arc" style="--r: -3deg; width: 170px">
+            <div class="arc-in">
+              <div class="arc-top">
+                <span class="arc-num">XVIII</span
+                ><span class="arc-name">La Luna</span>
+              </div>
+              <div class="arc-art" style="height: 88px">%%ICON_MOON%%</div>
+              <span class="arc-plate plate"><span>Descafeinado</span></span>
+            </div>
+          </article>
+        </div>
+        <div class="card-body">
+          <span class="ref">Persona · los arcanos del tarot</span>
+          <div class="st-row"><h3>Cartas de arcanos</h3><span class="status in">Va · del otro lado de la ficha</span></div>
+          <p>
+            Cada producto de la tienda es un arcano, y el nombre tiene sentido:
+            el descafeinado es La Luna, el kit para arrancar de cero es El Loco.
+            En la tienda aparecen cuando das vuelta una ficha.
+          </p>
+          <div class="meta">
+            <span class="where">Va en · la tienda</span
+            ><span class="lvl" aria-label="Intensidad 2 de 3"
+              ><i class="on"></i><i class="on"></i><i></i
+            ></span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="demo">
+          <nav class="menu-mini" aria-label="Menú de ejemplo">
+            <a href="#h-home">Inicio</a>
+            <a href="#h-tienda" class="on">La tienda</a>
+            <a href="#h-menu">Dónde</a>
+          </nav>
+        </div>
+        <div class="card-body">
+          <span class="ref">Persona 5 · el menú de pausa</span>
+          <div class="st-row"><h3>Menú inclinado</h3><span class="status in">Va</span></div>
+          <p>
+            Opciones torcidas, desfasadas, y al pasar el mouse entra de golpe
+            una placa hueso con sombra tostada. En la barra de arriba de
+            escritorio queda chico; en el menú del celular es donde luce.
+          </p>
+          <div class="meta">
+            <span class="where">Va en · navegación</span
+            ><span class="lvl" aria-label="Intensidad 2 de 3"
+              ><i class="on"></i><i class="on"></i><i></i
+            ></span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="demo" style="padding: 0">
+          <div class="slash-stage">
+            <span class="slash-word" data-slash-word>La tienda</span>
+            <div class="slash-band" data-slash></div>
+          </div>
+          <button class="replay" type="button" data-replay-slash>
+            Ver el corte
+          </button>
+        </div>
+        <div class="card-body">
+          <span class="ref">Persona 5 · las transiciones de pantalla</span>
+          <div class="st-row"><h3>Corte diagonal</h3><span class="status in">Va</span></div>
+          <p>
+            Cuando tocás un link del menú, una franja tostada cruza la pantalla
+            en diagonal y del otro lado ya estás en la sección nueva. Dura menos
+            de un segundo, así que no llega a molestar.
+          </p>
+          <div class="meta">
+            <span class="where">Va en · cambio de sección</span
+            ><span class="lvl" aria-label="Intensidad 2 de 3"
+              ><i class="on"></i><i class="on"></i><i></i
+            ></span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="demo" style="padding: 0">
+          <div class="load">
+            <svg class="bat-fly" viewBox="0 0 80 40" aria-hidden="true">
+              <path
+                class="wing l"
+                d="M36,18 C28,6 14,4 2,10 C10,12 12,18 10,24 C18,20 26,22 36,24 Z"
+                fill="#E8E2D0"
+              ></path>
+              <path
+                class="wing r"
+                d="M44,18 C52,6 66,4 78,10 C70,12 68,18 70,24 C62,20 54,22 44,24 Z"
+                fill="#E8E2D0"
+              ></path>
+              <ellipse cx="40" cy="21" rx="6" ry="8" fill="#E8E2D0"></ellipse>
+              <path
+                d="M35,14 L36,7 L39,13 Z M45,14 L44,7 L41,13 Z"
+                fill="#E8E2D0"
+              ></path>
+            </svg>
+            <div class="load-stripe"></div>
+            <div class="load-word">
+              Cargando<span>.</span><span>.</span><span>.</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="ref">Persona 5 · la pantalla de carga</span>
+          <div class="st-row"><h3>Cargando, con el murciélago</h3><span class="status maybe">Sin decidir</span></div>
+          <p>
+            En Persona corre Morgana. Acá vuela el murciélago de Falco. Sirve
+            para la primera carga o para la página de error: si alguien se
+            pierde, por lo menos se ríe.
+          </p>
+          <div class="meta">
+            <span class="where">Va en · carga y página 404</span
+            ><span class="lvl" aria-label="Intensidad 1 de 3"
+              ><i class="on"></i><i></i><i></i
+            ></span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= TIENDA ================= -->
+  <section class="sec" aria-labelledby="h-tienda">
+    <div class="sec-head">
+      <div class="label">La tienda</div>
+      <h2 id="h-tienda">La tienda de siempre, con un arcano escondido</h2>
+      <p>Vuelve el carrusel de antes: dos filas que se mueven solas en sentidos opuestos, sin carrito, todo por DM. La diferencia está atrás: pasá el mouse por una ficha (en el celular, tocala) y se da vuelta con su arcano y el porqué.</p>
+    </div>
+    <div class="shop">
+      <div class="shop-row"><span class="label">Café</span><i></i></div>
+      <div class="rail2"><div class="track2 to-l">%%ROW1%%</div></div>
+      <div class="shop-row"><span class="label">Kits y accesorios</span><i></i></div>
+      <div class="rail2"><div class="track2 to-r">%%ROW2%%</div></div>
+    </div>
+  </section>
+
+  <!-- ================= MENÚ MOBILE ================= -->
+  <section class="sec" aria-labelledby="h-menu">
+    <div class="sec-head">
+      <div class="label">Celular</div>
+      <h2 id="h-menu">El menú del celular</h2>
+    </div>
+    <div class="phone-row">
+      <div class="phone">
+        <div class="screen">
+          <div class="scr-top">
+            <b>Falco</b>
+            <button
+              class="burger"
+              type="button"
+              id="burger"
+              aria-expanded="false"
+              aria-controls="menu-full"
+            >
+              Menú
+            </button>
+          </div>
+          <div class="scr-home" aria-hidden="true">
+            <div class="title">café de<br />santoto</div>
+            <p>
+              Somos una cafetería de especialidad en una esquina de Santo Tomé.
+            </p>
+          </div>
+          <div class="menu-full" id="menu-full">
+            <div class="menu-slab"></div>
+            <div class="menu-dots"></div>
+            <nav class="menu-list" aria-label="Menú del celular de ejemplo">
+              <a href="#h-home"><small>01</small>Inicio</a>
+              <a href="#h-tienda" class="on"><small>02</small>Tienda</a>
+              <a href="#h-home"><small>03</small>Dónde</a>
+              <a href="#h-home"><small>04</small>Falco FM</a>
+            </nav>
+            <div class="menu-hud">
+              <div class="hud" data-hud>
+                <div class="hud-date">
+                  <span data-d>18</span><small>/<span data-m>9</span></small>
+                </div>
+                <div class="hud-wd">
+                  <span class="plate hi"><span data-wd>JUE</span></span>
+                </div>
+                <div class="hud-tod" data-tod>Tarde</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-notes">
+        <p>
+          Tocá <strong>Menú</strong> en el teléfono. La pantalla se corta de
+          derecha a izquierda, cruza una franja tostada en diagonal y las
+          opciones entran de a una, torcidas y desfasadas, como en el menú de
+          pausa de Persona 5.
+        </p>
+        <p>
+          Abajo queda el calendario del día. Así, aunque tengas el menú abierto,
+          sabés si Falco está abierto.
+        </p>
+        <p>
+          En la versión actual el menú del celular no está diseñado todavía.
+          Este es el lugar donde Persona suma más con menos riesgo, porque el
+          resto de la página ni se entera.
+        </p>
+        <button class="cta" type="button" id="burger-2">
+          <span>Abrir el menú</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LO QUE QUEDÓ ================= -->
+  <section class="sec" aria-labelledby="h-pick">
+    <div class="sec-head">
+      <div class="label">Lo que quedó</div>
+      <h2 id="h-pick">Tu selección</h2>
+      <p>Sin el titular recortado, ningún detalle grita solo. Eso está bien: el protagonista vuelve a ser el E65S, y Persona queda en la forma de hablar del sitio.</p>
+    </div>
+    <div class="pick">
+      <div class="pick-item bold">
+        <span class="ref">Va</span>
+        <h3>Seis detalles</h3>
+        <p>Calendario del día, caja de diálogo, pentágono de cata, arcanos detrás de cada ficha, menú inclinado y corte diagonal. Y el menú del celular, que junta tres de ellos.</p>
+      </div>
+      <div class="pick-item">
+        <span class="ref">Afuera</span>
+        <h3>Titular recortado y tienda de arcanos</h3>
+        <p>"santoto" vuelve a ser texto normal. La tienda vuelve al carrusel, con el chip de "Nuevo".</p>
+      </div>
+      <div class="pick-item">
+        <span class="ref">Sin decidir</span>
+        <h3>El murciélago de carga</h3>
+        <p>No lo mencionaste. Queda en la lista hasta que digas si va en la carga y en la página de error.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  (function () {
+    // ---- versión de la home ----
+    var mock = document.getElementById("mock");
+    var bC = document.getElementById("v-cueva"),
+      bP = document.getElementById("v-p5");
+    function setV(p5) {
+      mock.classList.toggle("is-p5", p5);
+      bP.setAttribute("aria-pressed", String(p5));
+      bC.setAttribute("aria-pressed", String(!p5));
+      if (p5) replayRansom(mock.querySelector("[data-ransom]"));
+    }
+    bC.addEventListener("click", function () {
+      setV(false);
+    });
+    bP.addEventListener("click", function () {
+      setV(true);
+    });
+
+    // ---- calendario real ----
+    var WD = ["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"];
+    function tod(h) {
+      if (h === 0) return "Hora oscura";
+      if (h < 6) return "Madrugada";
+      if (h < 12) return "Mañana";
+      if (h < 14) return "Mediodía";
+      if (h < 19) return "Tarde";
+      return "Noche";
+    }
+    function state(d) {
+      // horarios de ejemplo del wireframe: Lun a Sáb 08–20, Dom 15–20
+      var day = d.getDay(),
+        h = d.getHours() + d.getMinutes() / 60;
+      var open = day === 0 ? 15 : 8,
+        close = 20;
+      if (h >= open && h < close)
+        return { on: true, txt: "Abierto · cierra 20:00" };
+      return {
+        on: false,
+        txt:
+          "Cerrado · abre " +
+          (h < open ? (open < 10 ? "0" : "") + open + ":00" : "mañana"),
+      };
+    }
+    function paintHud() {
+      var d = new Date(),
+        s = state(d);
+      document.querySelectorAll("[data-hud]").forEach(function (el) {
+        var q = function (k) {
+          return el.querySelector(k);
+        };
+        if (q("[data-d]")) q("[data-d]").textContent = d.getDate();
+        if (q("[data-m]")) q("[data-m]").textContent = d.getMonth() + 1;
+        if (q("[data-wd]")) q("[data-wd]").textContent = WD[d.getDay()];
+        if (q("[data-tod]")) q("[data-tod]").textContent = tod(d.getHours());
+        if (q("[data-state]")) q("[data-state]").textContent = s.txt;
+        if (q("[data-dot]")) q("[data-dot]").classList.toggle("off", !s.on);
+      });
+    }
+    paintHud();
+    setInterval(paintHud, 60000);
+
+    // ---- titular recortado ----
+    function replayRansom(el) {
+      if (!el) return;
+      el.querySelectorAll(".rl").forEach(function (l) {
+        l.style.animation = "none";
+        void l.offsetWidth;
+        l.style.animation = "";
+      });
+    }
+    document.querySelectorAll("[data-ransom]").forEach(function (el) {
+      el.addEventListener("click", function () {
+        replayRansom(el);
+      });
+    });
+    document.querySelectorAll("[data-replay-ransom]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        replayRansom(b.parentElement.querySelector("[data-ransom]"));
+      });
+    });
+
+    // ---- diálogo tipeado ----
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.querySelectorAll("[data-replay-type]").forEach(function (b) {
+      var t = b.parentElement.querySelector("[data-type]"),
+        full = t.getAttribute("data-type"),
+        timer;
+      b.addEventListener("click", function () {
+        clearInterval(timer);
+        if (reduce) {
+          t.textContent = full;
+          return;
+        }
+        var i = 0;
+        t.textContent = "";
+        timer = setInterval(function () {
+          i++;
+          t.textContent = full.slice(0, i);
+          if (i >= full.length) clearInterval(timer);
+        }, 28);
+      });
+    });
+
+    // ---- corte diagonal ----
+    var words = ["La tienda", "Dónde estamos", "Falco FM", "Inicio"],
+      wi = 0;
+    document.querySelectorAll("[data-replay-slash]").forEach(function (b) {
+      var stage = b.parentElement,
+        band = stage.querySelector("[data-slash]"),
+        word = stage.querySelector("[data-slash-word]");
+      b.addEventListener("click", function () {
+        band.classList.remove("go");
+        void band.offsetWidth;
+        band.classList.add("go");
+        setTimeout(
+          function () {
+            wi = (wi + 1) % words.length;
+            word.textContent = words[wi];
+          },
+          reduce ? 0 : 380,
+        );
+      });
+    });
+
+    // ---- menú del celular ----
+    var menu = document.getElementById("menu-full"),
+      burger = document.getElementById("burger");
+    function toggleMenu() {
+      var open = !menu.classList.contains("open");
+      menu.classList.toggle("open", open);
+      burger.setAttribute("aria-expanded", String(open));
+      burger.textContent = open ? "Cerrar" : "Menú";
+      document.getElementById("burger-2").firstElementChild.textContent = open
+        ? "Cerrar el menú"
+        : "Abrir el menú";
+    }
+    burger.addEventListener("click", toggleMenu);
+    document.getElementById("burger-2").addEventListener("click", toggleMenu);
+
+    // ---- fichas de la tienda: tocar para dar vuelta ----
+  document.querySelectorAll('.pc').forEach(function (c) {
+    c.addEventListener('click', function () { c.classList.toggle('flip'); });
+    c.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.classList.toggle('flip'); } });
+  });
+
+  // ---- estrella de "nuevo" ----
+    var pts = [];
+    for (var k = 0; k < 24; k++) {
+      var a = (Math.PI * 2 * k) / 24 - Math.PI / 2,
+        r = k % 2 ? 36 : 50;
+      pts.push(
+        (50 + r * Math.cos(a)).toFixed(1) +
+          "% " +
+          (50 + r * Math.sin(a)).toFixed(1) +
+          "%",
+      );
+    }
+    document.querySelectorAll(".burst").forEach(function (b) {
+      b.style.clipPath = "polygon(" + pts.join(",") + ")";
+    });
+  })();
+</script>

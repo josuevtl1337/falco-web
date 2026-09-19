@@ -1,0 +1,119 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1040,
+      "title": "01 · Home — presentación + tolva"
+    },
+    {
+      "file": "Tienda.dc.html",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 960,
+      "title": "02 · La tienda (carrusel)"
+    },
+    {
+      "file": "Donde.dc.html",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 1000,
+      "title": "03 · Dónde estamos + Falco FM"
+    },
+    {
+      "file": "MobileHome.dc.html",
+      "x": 0,
+      "y": 1200,
+      "w": 390,
+      "h": 940,
+      "title": "01 · Home — mobile 390"
+    },
+    {
+      "file": "MobileTienda.dc.html",
+      "x": 1560,
+      "y": 1200,
+      "w": 390,
+      "h": 940,
+      "title": "02 · La tienda — mobile 390"
+    },
+    {
+      "file": "MobileDonde.dc.html",
+      "x": 3120,
+      "y": 1200,
+      "w": 390,
+      "h": 940,
+      "title": "03 · Dónde + Falco FM — mobile 390"
+    },
+    {
+      "file": "Sistema.dc.html",
+      "x": 0,
+      "y": 2280,
+      "w": 1000,
+      "h": 1180,
+      "title": "Sistema de diseño v3"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "brief",
+      "x": 0,
+      "y": -250,
+      "w": 640,
+      "text": "FALCO — \"La Cueva\", v3\n\nLa paleta sale del logo: carbón #292A2C de fondo, tostado #885333 (la gota de la \"a\") como único color de marca, hueso #E8E2D0 para texto. El ámbar quedó reservado a LUZ.\n\nEl tostado nunca llena un bloque grande: vive en líneas, etiquetas y bordes.\n\nArriba, desktop a 1440. Abajo, cada pantalla en su versión mobile de 390, alineada con su desktop para comparar de una.\n\nTodo lo que está entre [corchetes] es un dato que tienen que completar ustedes."
+    },
+    {
+      "id": "home-note",
+      "x": 1560,
+      "y": -250,
+      "w": 640,
+      "text": "HOME EN DOS BLOQUES\n\nIzquierda: quiénes somos en tres frases, con la misión destacada. Derecha: el molino como diagrama técnico, con la info de la tolva colgando de cada parte.\n\nY el molino MUELE: los granos se acomodan, la aguja gira, el molido cae. La página no está esperando, está trabajando."
+    },
+    {
+      "id": "tienda-note",
+      "x": 3120,
+      "y": -250,
+      "w": 640,
+      "text": "LA TIENDA\n\nDos carruseles infinitos en sentidos opuestos. Frenan cuando pasás el mouse y la ficha se levanta con borde tostado.\n\nSin carrito: cada ficha termina en DM."
+    },
+    {
+      "id": "fm-note",
+      "x": 4680,
+      "y": 0,
+      "w": 600,
+      "text": "FALCO FM + EL MAPA\n\nEl pin del mapa emite ondas concéntricas, como la ecolocalización de un murciélago. Es el único guiño literal al bicho en todo el sitio, y es silencioso.\n\nAbajo, la barra de reproductor con ecualizador vivo y la barra de progreso avanzando."
+    },
+    {
+      "id": "mob-home",
+      "x": 470,
+      "y": 1200,
+      "w": 900,
+      "text": "MOBILE · HOME\n\nLos dos bloques del desktop se apilan. El molino no desaparece: se achica y queda de marca de agua detrás de la ficha de tolva, para que la idea sobreviva a la pantalla chica.\n\nEl título baja de 104px a 54px y mantiene el revelado por máscara línea a línea."
+    },
+    {
+      "id": "mob-tienda",
+      "x": 2030,
+      "y": 1200,
+      "w": 900,
+      "text": "MOBILE · TIENDA\n\nLos carruseles sangran hacia los dos bordes a propósito: así se lee que hay más contenido del que entra en pantalla.\n\nSiguen moviéndose solos y además se arrastran con el dedo. Las fichas bajan de 286px a 208px."
+    },
+    {
+      "id": "mob-donde",
+      "x": 3590,
+      "y": 1200,
+      "w": 900,
+      "text": "MOBILE · DÓNDE + FM\n\nEl mapa se achica pero conserva el sonar del pin. Los dos botones quedan lado a lado a 48px de alto.\n\nLa barra de Falco FM se compacta: carátula, ecualizador, tema y una sola tecla de play. Todo lo tocable llega a 44px."
+    },
+    {
+      "id": "sys-note",
+      "x": 1160,
+      "y": 2280,
+      "w": 620,
+      "text": "SISTEMA\n\nLa lámina de referencia: paleta con el rol de cada color, las cuatro tipografías con su trabajo, y el catálogo de movimiento con la regla que lo gobierna.\n\nEs el documento a respetar cuando pasemos a código."
+    }
+  ],
+  "launch": { "view": "canvas" }
+}

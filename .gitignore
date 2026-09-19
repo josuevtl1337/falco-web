@@ -1,0 +1,17 @@
+# dependencias y builds
+node_modules/
+dist/
+.astro/
+.wrangler/
+.dev.vars
+.env
+.env.*
+!.env.example
+
+# sistema
+.DS_Store
+Thumbs.db
+
+# logs de la herramienta de diseño
+design/pre-log.json
+design/post-log.json

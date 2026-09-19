@@ -1,0 +1,503 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Instrument+Sans:wght@400;500;600&family=Martian+Mono:wght@300;400;600&family=Grand+Hotel&display=swap"
+        />
+        <style>
+          body {
+            margin: 0;
+            background: #292a2c;
+            color: #e8e2d0;
+            font-family: "Instrument Sans", system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+          }
+          .sechead {
+            font-family: "Martian Mono", ui-monospace, monospace;
+            font-size: 10px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #885333;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(232, 226, 208, 0.12);
+            margin-bottom: 22px;
+          }
+          .hex {
+            font-family: "Martian Mono", ui-monospace, monospace;
+            font-size: 11px;
+            color: #e8e2d0;
+          }
+          .lbl {
+            font-size: 14px;
+            font-weight: 500;
+            color: #e8e2d0;
+          }
+          .use {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #9a9c9e;
+          }
+          .sw {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+          .chip {
+            height: 82px;
+          }
+          @keyframes breathe {
+            0%,
+            100% {
+              opacity: 0.7;
+              transform: translateX(-50%) scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: translateX(-50%) scale(1.06);
+            }
+          }
+          @keyframes grain {
+            0% {
+              background-position: 0 0;
+            }
+            100% {
+              background-position: 3px 3px;
+            }
+          }
+          @keyframes bob {
+            0%,
+            100% {
+              transform: translateY(0);
+            }
+            50% {
+              transform: translateY(-4px);
+            }
+          }
+          @keyframes wipe {
+            0% {
+              clip-path: inset(0 100% 0 0);
+            }
+            55%,
+            100% {
+              clip-path: inset(0 0 0 0);
+            }
+          }
+        </style>
+      </helmet>
+
+      <div
+        style="
+          position: relative;
+          width: 1000px;
+          height: 1180px;
+          overflow: hidden;
+          background: #292a2c;
+          padding: 56px;
+          box-sizing: border-box;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 38px;
+          "
+        >
+          <div
+            style="
+              font-family: &quot;Bricolage Grotesque&quot;, sans-serif;
+              font-weight: 500;
+              font-size: 40px;
+              letter-spacing: -0.03em;
+            "
+          >
+            Sistema · La Cueva
+          </div>
+          <div
+            style="
+              font-family: &quot;Martian Mono&quot;, ui-monospace, monospace;
+              font-size: 10px;
+              letter-spacing: 0.18em;
+              text-transform: uppercase;
+              color: #8d8f91;
+            "
+          >
+            v3 · gris + tostado
+          </div>
+        </div>
+
+        <!-- PALETA -->
+        <div style="margin-bottom: 34px">
+          <div class="sechead">Paleta · sale del logo, no de una moodboard</div>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(4, minmax(0, 1fr));
+              gap: 14px;
+            "
+          >
+            <div class="sw">
+              <div
+                class="chip"
+                style="
+                  background: #292a2c;
+                  border: 1px solid rgba(232, 226, 208, 0.18);
+                "
+              ></div>
+              <div class="hex">#292A2C</div>
+              <div class="lbl">Carbón</div>
+              <div class="use">
+                Fondo base. Es literalmente el gris del logo.
+              </div>
+            </div>
+            <div class="sw">
+              <div class="chip" style="background: #313335"></div>
+              <div class="hex">#313335</div>
+              <div class="lbl">Piedra</div>
+              <div class="use">
+                Superficie elevada: paneles, cards, la píldora de estado.
+              </div>
+            </div>
+            <div class="sw">
+              <div class="chip" style="background: #1e1f21"></div>
+              <div class="hex">#1E1F21</div>
+              <div class="lbl">Sombra</div>
+              <div class="use">
+                Superficie hundida: el mapa, el fondo de las fichas.
+              </div>
+            </div>
+            <div class="sw">
+              <div class="chip" style="background: #885333"></div>
+              <div class="hex">#885333</div>
+              <div class="lbl">Tostado</div>
+              <div class="use">
+                La gota de la "a" de Falco. Único color de marca: etiquetas,
+                bordes vivos, líneas guía.
+              </div>
+            </div>
+            <div class="sw">
+              <div class="chip" style="background: #e8e2d0"></div>
+              <div class="hex">#E8E2D0</div>
+              <div class="lbl">Hueso</div>
+              <div class="use">
+                Texto principal y botones sólidos. Sale del murciélago.
+              </div>
+            </div>
+            <div class="sw">
+              <div class="chip" style="background: #9a9c9e"></div>
+              <div class="hex">#9A9C9E</div>
+              <div class="lbl">Ceniza</div>
+              <div class="use">
+                Texto secundario. Gris neutro, sin temperatura.
+              </div>
+            </div>
+            <div class="sw">
+              <div class="chip" style="background: #f2c48b"></div>
+              <div class="hex">#F2C48B</div>
+              <div class="lbl">Brasa</div>
+              <div class="use">
+                SOLO luz: glows, el punto de "abierto", la barra del
+                reproductor. Nunca en párrafos.
+              </div>
+            </div>
+            <div class="sw">
+              <div
+                class="chip"
+                style="
+                  background: #313335;
+                  border: 1px solid rgba(232, 226, 208, 0.12);
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <div
+                  style="
+                    font-family:
+                      &quot;Martian Mono&quot;, ui-monospace, monospace;
+                    font-size: 9px;
+                    letter-spacing: 0.16em;
+                    color: #885333;
+                    text-align: center;
+                    line-height: 1.7;
+                    padding: 0 10px;
+                  "
+                >
+                  EL TOSTADO<br />ES DETALLE
+                </div>
+              </div>
+              <div class="hex">—</div>
+              <div class="lbl">La regla</div>
+              <div class="use">
+                El marrón nunca llena un bloque grande: aparece en líneas,
+                etiquetas y bordes. El sitio es gris.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TIPOGRAFÍA -->
+        <div style="margin-bottom: 34px">
+          <div class="sechead">
+            Tipografía · cuatro voces, cada una con su trabajo
+          </div>
+          <div style="display: flex; gap: 30px; align-items: flex-start">
+            <div style="flex: 1">
+              <div
+                style="
+                  font-family: &quot;Grand Hotel&quot;, cursive;
+                  font-size: 50px;
+                  line-height: 1;
+                  color: #e8e2d0;
+                "
+              >
+                Falco
+              </div>
+              <div class="use" style="margin-top: 8px">
+                Script del logo.
+                <strong style="color: #e8e2d0">Solo el logo.</strong> Se
+                reemplaza por el SVG real de ustedes.
+              </div>
+            </div>
+            <div style="flex: 1.3">
+              <div
+                style="
+                  font-family: &quot;Bricolage Grotesque&quot;, sans-serif;
+                  font-weight: 500;
+                  font-size: 42px;
+                  line-height: 1;
+                  letter-spacing: -0.04em;
+                  color: #e8e2d0;
+                "
+              >
+                café de santoto
+              </div>
+              <div class="use" style="margin-top: 8px">
+                Bricolage Grotesque · títulos. Ancho variable, con carácter. No
+                es Inter y se nota.
+              </div>
+            </div>
+          </div>
+          <div
+            style="
+              display: flex;
+              gap: 30px;
+              align-items: flex-start;
+              margin-top: 22px;
+            "
+          >
+            <div style="flex: 1">
+              <div style="font-size: 17px; line-height: 1.6; color: #a8aaac">
+                Traer el mundo del café a Santo Tomé, sin que haga falta saber
+                nada de café.
+              </div>
+              <div class="use" style="margin-top: 8px">
+                Instrument Sans · texto corrido. Neutral a propósito.
+              </div>
+            </div>
+            <div style="flex: 1.3">
+              <div
+                style="
+                  font-family:
+                    &quot;Martian Mono&quot;, ui-monospace, monospace;
+                  font-size: 13px;
+                  letter-spacing: 0.06em;
+                  color: #885333;
+                "
+              >
+                HUILA · LAVADO · 1750 MSNM
+              </div>
+              <div class="use" style="margin-top: 8px">
+                Martian Mono · datos, etiquetas, navegación. Va en tostado.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MOVIMIENTO -->
+        <div>
+          <div class="sechead">
+            Movimiento · la página respira, no hace piruetas
+          </div>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(4, 1fr);
+              gap: 14px;
+            "
+          >
+            <div>
+              <div
+                style="
+                  height: 92px;
+                  background: #1e1f21;
+                  position: relative;
+                  overflow: hidden;
+                  border: 1px solid rgba(232, 226, 208, 0.1);
+                "
+              >
+                <div
+                  style="
+                    position: absolute;
+                    left: 50%;
+                    top: -56px;
+                    width: 200px;
+                    height: 190px;
+                    background: radial-gradient(
+                      closest-side,
+                      rgba(242, 196, 139, 0.34),
+                      rgba(242, 196, 139, 0) 72%
+                    );
+                    animation: breathe 9s ease-in-out infinite;
+                  "
+                ></div>
+              </div>
+              <div class="lbl" style="margin-top: 9px">Respiración</div>
+              <div class="use">
+                El pozo de luz late cada 9s. Es lo que hace que el fondo no
+                parezca una foto.
+              </div>
+            </div>
+            <div>
+              <div
+                style="
+                  height: 92px;
+                  background: #313335;
+                  border: 1px solid rgba(232, 226, 208, 0.1);
+                  position: relative;
+                  overflow: hidden;
+                "
+              >
+                <div
+                  style="
+                    position: absolute;
+                    inset: -4px;
+                    background-image: radial-gradient(
+                      rgba(232, 226, 208, 0.13) 1px,
+                      transparent 1px
+                    );
+                    background-size: 3px 3px;
+                    animation: grain 0.9s steps(3) infinite;
+                  "
+                ></div>
+              </div>
+              <div class="lbl" style="margin-top: 9px">Grano vivo</div>
+              <div class="use">
+                El ruido se mueve, como el grano de una película. Encima de
+                todo.
+              </div>
+            </div>
+            <div>
+              <div
+                style="
+                  height: 92px;
+                  background: #1e1f21;
+                  border: 1px solid rgba(232, 226, 208, 0.1);
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 9px;
+                "
+              >
+                <svg viewBox="0 0 40 30" style="width: 58px">
+                  <g fill="#885333">
+                    <ellipse
+                      cx="10"
+                      cy="15"
+                      rx="7"
+                      ry="5"
+                      style="animation: bob 4.2s ease-in-out infinite"
+                    ></ellipse>
+                    <ellipse
+                      cx="24"
+                      cy="12"
+                      rx="7"
+                      ry="5"
+                      style="animation: bob 5.1s ease-in-out infinite 0.4s"
+                    ></ellipse>
+                    <ellipse
+                      cx="32"
+                      cy="19"
+                      rx="7"
+                      ry="5"
+                      style="animation: bob 4.6s ease-in-out infinite 0.9s"
+                    ></ellipse>
+                  </g>
+                </svg>
+              </div>
+              <div class="lbl" style="margin-top: 9px">El molino trabaja</div>
+              <div class="use">
+                Los granos se acomodan, la aguja gira, el molido cae. Nunca
+                para.
+              </div>
+            </div>
+            <div>
+              <div
+                style="
+                  height: 92px;
+                  background: #1e1f21;
+                  border: 1px solid rgba(232, 226, 208, 0.1);
+                  display: flex;
+                  align-items: center;
+                  padding: 0 16px;
+                  box-sizing: border-box;
+                  overflow: hidden;
+                "
+              >
+                <div
+                  style="
+                    font-family: &quot;Bricolage Grotesque&quot;, sans-serif;
+                    font-weight: 500;
+                    font-size: 30px;
+                    letter-spacing: -0.03em;
+                    color: #e8e2d0;
+                    animation: wipe 3.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+                  "
+                >
+                  santoto
+                </div>
+              </div>
+              <div class="lbl" style="margin-top: 9px">Entrada de texto</div>
+              <div class="use">
+                Revelado por máscara, línea por línea, con desenfoque que se
+                resuelve. Nunca un fade genérico.
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="use"
+            style="
+              margin-top: 22px;
+              padding-left: 18px;
+              border-left: 2px solid #885333;
+              max-width: 720px;
+            "
+          >
+            <strong style="color: #e8e2d0">La regla del movimiento:</strong> si
+            una animación llama la atención sobre sí misma, está mal. Todo esto
+            tiene que notarse recién a los diez segundos de estar mirando —
+            hasta ahí, sólo tiene que dar la sensación de que la página está
+            despierta. Y todo respeta
+            <span
+              style="
+                font-family: &quot;Martian Mono&quot;, ui-monospace, monospace;
+              "
+              >prefers-reduced-motion</span
+            >.
+          </div>
+        </div>
+      </div>
+    </x-dc>
+  </body>
+</html>

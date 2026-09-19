@@ -1,0 +1,437 @@
+<!-- ============================== 04 PEDIDO ============================== -->
+<section class="b-view" id="v-pedido">
+  <div class="b-vhead">
+    <h2><small>04</small>Pedido por WhatsApp</h2>
+    <button class="b-replay" type="button" data-replay>Repetir entrada</button>
+  </div>
+  <div class="b-notes">
+    <p class="b-note key">
+      <b>Lo más importante</b>El pedido no está hecho hasta que Falco lo
+      confirma por WhatsApp. El recorrido lo dice en cada paso, siempre con las mismas palabras: "confirmar" y "no está reservado".
+    </p>
+    <p class="b-note">
+      <b>Nada se cobra en el sitio</b>El sitio solo arma el mensaje. El stock,
+      el pago y el horario de retiro se arreglan en el chat, como hoy.
+    </p>
+    <p class="b-note">
+      <b>"Tu pedido", no un carrito</b>Una lista que se guarda en el navegador.
+      Aparece recién cuando sumás algo.
+    </p>
+  </div>
+
+  <div class="flow" aria-label="Los pasos del pedido">
+    <span><b>1</b>Elegís en la tienda</span><i></i>
+    <span><b>2</b>Armás tu pedido</span><i></i>
+    <span><b>3</b>Lo mandás por WhatsApp</span><i></i>
+    <span class="flow-key"><b>4</b>Falco confirma stock y horario</span><i></i>
+    <span><b>5</b>Recién ahí, retirás</span>
+  </div>
+
+  <!-- ---------- CELULAR ---------- -->
+  <div class="b-sub">
+    <h3>Celular: el recorrido completo</h3>
+    <p>
+      Siete pantallas, en orden. Los marcos miden una pantalla de celular (390 ×
+      844), salvo "Tu pedido", que se scrollea: ahí el botón queda fijo abajo.
+    </p>
+  </div>
+  <div class="b-mgrid">
+    <div>
+      <div class="b-flabel">
+        <span><b class="step">1</b>Recién sumaste algo</span><span>Tienda</span>
+      </div>
+      <div class="frame" data-w="390">
+        <div class="ab grainy m" style="width: 390px; height: 844px">
+          %%M_TOP%%
+          <div class="toast" role="status">
+            <b>¡Sumado!</b><span>[Huila] · Colombia · 250 g</span>
+          </div>
+          <div style="display: grid; gap: 14px; padding: 26px 22px 0">
+            <div>
+              <span class="plate hi"><span>La tienda</span></span>
+            </div>
+            <div class="h-m" style="font-size: 44px">
+              Llevate<br />Falco a casa
+            </div>
+          </div>
+          <div style="padding: 22px 22px 0">
+            <div class="shop-row"><span class="lbl">Café</span><i></i></div>
+          </div>
+          <div class="rail">
+            <div class="track to-l" style="padding-left: 22px">
+              %%ROW_CAFE%%
+            </div>
+          </div>
+          <div class="pbar">
+            <span class="pbar-n">3</span>
+            <span class="pbar-t"
+              ><b>Tu pedido</b><small>3 productos · sin confirmar</small></span
+            >
+            <span class="pbar-go">Ver <span aria-hidden="true">›</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="b-flabel">
+        <span><b class="step">2</b>El detalle de un café</span
+        ><span>Hoja que sube</span>
+      </div>
+      <div class="frame" data-w="390">
+        <div class="ab" style="width: 390px; height: 844px">
+          %%M_TOP%%
+          <div class="scrim"></div>
+          <div class="sheet pd">
+            <div class="sheet-grip"></div>
+            <div class="pd-head">
+              <span class="plate hi"><span>Café · Colombia</span></span>
+              <span class="sheet-x" aria-label="Cerrar">✕</span>
+            </div>
+            <div class="pd-title">
+              <span class="h-m" style="font-size: 34px">[Huila] · Colombia</span
+              ><span class="pd-meta">250 g · en grano</span>
+            </div>
+            <p class="pd-desc">
+              Luminoso y dulce, con durazno y panela. El café para arrancar el
+              día.
+            </p>
+            <div style="max-width: 250px">%%PENTA%%</div>
+            <div class="pd-buy">
+              <span class="pd-price">$ [00.000]</span>%%QTY1%%
+            </div>
+            <a class="btn a pd-cta" href="#v-pedido"
+              ><span>Sumar al pedido</span></a
+            >
+            <p class="pd-note">
+              El stock se confirma por WhatsApp antes de retirar
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="b-flabel">
+        <span><b class="step">2</b>Si hay opciones</span
+        ><span>Remera: el talle</span>
+      </div>
+      <div class="frame" data-w="390">
+        <div class="ab" style="width: 390px; height: 844px">
+          %%M_TOP%%
+          <div class="scrim"></div>
+          <div class="sheet pd">
+            <div class="sheet-grip"></div>
+            <div class="pd-head">
+              <span class="plate hi"><span>Remera</span></span>
+              <span class="sheet-x" aria-label="Cerrar">✕</span>
+            </div>
+            <div class="pd-shot"></div>
+            <div class="pd-title">
+              <span class="h-m" style="font-size: 34px">Remera Falco</span
+              ><span class="pd-meta">Algodón · estampa [diseño]</span>
+            </div>
+            <div class="pd-opt">
+              <span class="lbl">Talle</span>
+              <div class="chips" role="radiogroup" aria-label="Talle">
+                <span class="chip" role="radio" aria-checked="false">S</span>
+                <span class="chip on" role="radio" aria-checked="true">M</span>
+                <span class="chip" role="radio" aria-checked="false">L</span>
+                <span class="chip" role="radio" aria-checked="false">XL</span>
+              </div>
+              <a class="pd-link" href="#v-pedido">Guía de talles ›</a>
+            </div>
+            <div class="pd-buy">
+              <span class="pd-price">$ [00.000]</span>%%QTY1%%
+            </div>
+            <a class="btn a pd-cta" href="#v-pedido"
+              ><span>Sumar al pedido</span></a
+            >
+            <p class="pd-note">
+              El stock se confirma por WhatsApp antes de retirar
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="b-flabel">
+        <span><b class="step">3</b>Tu pedido</span
+        ><span>Se scrollea · botón fijo</span>
+      </div>
+      <div class="frame" data-w="390">
+        <div class="ab" style="width: 390px; height: 920px">
+          <div class="nav" style="height: 70px; padding: 0 22px">
+            <span class="sheet-x" style="margin-left: -12px" aria-label="Volver"
+              >‹</span
+            >
+            <span class="plate hi"><span>Tu pedido</span></span>
+            <span style="width: 32px"></span>
+          </div>
+          %%STEPS_1%%
+          <div class="order">
+            %%ITEMS%%
+            <div class="order-total">
+              <span>Total estimado</span><b>$ [00.000]</b>
+            </div>
+            <label class="field"
+              ><span>Tu nombre</span
+              ><input id="p-name-m" type="text" value="Sofía" readonly
+            /></label>
+            <label class="field"
+              ><span>Algo más (opcional)</span
+              ><input
+                id="p-note-m"
+                type="text"
+                value="Paso a la tarde"
+                readonly
+            /></label>
+            <div class="retiro">
+              <span class="plate"><span>Retiro en el local</span></span>
+              <p>Iriondo 2153, Santo Tomé · <b>cuando te confirmemos</b></p>
+              <div class="estado sm on" data-hud-lite>
+                <span class="dot"></span><b data-state>Abierto ahora</b
+                ><small data-state-sub>cierra 20:00</small>
+              </div>
+            </div>
+          </div>
+          <div class="order-send">
+            <a class="btn a" href="#v-pedido" style="width: 100%"
+              ><span>%%WA_ICON%% Enviar para confirmar</span></a
+            >
+            <p>Se abre WhatsApp con el mensaje escrito. No se cobra nada acá.</p>
+            <span class="reply-line" data-hud-lite><span class="dot"></span><span data-reply>Respondemos en el horario del local, normalmente en unos minutos.</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="b-flabel">
+        <span><b class="step">4</b>WhatsApp abre así</span
+        ><span>Ilustrativo</span>
+      </div>
+      <div class="frame" data-w="390">
+        <div class="ab" style="width: 390px; height: 844px">
+          %%WA_HEAD%%
+          <div class="wa-body"></div>
+          <div class="wa-compose">
+            <div class="wa-input">%%MSG%%</div>
+            <span class="wa-send" aria-label="Enviar">%%SEND_ICON%%</span>
+          </div>
+          <p class="wa-hint">
+            El mensaje ya está escrito y pide la confirmación. La persona solo
+            toca enviar.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="b-flabel">
+        <span><b class="step">5</b>Vuelve al sitio</span
+        ><span>Esperando confirmación</span>
+      </div>
+      <div class="frame" data-w="390">
+        <div class="ab grainy" style="width: 390px; height: 844px">
+          %%M_TOP%% %%STEPS_2%%
+          <div class="wait">
+            <span class="plate hi"><span>Pedido enviado</span></span>
+            <div class="h-m" style="font-size: 40px">
+              Esperando la confirmación de Falco
+            </div>
+            <p class="wait-p">
+              Te respondemos por WhatsApp con el stock y desde qué hora lo podés
+              retirar.
+              <b>Hasta que te respondamos, el pedido no está reservado.</b>
+            </p>
+            <p class="wait-reply" data-hud-lite>
+              <span class="dot"></span
+              ><span data-reply
+                >Respondemos en el horario del local, normalmente en unos
+                minutos.</span
+              >
+            </p>
+            <div class="wait-list">%%ITEMS_RO%%</div>
+            <a class="btn b" href="#v-pedido" style="justify-self: start"
+              ><span>%%WA_ICON%% Volver al chat</span></a
+            >
+            <a class="pd-link" href="#v-pedido">Empezar otro pedido ›</a>
+          </div>
+          <div class="pbar wait-bar">
+            <span class="pbar-n" aria-hidden="true">⧗</span>
+            <span class="pbar-t"
+              ><b>Esperando confirmación</b
+              ><small>Todavía no retires</small></span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="b-flabel">
+        <span><b class="step">6</b>Falco confirma</span
+        ><span>Recién ahí, retirás</span>
+      </div>
+      <div class="frame" data-w="390">
+        <div class="ab" style="width: 390px; height: 844px">
+          %%WA_HEAD%%
+          <div
+            class="wa-body"
+            style="
+              display: grid;
+              gap: 12px;
+              align-content: end;
+              padding-bottom: 96px;
+            "
+          >
+            <div class="wa-msg out">%%MSG%%<small>18:02</small></div>
+            <div class="wa-msg in">
+              <b>¡Confirmado, Sofía!</b> Hay stock de todo. Te lo dejamos listo
+              desde las 16. Podés pagar en el local o por transferencia al alias
+              [falco.cafe].<small>18:05</small>
+            </div>
+          </div>
+          <div class="wa-compose">
+            <div class="wa-input" style="color: #8a8d90">Mensaje</div>
+            <span class="wa-send">%%SEND_ICON%%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- ESCRITORIO ---------- -->
+  <div class="b-sub">
+    <h3>Escritorio</h3>
+    <p>
+      Mismo recorrido: el detalle y el pedido se abren como un panel a la
+      derecha, sin salir de la tienda.
+    </p>
+  </div>
+  <div>
+    <div class="b-flabel">
+      <span><b class="step">2</b>El detalle, en un panel</span
+      ><span>Escritorio · 1440</span>
+    </div>
+    <div class="frame" data-w="1440">
+      <div class="ab grainy" style="width: 1440px; height: 860px">
+        %%D_TIENDA%%
+        <div class="scrim"></div>
+        <aside class="drawer">
+          <div class="pd-head">
+            <span class="plate hi"><span>Café · Colombia</span></span>
+            <span class="sheet-x" aria-label="Cerrar">✕</span>
+          </div>
+          <div class="pd-title">
+            <span class="h-m" style="font-size: 44px">[Huila] · Colombia</span
+            ><span class="pd-meta">250 g · en grano</span>
+          </div>
+          <p class="pd-desc" style="font-size: 17px">
+            Luminoso y dulce, con durazno y panela. El café para arrancar el
+            día.
+          </p>
+          <div style="max-width: 300px">%%PENTA%%</div>
+          <div class="pd-buy">
+            <span class="pd-price" style="font-size: 22px">$ [00.000]</span
+            >%%QTY1%%
+          </div>
+          <a class="btn a pd-cta" href="#v-pedido"
+            ><span>Sumar al pedido</span></a
+          >
+          <p class="pd-note">
+            El stock se confirma por WhatsApp antes de retirar
+          </p>
+        </aside>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="b-flabel">
+      <span><b class="step">3</b>Tu pedido, en el mismo panel</span
+      ><span>Escritorio · 1440</span>
+    </div>
+    <div class="frame" data-w="1440">
+      <div class="ab grainy" style="width: 1440px; height: 940px">
+        %%D_TIENDA%%
+        <div class="scrim"></div>
+        <aside class="drawer" style="width: 620px">
+          <div class="pd-head">
+            <span class="plate hi"><span>Tu pedido</span></span
+            ><span class="sheet-x" aria-label="Cerrar">✕</span>
+          </div>
+          %%STEPS_1%%
+          <div class="order" style="padding: 0">
+            %%ITEMS%%
+            <div class="order-total">
+              <span>Total estimado</span><b>$ [00.000]</b>
+            </div>
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px"
+            >
+              <label class="field"
+                ><span>Tu nombre</span
+                ><input id="p-name-d" type="text" value="Sofía" readonly
+              /></label>
+              <label class="field"
+                ><span>Algo más (opcional)</span
+                ><input
+                  id="p-note-d"
+                  type="text"
+                  value="Paso a la tarde"
+                  readonly
+              /></label>
+            </div>
+            <div class="preview">
+              <span class="lbl">Así llega el mensaje</span>
+              <div class="wa-msg out" style="max-width: none">%%MSG%%</div>
+            </div>
+          </div>
+          <div style="display: grid; gap: 10px">
+            <a class="btn a" href="#v-pedido" style="justify-self: start"
+              ><span>%%WA_ICON%% Enviar para confirmar</span></a
+            >
+            <p class="pd-note" style="text-align: left">
+              Se abre WhatsApp (o WhatsApp Web) con el mensaje escrito. No se
+              cobra nada acá.
+            </p>
+            <span class="reply-line" data-hud-lite><span class="dot"></span><span data-reply>Respondemos en el horario del local, normalmente en unos minutos.</span></span>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- EL MENSAJE ---------- -->
+  <div class="b-sub">
+    <h3>El mensaje</h3>
+    <p>
+      Siempre con el mismo formato. Hasta el mensaje pide la confirmación: así
+      la persona lo lee dos veces, en el sitio y en su propio chat.
+    </p>
+  </div>
+  <div class="msg-spec">
+    <pre class="msg-raw">%%MSG_RAW%%</pre>
+    <div class="b-notes" style="grid-template-columns: 1fr">
+      <p class="b-note">
+        <b>Las palabras, siempre las mismas</b>"Confirmar" para lo que hace
+        Falco y "no está reservado" para lo que todavía no pasó. Nunca
+        "comprado", "listo" ni "pedido hecho" antes de la respuesta.
+      </p>
+      <p class="b-note">
+        <b>Cómo se abre</b>Un link a <code>wa.me/549[número]?text=…</code> con
+        el mensaje codificado. En el celular abre la app; en la compu, WhatsApp
+        Web.
+      </p>
+      <p class="b-note">
+        <b>"Total estimado"</b>El precio final también lo confirman ustedes en
+        el chat.
+      </p>
+      <p class="b-note">
+        <b>Qué falta</b>El número de WhatsApp del local y los precios.
+      </p>
+    </div>
+  </div>
+</section>
