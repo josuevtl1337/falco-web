@@ -18,8 +18,8 @@ export const angles = {
 } as const;
 
 export const easing = {
-  persona: "cubic-bezier(.2, 1.2, .4, 1)",
-  ambient: "cubic-bezier(.16, 1, .3, 1)",
+  persona: "cubic-bezier(0.2, 1.2, 0.4, 1)",
+  ambient: "cubic-bezier(0.16, 1, 0.3, 1)",
 } as const;
 
 export const fonts = {
