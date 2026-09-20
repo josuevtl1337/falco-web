@@ -74,7 +74,7 @@ a {
   font-family: var(--font-mono);
   font-size: var(--text-small);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.1em;
   text-decoration: none;
   cursor: pointer;
 }
