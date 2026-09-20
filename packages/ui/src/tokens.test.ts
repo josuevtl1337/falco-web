@@ -1,6 +1,16 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { angles, colors, easing, fonts, space, text, touch } from "./tokens";
+import {
+  angles,
+  colors,
+  duration,
+  easing,
+  fonts,
+  radius,
+  space,
+  text,
+  touch,
+} from "./tokens";
 
 const css = readFileSync(new URL("./tokens.css", import.meta.url), "utf8");
 
@@ -47,9 +57,20 @@ describe("escalas", () => {
   });
 
   it("cada escala tiene su propiedad CSS con el mismo valor", () => {
-    for (const [name, value] of Object.entries(space))
-      expect(css).toContain(`--space-${name}: ${value};`);
-    for (const [name, value] of Object.entries(text))
-      expect(css).toContain(`--text-${name}: ${value};`);
+    // Una escala que no se recorra acá puede desincronizarse sin que nadie se entere:
+    // este test existe justamente para que eso no pase.
+    const scales: [string, Record<string, string>][] = [
+      ["space", space],
+      ["text", text],
+      ["radius", radius],
+      ["duration", duration],
+      ["touch", touch],
+    ];
+    for (const [prefix, scale] of scales) {
+      const entries = Object.entries(scale);
+      expect(entries.length).toBeGreaterThan(0);
+      for (const [name, value] of entries)
+        expect(cssValue(`${prefix}-${name}`)).toBe(value);
+    }
   });
 });

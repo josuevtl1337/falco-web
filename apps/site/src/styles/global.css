@@ -33,8 +33,12 @@ a {
   color: inherit;
 }
 
+/* Los dos ejes: un botón de 44 px de alto y 20 de ancho sigue siendo difícil
+   de tocar. En los enlaces dentro de un párrafo no aplica, porque un elemento
+   en línea ignora min-height y min-width. */
 :where(a, button, [role="button"], input, select, summary) {
   min-height: var(--touch-min);
+  min-width: var(--touch-min);
 }
 
 :focus-visible {
