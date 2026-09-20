@@ -1,0 +1,114 @@
+---
+const links = [
+  { href: "/tienda", label: "La tienda" },
+  { href: "/donde-estamos", label: "Dónde estamos" },
+  { href: "https://www.instagram.com/falco.cafe/", label: "@falco.cafe" },
+];
+
+const path = Astro.url.pathname;
+---
+
+<nav class="nav" aria-label="Principal">
+  <a class="nav__logo" href="/" aria-label="Falco, ir al inicio">
+    <!-- 150 × 61 mantiene la proporción 2,48:1 del logo y evita que la página
+         salte mientras carga. -->
+    <img src="/logo-falco.svg" alt="" width="150" height="61" />
+  </a>
+
+  <ul>
+    {
+      links.map((link) => (
+        <li>
+          <a
+            href={link.href}
+            aria-current={path === link.href ? "page" : undefined}
+          >
+            {link.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+  }
+
+  .nav__logo {
+    display: inline-flex;
+    min-width: 0;
+  }
+
+  .nav__logo img {
+    display: block;
+    width: 150px;
+    height: auto;
+  }
+
+  .nav ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-lg);
+    margin: 0;
+    padding: 0;
+    rotate: var(--angle-menu);
+  }
+
+  .nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-min);
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--color-hueso);
+  }
+
+  .nav a[aria-current="page"] {
+    color: var(--color-brasa);
+  }
+
+  /* En el celular el menú se endereza (inclinado y envuelto se vuelve ilegible)
+     y queda en una sola fila: apilado se comía un cuarto de la primera pantalla,
+     y lo primero que hay que ver es qué café hay en la tolva. */
+  @media (max-width: 640px) {
+    .nav {
+      flex-wrap: nowrap;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+    }
+
+    .nav ul {
+      rotate: none;
+      flex-wrap: nowrap;
+      gap: var(--space-md);
+    }
+
+    .nav a {
+      white-space: nowrap;
+    }
+
+    .nav__logo img {
+      width: 96px;
+    }
+  }
+
+  /* Debajo de 420 px no entran las tres etiquetas: la de Instagram se va, y
+     el enlace sigue estando en "Dónde estamos". */
+  @media (max-width: 420px) {
+    .nav li:last-child {
+      display: none;
+    }
+  }
+</style>

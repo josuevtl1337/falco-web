@@ -1,0 +1,23 @@
+---
+
+---
+
+<div class="dialogo">
+  <slot />
+</div>
+
+<style>
+  .dialogo {
+    padding: var(--space-lg);
+    background: var(--color-piedra);
+    border-left: 3px solid var(--color-tostado);
+    border-radius: 0;
+    rotate: var(--angle-dialog);
+    max-width: 46ch;
+  }
+
+  .dialogo :global(p) {
+    margin: 0;
+    font-size: var(--text-lead);
+  }
+</style>

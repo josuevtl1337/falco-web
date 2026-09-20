@@ -1,0 +1,71 @@
+---
+import type { Coffee } from "@falco/db";
+
+interface Props {
+  coffee: Coffee;
+}
+
+const { coffee } = Astro.props;
+
+// Solo se muestran las placas que el café tiene cargadas: una placa vacía
+// dice menos que ninguna.
+const plates = [
+  { label: "Origen", value: coffee.country },
+  { label: "Finca", value: coffee.farm },
+  { label: "Variedad", value: coffee.variety },
+  { label: "Proceso", value: coffee.process },
+  {
+    label: "Altura",
+    value: coffee.altitudeMasl ? `${coffee.altitudeMasl} msnm` : undefined,
+  },
+  { label: "Tostadero", value: coffee.roaster },
+].filter(
+  (plate): plate is { label: string; value: string } => Boolean(plate.value),
+);
+---
+
+<ul class="placas">
+  {
+    plates.map((plate) => (
+      <li class="placa">
+        <span>{plate.label}</span>
+        <b>{plate.value}</b>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .placas {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    /* Fila más suelta que columna: al rotar −14°, las esquinas de cada placa
+       se van hacia arriba y abajo, y con poco espacio se pisan entre sí. */
+    gap: var(--space-lg) var(--space-sm);
+  }
+
+  .placa {
+    display: grid;
+    gap: 2px;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-piedra);
+    border-radius: var(--radius-sm);
+    rotate: var(--angle-plate);
+  }
+
+  .placa span {
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-ceniza);
+  }
+
+  .placa b {
+    color: var(--color-hueso);
+    font-weight: 600;
+  }
+</style>

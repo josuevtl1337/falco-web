@@ -1,0 +1,107 @@
+---
+import type { TastingProfile } from "@falco/db";
+import { PENTAGON_AXES, PENTAGON_LABELS, pentagonPolygon } from "./pentagono";
+
+interface Props {
+  profile: TastingProfile;
+  labels?: boolean;
+}
+
+const { profile, labels = true } = Astro.props;
+
+const shape = pentagonPolygon(profile);
+const guide = pentagonPolygon({
+  acidity: 5,
+  sweetness: 5,
+  body: 5,
+  aroma: 5,
+  finish: 5,
+});
+const half = pentagonPolygon({
+  acidity: 3,
+  sweetness: 3,
+  body: 3,
+  aroma: 3,
+  finish: 3,
+});
+
+// El SVG es una imagen: quien no lo ve necesita el mismo dato en palabras.
+const description = PENTAGON_AXES.map(
+  (axis) => `${PENTAGON_LABELS[axis]} ${profile[axis]} de 5`,
+).join(", ");
+---
+
+<figure class="pentagono">
+  <svg viewBox="0 0 100 100" role="img" aria-label={description}>
+    <polygon
+      points={guide}
+      fill="none"
+      stroke="var(--color-sombra)"
+      stroke-width="1"></polygon>
+    <polygon
+      points={half}
+      fill="none"
+      stroke="var(--color-sombra)"
+      stroke-width="0.5"></polygon>
+    <polygon
+      points={shape}
+      fill="var(--color-tostado)"
+      fill-opacity="0.55"
+      stroke="var(--color-brasa)"
+      stroke-width="1.5"
+      stroke-linejoin="round"></polygon>
+  </svg>
+
+  {
+    labels && (
+      <figcaption>
+        <ul>
+          {PENTAGON_AXES.map((axis) => (
+            <li>
+              <span>{PENTAGON_LABELS[axis]}</span>
+              <b>{profile[axis]}</b>
+            </li>
+          ))}
+        </ul>
+      </figcaption>
+    )
+  }
+</figure>
+
+<style>
+  .pentagono {
+    margin: 0;
+  }
+
+  .pentagono svg {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+  }
+
+  .pentagono ul {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-md) 0 0;
+    max-width: 300px;
+    display: grid;
+    gap: var(--space-xs);
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .pentagono li {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    color: var(--color-ceniza);
+  }
+
+  .pentagono b {
+    color: var(--color-hueso);
+    font-variant-numeric: tabular-nums;
+  }
+</style>

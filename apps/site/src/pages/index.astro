@@ -1,9 +1,17 @@
 ---
 import { env } from "cloudflare:workers";
-import { getUpcomingSpecialDays, getWeekHours } from "@falco/db";
+import {
+  getHopperCoffee,
+  getUpcomingSpecialDays,
+  getWeekHours,
+} from "@falco/db";
 import { getOpenStatus, toArgentina } from "@falco/domain";
 import Base from "../layouts/Base.astro";
 import Calendario from "../components/Calendario.astro";
+import Dialogo from "../components/Dialogo.astro";
+import Nav from "../components/Nav.astro";
+import Pentagono from "../components/Pentagono.astro";
+import Placas from "../components/Placas.astro";
 import { OpenNow } from "../islands/OpenNow";
 
 const now = new Date();
@@ -11,6 +19,7 @@ const week = await getWeekHours(env.DB);
 const today = toArgentina(now).date;
 const specials = await getUpcomingSpecialDays(env.DB, today, 30);
 const status = getOpenStatus(now, week, specials);
+const coffee = await getHopperCoffee(env.DB);
 
 const formatter = new Intl.DateTimeFormat("es-AR", {
   timeZone: "America/Argentina/Buenos_Aires",
@@ -26,6 +35,8 @@ const part = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
   title="Falco · café de santoto"
   description="Café de especialidad en Santo Tomé. Mirá qué hay en la tolva y llevate un cuarto."
 >
+  <Nav slot="nav" />
+
   <header class="hud">
     <Calendario
       weekday={part("weekday")}
@@ -34,4 +45,110 @@ const part = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
     />
     <OpenNow week={week} specials={specials} initial={status} client:idle />
   </header>
+
+  <section class="mision">
+    <h1>Traer el mundo del café a Santo Tomé</h1>
+    <Dialogo>
+      <p>
+        Nuestra misión siempre fue la misma: traer el mundo del café a Santo
+        Tomé.
+      </p>
+    </Dialogo>
+  </section>
+
+  {
+    coffee && (
+      <section class="tolva" aria-labelledby="tolva-titulo">
+        <div class="tolva__texto">
+          <p class="tolva__eyebrow">En tolva</p>
+          <h2 id="tolva-titulo">{coffee.name}</h2>
+          {coffee.tastingNotes && (
+            <p class="tolva__notas">{coffee.tastingNotes}</p>
+          )}
+          {coffee.description && <p>{coffee.description}</p>}
+          <Placas coffee={coffee} />
+          <a class="boton" href="/tienda">
+            Llevate un cuarto
+          </a>
+        </div>
+
+        <div class="tolva__pentagono">
+          <Pentagono profile={coffee.profile} />
+        </div>
+      </section>
+    )
+  }
 </Base>
+
+<style>
+  .mision,
+  .tolva {
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  .mision h1 {
+    font-size: var(--text-display);
+    max-width: 18ch;
+    margin-bottom: var(--space-lg);
+  }
+
+  .tolva {
+    display: grid;
+    gap: var(--space-xl);
+    align-items: start;
+    border-top: 1px solid var(--color-sombra);
+  }
+
+  .tolva__texto {
+    display: grid;
+    gap: var(--space-md);
+    justify-items: start;
+  }
+
+  .tolva__eyebrow {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ceniza);
+  }
+
+  .tolva h2 {
+    font-size: var(--text-title);
+    margin: 0;
+  }
+
+  .tolva__notas {
+    margin: 0;
+    font-size: var(--text-lead);
+    color: var(--color-brasa);
+  }
+
+  .tolva p {
+    margin: 0;
+    max-width: 52ch;
+  }
+
+  @media (min-width: 900px) {
+    .mision,
+    .tolva {
+      padding-inline: var(--space-xxl);
+    }
+
+    .tolva {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .mision,
+    .tolva {
+      padding: var(--space-lg) var(--space-md);
+    }
+
+    .mision h1 {
+      font-size: var(--text-title);
+    }
+  }
+</style>
