@@ -16,6 +16,12 @@
 - Todas las horas se interpretan en `America/Argentina/Buenos_Aires`, nunca en la hora del dispositivo.
 - Precios en pesos enteros (`price_ars INTEGER`).
 - Pedido: máximo **20 productos distintos** y **2 unidades por producto**.
+  > Corregido al cerrar el Plan 1: el código de las tasks de más abajo dice
+  > `ORDER_LIMITS = { maxLines, maxUnitsPerLine }` y `AddOutcome.line_limit`, y contaba los topes
+  > **por variante** (los 4 talles de una remera daban 8 remeras). Lo que se implementó cuenta
+  > productos distintos y unidades sumadas por producto:
+  > `ORDER_LIMITS = { maxProducts: 20, maxUnitsPerProduct: 2 }` y `AddOutcome.product_limit`.
+  > **El Plan 2 usa esta API, no la de los bloques de código de abajo.**
 - Vencimiento del pedido: sin enviar, **3 días** desde el último cambio; enviado, **48 horas** desde el envío.
 - Clave de guardado del pedido: `falco.order.v1`. Código de pedido: `F-XXXX`.
 - Mensaje de WhatsApp: empieza con `¡Buenas!`, dice "Total estimado" y termina con `¿Me confirman si hay stock y desde qué hora lo puedo retirar?`. Nunca "comprado", "listo" ni "pedido hecho".
