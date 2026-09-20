@@ -1,0 +1,91 @@
+@import "@fontsource/bricolage-grotesque/700.css";
+@import "@fontsource/instrument-sans/400.css";
+@import "@fontsource/instrument-sans/600.css";
+@import "@fontsource/martian-mono/400.css";
+@import "@falco/ui/tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-carbon);
+  color: var(--color-hueso);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  line-height: 1.1;
+  text-wrap: balance;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+:where(a, button, [role="button"], input, select, summary) {
+  min-height: var(--touch-min);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brasa);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+}
+.skip-link:focus {
+  left: var(--space-md);
+  top: var(--space-md);
+  z-index: 10;
+  background: var(--color-piedra);
+  padding: var(--space-sm) var(--space-md);
+}
+
+/*
+ * Compartido entre páginas (index, tienda, donde-estamos) y usado dentro de
+ * islas de React: vive acá, no en el <style> con scope de un .astro, porque
+ * el scoping de Astro haría que la clase no aplicara fuera del componente
+ * que la define.
+ */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-min);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-tostado);
+  color: var(--color-hueso);
+  border: none;
+  border-radius: var(--radius-sm);
+  rotate: var(--angle-button);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

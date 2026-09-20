@@ -27,3 +27,32 @@ export const fonts = {
   body: '"Instrument Sans", system-ui, sans-serif',
   mono: '"Martian Mono", ui-monospace, "SFMono-Regular", monospace',
 } as const;
+
+export const space = {
+  xs: "4px",
+  sm: "8px",
+  md: "16px",
+  lg: "24px",
+  xl: "40px",
+  xxl: "72px",
+} as const;
+
+export const text = {
+  micro: "12px",
+  small: "14px",
+  body: "16px",
+  lead: "20px",
+  title: "28px",
+  display: "44px",
+} as const;
+
+export const radius = { sm: "4px", md: "8px", lg: "16px" } as const;
+
+export const duration = {
+  quick: "120ms",
+  base: "240ms",
+  slow: "520ms",
+} as const;
+
+// Nada que se toque puede ser más chico que esto (spec 6.3).
+export const touch = { min: "44px" } as const;

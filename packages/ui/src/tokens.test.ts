@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { angles, colors, easing, fonts } from "./tokens";
+import { angles, colors, easing, fonts, space, text, touch } from "./tokens";
 
 const css = readFileSync(new URL("./tokens.css", import.meta.url), "utf8");
 
@@ -38,5 +38,18 @@ describe("paleta", () => {
       "ceniza",
       "brasa",
     ]);
+  });
+});
+
+describe("escalas", () => {
+  it("el área táctil mínima es de 44 px", () => {
+    expect(touch.min).toBe("44px");
+  });
+
+  it("cada escala tiene su propiedad CSS con el mismo valor", () => {
+    for (const [name, value] of Object.entries(space))
+      expect(css).toContain(`--space-${name}: ${value};`);
+    for (const [name, value] of Object.entries(text))
+      expect(css).toContain(`--text-${name}: ${value};`);
   });
 });
