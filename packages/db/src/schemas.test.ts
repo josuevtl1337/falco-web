@@ -78,6 +78,21 @@ describe("weekHoursSchema", () => {
 });
 
 describe("specialDaySchema", () => {
+  it("la nota puede venir vacía o en null", () => {
+    const base = {
+      date: "2026-12-25",
+      isClosed: true,
+      opensAt: null,
+      closesAt: null,
+    };
+    expect(
+      specialDaySchema.parse({ ...base, note: null }).note,
+    ).toBeUndefined();
+    expect(
+      specialDaySchema.parse({ ...base, note: "  " }).note,
+    ).toBeUndefined();
+  });
+
   it("valida la fecha", () => {
     expect(
       specialDaySchema.safeParse({
@@ -122,6 +137,18 @@ describe("coffeeInputSchema", () => {
       "Tiene que ser un número del 1 al 5.",
     );
   });
+
+  it("un campo opcional vaciado en el admin llega como null y queda en nada", () => {
+    const result = coffeeInputSchema.parse({
+      ...valid,
+      farm: null,
+      description: null,
+      altitudeMasl: null,
+    });
+    expect(result.farm).toBeUndefined();
+    expect(result.description).toBeUndefined();
+    expect(result.altitudeMasl).toBeUndefined();
+  });
 });
 
 describe("productInputSchema", () => {
@@ -156,6 +183,16 @@ describe("productInputSchema", () => {
     ).toBe(
       "Solo los productos de tipo café se vinculan a un café del catálogo.",
     );
+  });
+
+  it("un producto sin café vinculado acepta null en coffeeId", () => {
+    const result = productInputSchema.parse({
+      ...valid,
+      coffeeId: null,
+      description: null,
+    });
+    expect(result.coffeeId).toBeUndefined();
+    expect(result.description).toBeUndefined();
   });
 
   it("el slug solo lleva minúsculas, números y guiones", () => {

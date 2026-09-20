@@ -9,7 +9,7 @@ const optionalText = (max: number) =>
     .string()
     .trim()
     .max(max, `Usá ${max} caracteres como máximo.`)
-    .optional()
+    .nullish()
     .transform((value) => (value ? value : undefined));
 
 const requiredText = (max: number) =>
@@ -98,7 +98,8 @@ export const coffeeInputSchema = z.object({
     .int("Poné la altura en metros, sin decimales.")
     .min(0)
     .max(3000, "La altura tiene que estar entre 0 y 3000 metros.")
-    .optional(),
+    .nullish()
+    .transform((value) => value ?? undefined),
   tastingNotes: optionalText(120),
   description: optionalText(400),
   roaster: requiredText(60).default("Puerto Blest"),
@@ -114,7 +115,12 @@ export const productInputSchema = z
     slug: z.string().regex(SLUG, "Usá solo minúsculas, números y guiones."),
     kind: z.enum(["coffee", "gear", "kit", "apparel"]),
     shelf: z.enum(["coffee", "kits"]),
-    coffeeId: z.number().int().positive().optional(),
+    coffeeId: z
+      .number()
+      .int()
+      .positive()
+      .nullish()
+      .transform((value) => value ?? undefined),
     name: requiredText(60),
     detail: requiredText(80),
     description: optionalText(600),
