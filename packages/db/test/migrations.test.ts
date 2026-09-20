@@ -52,8 +52,9 @@ const product = insert("products", {
   price_ars: "100",
 });
 
+// 2026-12-25 ya está en el seed, así que la probeta usa otra fecha.
 const specialDay = insert("special_days", {
-  date: "'2026-12-25'",
+  date: "'2027-01-01'",
   is_closed: "1",
 });
 
@@ -67,13 +68,29 @@ const setting = insert("settings", { key: "'probeta'", value: "'si'" });
 describe("0001_init + seed", () => {
   it("carga los datos de prueba", () => {
     expect(count("coffees")).toBe(1);
-    expect(count("products")).toBe(3);
-    expect(count("product_options")).toBe(4);
+    expect(count("products")).toBe(5);
+    expect(count("product_options")).toBe(5);
     expect(count("business_hours")).toBe(7);
+    expect(count("special_days")).toBe(1);
     const hopper = db
       .prepare("SELECT value FROM settings WHERE key = 'hopper_coffee_id'")
       .get() as { value: string };
     expect(hopper.value).toBe("1");
+  });
+
+  it("trae un feriado cerrado para probar el cartel de horarios", () => {
+    const holiday = one<{ date: string; is_closed: number; note: string }>(
+      "SELECT date, is_closed, note FROM special_days",
+    );
+    expect(holiday.is_closed).toBe(1);
+    expect(holiday.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(holiday.note.length).toBeGreaterThan(0);
+  });
+
+  it("trae un producto oculto, uno a consultar y un talle agotado", () => {
+    expect(count("products WHERE is_visible = 0")).toBe(1);
+    expect(count("products WHERE ask_stock = 1")).toBe(1);
+    expect(count("product_options WHERE is_available = 0")).toBe(1);
   });
 
   it("rechaza valores del pentágono fuera de 1 a 5", () => {
@@ -283,7 +300,7 @@ describe("fechas de los días especiales", () => {
   });
 
   it("acepta una fecha real, bisiesto incluido", () => {
-    expect(specialDay({ date: "'2026-12-25'" })).not.toThrow();
+    expect(specialDay({ date: "'2027-05-01'" })).not.toThrow();
     expect(specialDay({ date: "'2028-02-29'" })).not.toThrow();
   });
 });
