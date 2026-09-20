@@ -19,11 +19,13 @@ export function OpenNow({ week, specials, initial }: Props) {
   const [status, setStatus] = useState<OpenStatus>(initial);
 
   useEffect(() => {
-    // Sin llamada inmediata acá: el primer pintado ya es el que mandó el
-    // servidor (prop `initial`), y no hay que pisarlo apenas monta. Recién
-    // se recalcula cuando pasa el primer minuto.
     const recalculate = () =>
       setStatus(getOpenStatus(new Date(), week, specials));
+    // Se recalcula apenas monta, y no solo cada minuto: el HTML se cachea 60
+    // segundos en el borde, así que el estado que calculó el servidor puede
+    // llegar atrasado. Esto no afecta el primer pintado —los efectos corren
+    // después— pero corrige enseguida un cartel que ya no dice la verdad.
+    recalculate();
     const timer = setInterval(recalculate, 60_000);
     return () => clearInterval(timer);
   }, [week, specials]);
