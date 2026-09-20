@@ -1,10 +1,8 @@
 import { addDays, formatHHMM, parseHHMM, toArgentina } from "./time";
 
-export type DayHours = {
-  isClosed: boolean;
-  opensAt: string | null;
-  closesAt: string | null;
-};
+export type Shift = { opensAt: string; closesAt: string };
+/** Un día sin tramos está cerrado. */
+export type DayHours = { shifts: readonly Shift[] };
 export type WeekHours = Readonly<Record<number, DayHours>>;
 export type SpecialDay = DayHours & { date: string; note?: string | null };
 export type OpenStatus =
@@ -25,7 +23,7 @@ const WEEKDAY_NAMES = [
   "sábado",
 ];
 const LOOKAHEAD_DAYS = 14;
-const CLOSED_DAY: DayHours = { isClosed: true, opensAt: null, closesAt: null };
+const CLOSED_DAY: DayHours = { shifts: [] };
 
 function hoursFor(
   date: string,
@@ -40,10 +38,13 @@ function hoursFor(
   );
 }
 
-function isOpenDay(
-  day: DayHours,
-): day is DayHours & { opensAt: string; closesAt: string } {
-  return !day.isClosed && day.opensAt !== null && day.closesAt !== null;
+// Se ordena por minuto de apertura, no por texto: "HH:MM" ya compara bien
+// como texto, pero pasar por parseHHMM deja explícito que se ordena en
+// minutos y no se rompe si algún día llega "24:00" como apertura.
+function sortedShifts(day: DayHours): Shift[] {
+  return [...day.shifts].sort(
+    (a, b) => parseHHMM(a.opensAt) - parseHHMM(b.opensAt),
+  );
 }
 
 export function getOpenStatus(
@@ -52,11 +53,13 @@ export function getOpenStatus(
   specials: readonly SpecialDay[] = [],
 ): OpenStatus {
   const now = toArgentina(instant);
-  const today = hoursFor(now.date, now.weekday, week, specials);
+  const todayShifts = sortedShifts(
+    hoursFor(now.date, now.weekday, week, specials),
+  );
 
-  if (isOpenDay(today)) {
-    const opens = parseHHMM(today.opensAt);
-    const closes = parseHHMM(today.closesAt);
+  for (const shift of todayShifts) {
+    const opens = parseHHMM(shift.opensAt);
+    const closes = parseHHMM(shift.closesAt);
     if (now.minutes >= opens && now.minutes < closes) {
       const closesAt = formatHHMM(closes);
       return {
@@ -65,6 +68,10 @@ export function getOpenStatus(
         label: `Abierto ahora · cierra ${closesAt}`,
       };
     }
+  }
+
+  for (const shift of todayShifts) {
+    const opens = parseHHMM(shift.opensAt);
     if (now.minutes < opens) {
       const opensAt = formatHHMM(opens);
       return {
@@ -78,9 +85,9 @@ export function getOpenStatus(
   for (let offset = 1; offset <= LOOKAHEAD_DAYS; offset++) {
     const date = addDays(now.date, offset);
     const weekday = (now.weekday + offset) % 7;
-    const day = hoursFor(date, weekday, week, specials);
-    if (isOpenDay(day)) {
-      const opensAt = formatHHMM(parseHHMM(day.opensAt));
+    const [first] = sortedShifts(hoursFor(date, weekday, week, specials));
+    if (first) {
+      const opensAt = formatHHMM(parseHHMM(first.opensAt));
       const when = offset === 1 ? "mañana" : `el ${WEEKDAY_NAMES[weekday]}`;
       return {
         state: "closed",
