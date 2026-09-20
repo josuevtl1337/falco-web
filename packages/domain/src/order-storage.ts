@@ -22,7 +22,7 @@ function isOrderLine(value: unknown): value is OrderLine {
     isPositiveInt(line.productId) &&
     (line.optionId === undefined || isPositiveInt(line.optionId)) &&
     isPositiveInt(line.qty) &&
-    (line.qty as number) <= ORDER_LIMITS.maxUnitsPerLine
+    (line.qty as number) <= ORDER_LIMITS.maxUnitsPerProduct
   );
 }
 
@@ -36,7 +36,7 @@ export function isOrder(value: unknown): value is Order {
     isOptionalString(order.customerName) &&
     isOptionalString(order.note) &&
     Array.isArray(order.items) &&
-    order.items.length <= ORDER_LIMITS.maxLines &&
+    order.items.length <= ORDER_LIMITS.maxProducts &&
     order.items.every(isOrderLine)
   );
 }

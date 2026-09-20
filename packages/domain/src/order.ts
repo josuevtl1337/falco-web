@@ -1,4 +1,5 @@
-export const ORDER_LIMITS = { maxLines: 20, maxUnitsPerLine: 2 } as const;
+// 20 productos distintos y 2 unidades por producto, sumando todos sus talles.
+export const ORDER_LIMITS = { maxProducts: 20, maxUnitsPerProduct: 2 } as const;
 
 const HOUR_MS = 60 * 60 * 1000;
 export const ORDER_TTL = {
@@ -17,12 +18,23 @@ export type Order = {
   sentAt?: string;
 };
 export type AddOutcome =
-  "added" | "increased" | "unit_limit" | "line_limit" | "already_sent";
+  "added" | "increased" | "unit_limit" | "product_limit" | "already_sent";
 
 function sameLine(a: LineKey, b: LineKey): boolean {
   return (
     a.productId === b.productId && (a.optionId ?? null) === (b.optionId ?? null)
   );
+}
+
+export function unitsForProduct(order: Order, productId: number): number {
+  return order.items.reduce(
+    (total, line) => (line.productId === productId ? total + line.qty : total),
+    0,
+  );
+}
+
+function productCount(order: Order): number {
+  return new Set(order.items.map((line) => line.productId)).size;
 }
 
 function touch(order: Order, now: Date, changes: Partial<Order>): Order {
@@ -40,18 +52,24 @@ export function addItem(
 ): { order: Order; outcome: AddOutcome } {
   if (order.sentAt) return { order, outcome: "already_sent" };
 
+  // El tope de unidades es del producto: los talles lo comparten.
+  if (unitsForProduct(order, key.productId) >= ORDER_LIMITS.maxUnitsPerProduct)
+    return { order, outcome: "unit_limit" };
+
   const existing = order.items.find((line) => sameLine(line, key));
   if (existing) {
-    if (existing.qty >= ORDER_LIMITS.maxUnitsPerLine)
-      return { order, outcome: "unit_limit" };
     const items = order.items.map((line) =>
       line === existing ? { ...line, qty: line.qty + 1 } : line,
     );
     return { order: touch(order, now, { items }), outcome: "increased" };
   }
 
-  if (order.items.length >= ORDER_LIMITS.maxLines)
-    return { order, outcome: "line_limit" };
+  // Otro talle de un producto que ya está no es un producto nuevo.
+  const isNewProduct = !order.items.some(
+    (line) => line.productId === key.productId,
+  );
+  if (isNewProduct && productCount(order) >= ORDER_LIMITS.maxProducts)
+    return { order, outcome: "product_limit" };
 
   const line: OrderLine =
     key.optionId === undefined
@@ -81,7 +99,11 @@ export function setQty(
   if (!Number.isFinite(qty)) return order;
   const floored = Math.floor(qty);
   if (floored < 1) return removeItem(order, key, now);
-  const clamped = Math.min(floored, ORDER_LIMITS.maxUnitsPerLine);
+  // Lo que queda del producto después de los otros talles, nunca menos de 1:
+  // para dejar la línea en cero está removeItem.
+  const others = unitsForProduct(order, key.productId) - existing.qty;
+  const room = Math.max(ORDER_LIMITS.maxUnitsPerProduct - others, 1);
+  const clamped = Math.min(floored, room);
   if (clamped === existing.qty) return order;
   const items = order.items.map((line) =>
     sameLine(line, key) ? { ...line, qty: clamped } : line,

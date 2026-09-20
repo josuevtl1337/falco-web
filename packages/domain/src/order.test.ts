@@ -10,6 +10,7 @@ import {
   setCustomer,
   setQty,
   unitCount,
+  unitsForProduct,
   type Order,
 } from "./order";
 
@@ -50,7 +51,7 @@ describe("addItem", () => {
     expect(order.items).toEqual([{ productId: 1, qty: 2 }]);
   });
 
-  it(`no pasa de ${ORDER_LIMITS.maxUnitsPerLine} unidades por producto`, () => {
+  it(`no pasa de ${ORDER_LIMITS.maxUnitsPerProduct} unidades por producto`, () => {
     let order = createOrder("F-7K2Q", T0);
     order = addItem(order, { productId: 1 }, T0).order;
     order = addItem(order, { productId: 1 }, T0).order;
@@ -69,13 +70,41 @@ describe("addItem", () => {
     ]);
   });
 
-  it(`no acepta más de ${ORDER_LIMITS.maxLines} productos distintos`, () => {
+  it("dos talles del mismo producto ya son las 2 unidades permitidas", () => {
     let order = createOrder("F-7K2Q", T0);
-    for (let id = 1; id <= ORDER_LIMITS.maxLines; id++)
+    order = addItem(order, { productId: 3, optionId: 31 }, T0).order;
+    order = addItem(order, { productId: 3, optionId: 32 }, T0).order;
+
+    const again = addItem(order, { productId: 3, optionId: 31 }, T0);
+    expect(again.outcome).toBe("unit_limit");
+    expect(again.order).toBe(order);
+
+    const otherSize = addItem(order, { productId: 3, optionId: 33 }, T0);
+    expect(otherSize.outcome).toBe("unit_limit");
+    expect(otherSize.order).toBe(order);
+  });
+
+  it(`no acepta más de ${ORDER_LIMITS.maxProducts} productos distintos`, () => {
+    let order = createOrder("F-7K2Q", T0);
+    for (let id = 1; id <= ORDER_LIMITS.maxProducts; id++)
       order = addItem(order, { productId: id }, T0).order;
     const result = addItem(order, { productId: 999 }, T0);
-    expect(result.outcome).toBe("line_limit");
-    expect(result.order.items).toHaveLength(ORDER_LIMITS.maxLines);
+    expect(result.outcome).toBe("product_limit");
+    expect(result.order.items).toHaveLength(ORDER_LIMITS.maxProducts);
+  });
+
+  it("otro talle de un producto que ya está no cuenta como producto nuevo", () => {
+    let order = createOrder("F-7K2Q", T0);
+    for (let id = 1; id <= ORDER_LIMITS.maxProducts; id++)
+      order = addItem(order, { productId: id }, T0).order;
+
+    const sameProduct = addItem(order, { productId: 1, optionId: 31 }, T0);
+    expect(sameProduct.outcome).toBe("added");
+    expect(sameProduct.order.items).toHaveLength(ORDER_LIMITS.maxProducts + 1);
+
+    expect(addItem(sameProduct.order, { productId: 999 }, T0).outcome).toBe(
+      "product_limit",
+    );
   });
 
   it("no modifica un pedido ya enviado", () => {
@@ -120,6 +149,35 @@ describe("setQty y removeItem", () => {
 
   it("si la cantidad no cambia, devuelve el mismo pedido", () => {
     expect(setQty(base, { productId: 1 }, 1, later(1000))).toBe(base);
+  });
+
+  it("un talle se limita a lo que queda libre del producto", () => {
+    let order = createOrder("F-7K2Q", T0);
+    order = addItem(order, { productId: 3, optionId: 31 }, T0).order;
+    order = addItem(order, { productId: 3, optionId: 32 }, T0).order;
+
+    // El otro talle ya ocupa una unidad: pedir 5 deja la línea en 1.
+    expect(setQty(order, { productId: 3, optionId: 31 }, 5, later(1000))).toBe(
+      order,
+    );
+
+    // Si el otro talle se va, el que queda puede llegar a 2.
+    const freed = removeItem(order, { productId: 3, optionId: 32 }, T0);
+    expect(setQty(freed, { productId: 3, optionId: 31 }, 5, T0).items).toEqual([
+      { productId: 3, optionId: 31, qty: 2 },
+    ]);
+  });
+});
+
+describe("unitsForProduct", () => {
+  it("suma las unidades de todos los talles de un producto", () => {
+    let order = createOrder("F-7K2Q", T0);
+    order = addItem(order, { productId: 3, optionId: 31 }, T0).order;
+    order = addItem(order, { productId: 3, optionId: 32 }, T0).order;
+    order = addItem(order, { productId: 1 }, T0).order;
+    expect(unitsForProduct(order, 3)).toBe(2);
+    expect(unitsForProduct(order, 1)).toBe(1);
+    expect(unitsForProduct(order, 999)).toBe(0);
   });
 });
 
