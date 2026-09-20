@@ -231,6 +231,18 @@ describe("pruneUnavailable", () => {
   });
 });
 
+describe("markSent", () => {
+  const draft = addItem(createOrder("F-7K2Q", T0), { productId: 1 }, T0).order;
+
+  it("marcar dos veces no renueva el plazo de 48 horas", () => {
+    const sent = markSent(draft, T0);
+    const again = markSent(sent, later(47 * HOUR));
+    expect(again).toBe(sent);
+    expect(again.sentAt).toBe(T0.toISOString());
+    expect(isExpired(again, later(48 * HOUR))).toBe(true);
+  });
+});
+
 describe("isExpired", () => {
   const draft: Order = addItem(
     createOrder("F-7K2Q", T0),

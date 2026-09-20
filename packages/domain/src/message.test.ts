@@ -51,6 +51,13 @@ describe("formatArs", () => {
     expect(formatArs(41000)).toBe("$ 41.000");
     expect(formatArs(1234567)).toBe("$ 1.234.567");
   });
+
+  it("nunca muestra un precio negativo ni roto", () => {
+    expect(formatArs(-5000)).toBe("$ 0");
+    expect(formatArs(NaN)).toBe("$ 0");
+    expect(formatArs(Infinity)).toBe("$ 0");
+    expect(formatArs(-Infinity)).toBe("$ 0");
+  });
 });
 
 describe("orderTotal", () => {
@@ -86,7 +93,7 @@ describe("buildOrderMessage", () => {
   it("sin nombre ni comentario, usa el saludo corto y no agrega la línea del comentario", () => {
     const message = buildOrderMessage(sampleOrder(), CATALOG);
     expect(
-      message.startsWith("¡Buenas! Quiero hacer este pedido (F-7K2Q):\n"),
+      message?.startsWith("¡Buenas! Quiero hacer este pedido (F-7K2Q):\n"),
     ).toBe(true);
     expect(message).not.toContain("Comentario");
   });
@@ -99,9 +106,34 @@ describe("buildOrderMessage", () => {
   });
 
   it("nunca usa palabras que den el pedido por hecho", () => {
-    const message = buildOrderMessage(sampleOrder(), CATALOG).toLowerCase();
+    const message = buildOrderMessage(sampleOrder(), CATALOG)?.toLowerCase();
     for (const word of ["comprado", "listo", "pedido hecho"])
       expect(message).not.toContain(word);
+  });
+
+  it("si el talle elegido ya no está, saca la línea entera", () => {
+    let order = createOrder("F-7K2Q", T0);
+    order = addItem(order, { productId: 1 }, T0).order;
+    order = addItem(order, { productId: 3, optionId: 99 }, T0).order;
+    const message = buildOrderMessage(order, CATALOG);
+    expect(message).not.toContain("Remera");
+    expect(message).toContain("• 1 × Huila · Colombia · 250 g · en grano");
+    expect(message).toContain("Total estimado: $ 12.000");
+  });
+
+  it("un pedido sin líneas no arma mensaje", () => {
+    expect(
+      buildOrderMessage(createOrder("F-7K2Q", T0), CATALOG),
+    ).toBeUndefined();
+  });
+
+  it("un pedido cuyas líneas ya no existen tampoco arma mensaje", () => {
+    const order = addItem(
+      createOrder("F-7K2Q", T0),
+      { productId: 777 },
+      T0,
+    ).order;
+    expect(buildOrderMessage(order, CATALOG)).toBeUndefined();
   });
 });
 
@@ -114,5 +146,17 @@ describe("buildWhatsAppUrl", () => {
 
   it("rechaza un número demasiado corto", () => {
     expect(() => buildWhatsAppUrl("342 555", "Hola")).toThrow();
+  });
+
+  it("sin mensaje abre el chat igual, sin tirar error", () => {
+    expect(buildWhatsAppUrl("+54 9 342 555-1234")).toBe(
+      "https://wa.me/5493425551234",
+    );
+    expect(
+      buildWhatsAppUrl(
+        "+54 9 342 555-1234",
+        buildOrderMessage(createOrder("F-7K2Q", T0), CATALOG),
+      ),
+    ).toBe("https://wa.me/5493425551234");
   });
 });

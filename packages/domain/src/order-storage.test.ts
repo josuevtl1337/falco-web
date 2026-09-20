@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addItem, createOrder, markSent } from "./order";
+import { addItem, createOrder, markSent, ORDER_LIMITS } from "./order";
 import {
   clearOrder,
   loadOrder,
@@ -73,6 +73,99 @@ describe("saveOrder y loadOrder", () => {
     });
     expect(loadOrder(storage, T0)).toBeNull();
     expect(storage.data[ORDER_STORAGE_KEY]).toBeUndefined();
+  });
+
+  it("borra y descarta un pedido con dos líneas iguales", () => {
+    const storage = memoryStorage({
+      [ORDER_STORAGE_KEY]: JSON.stringify({
+        code: "F-7K2Q",
+        items: [
+          { productId: 1, qty: 2 },
+          { productId: 1, qty: 2 },
+        ],
+        updatedAt: T0.toISOString(),
+      }),
+    });
+    expect(loadOrder(storage, T0)).toBeNull();
+    expect(storage.data[ORDER_STORAGE_KEY]).toBeUndefined();
+  });
+
+  it("borra y descarta un producto con más unidades que el tope, repartidas en talles", () => {
+    const storage = memoryStorage({
+      [ORDER_STORAGE_KEY]: JSON.stringify({
+        code: "F-7K2Q",
+        items: [
+          { productId: 3, optionId: 31, qty: 2 },
+          { productId: 3, optionId: 32, qty: 1 },
+        ],
+        updatedAt: T0.toISOString(),
+      }),
+    });
+    expect(loadOrder(storage, T0)).toBeNull();
+    expect(storage.data[ORDER_STORAGE_KEY]).toBeUndefined();
+  });
+
+  it("acepta los talles de un mismo producto mientras no pasen el tope", () => {
+    const valid = {
+      code: "F-7K2Q",
+      items: [
+        { productId: 3, optionId: 31, qty: 1 },
+        { productId: 3, optionId: 32, qty: 1 },
+      ],
+      updatedAt: T0.toISOString(),
+    };
+    const storage = memoryStorage({
+      [ORDER_STORAGE_KEY]: JSON.stringify(valid),
+    });
+    expect(loadOrder(storage, T0)).toEqual(valid);
+  });
+
+  it("borra y descarta un pedido con más productos distintos que el tope", () => {
+    const items = Array.from(
+      { length: ORDER_LIMITS.maxProducts + 1 },
+      (_unused, index) => ({ productId: index + 1, qty: 1 }),
+    );
+    const storage = memoryStorage({
+      [ORDER_STORAGE_KEY]: JSON.stringify({
+        code: "F-7K2Q",
+        items,
+        updatedAt: T0.toISOString(),
+      }),
+    });
+    expect(loadOrder(storage, T0)).toBeNull();
+    expect(storage.data[ORDER_STORAGE_KEY]).toBeUndefined();
+  });
+
+  it("borra y descarta un código que no es un código de pedido", () => {
+    for (const code of ["", "hola mundo", "F-0000", "f-7k2q"]) {
+      const storage = memoryStorage({
+        [ORDER_STORAGE_KEY]: JSON.stringify({
+          code,
+          items: [{ productId: 1, qty: 1 }],
+          updatedAt: T0.toISOString(),
+        }),
+      });
+      expect(loadOrder(storage, T0)).toBeNull();
+      expect(storage.data[ORDER_STORAGE_KEY]).toBeUndefined();
+    }
+  });
+
+  it("borra y descarta fechas que no son un instante ISO", () => {
+    for (const dates of [
+      { updatedAt: "Sep 19 2026" },
+      { updatedAt: "2026-09-19" },
+      { updatedAt: T0.toISOString(), sentAt: "Sep 19 2026" },
+    ]) {
+      const storage = memoryStorage({
+        [ORDER_STORAGE_KEY]: JSON.stringify({
+          code: "F-7K2Q",
+          items: [{ productId: 1, qty: 1 }],
+          ...dates,
+        }),
+      });
+      expect(loadOrder(storage, T0)).toBeNull();
+      expect(storage.data[ORDER_STORAGE_KEY]).toBeUndefined();
+    }
   });
 
   it("no tira errores si el navegador bloquea el almacenamiento", () => {

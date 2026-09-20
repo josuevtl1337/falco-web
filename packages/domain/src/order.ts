@@ -122,7 +122,10 @@ export function setCustomer(
   return touch(order, now, { customerName, note });
 }
 
+// Idempotente a propósito: el botón "volver al chat" no puede renovar
+// las 48 horas del pedido enviado.
 export function markSent(order: Order, now: Date): Order {
+  if (order.sentAt) return order;
   return touch(order, now, { sentAt: now.toISOString() });
 }
 

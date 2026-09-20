@@ -13,8 +13,9 @@ const CLOSING_QUESTION =
   "¿Me confirman si hay stock y desde qué hora lo puedo retirar?";
 
 export function formatArs(amount: number): string {
-  const rounded = Math.round(amount).toString();
-  return `$ ${rounded.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
+  // Nadie tiene que ver "$ NaN" ni un precio en negativo.
+  const safe = Number.isFinite(amount) ? Math.max(Math.round(amount), 0) : 0;
+  return `$ ${safe.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
 }
 
 export function orderTotal(order: Order, catalog: Catalog): number {
@@ -25,39 +26,56 @@ export function orderTotal(order: Order, catalog: Catalog): number {
   );
 }
 
-function lineText(line: OrderLine, product: CatalogProduct): string {
+type UsableLine = { text: string; amount: number };
+
+function usableLine(line: OrderLine, catalog: Catalog): UsableLine | undefined {
+  const product = catalog.get(line.productId);
+  if (!product) return undefined;
   const option =
     line.optionId === undefined
       ? undefined
       : product.options?.find((o) => o.id === line.optionId);
+  // Si el talle que eligió la persona ya no está, se va la línea entera:
+  // el mensaje nunca puede cobrar una remera sin decir de qué talle es.
+  if (line.optionId !== undefined && !option) return undefined;
   const parts = [`${line.qty} × ${product.name}`, product.detail];
   if (option) parts.push(`talle ${option.label}`);
-  return `• ${parts.join(" · ")}`;
+  return {
+    text: `• ${parts.join(" · ")}`,
+    amount: product.priceArs * line.qty,
+  };
 }
 
 function endWithPunctuation(text: string): string {
   return /[.!?…]$/.test(text) ? text : `${text}.`;
 }
 
-export function buildOrderMessage(order: Order, catalog: Catalog): string {
+// Devuelve undefined cuando no queda ninguna línea que pedir: un pedido vacío
+// no tiene mensaje que mandar.
+export function buildOrderMessage(
+  order: Order,
+  catalog: Catalog,
+): string | undefined {
+  const lines = order.items.flatMap((line) => {
+    const usable = usableLine(line, catalog);
+    return usable ? [usable] : [];
+  });
+  if (lines.length === 0) return undefined;
+
   const name = order.customerName?.trim();
   const greeting = name
     ? `¡Buenas! Soy ${name} y quiero hacer este pedido (${order.code}):`
     : `¡Buenas! Quiero hacer este pedido (${order.code}):`;
 
-  const lines = order.items.flatMap((line) => {
-    const product = catalog.get(line.productId);
-    return product ? [lineText(line, product)] : [];
-  });
-
+  const total = lines.reduce((sum, line) => sum + line.amount, 0);
   const note = order.note?.trim();
 
   return [
     greeting,
     "",
-    ...lines,
+    ...lines.map((line) => line.text),
     "",
-    `Total estimado: ${formatArs(orderTotal(order, catalog))}`,
+    `Total estimado: ${formatArs(total)}`,
     "Lo retiraría en el local cuando me confirmen.",
     ...(note ? [`Comentario: ${endWithPunctuation(note)}`] : []),
     "",
@@ -67,10 +85,13 @@ export function buildOrderMessage(order: Order, catalog: Catalog): string {
 
 export function buildWhatsAppUrl(
   whatsappNumber: string,
-  message: string,
+  message?: string,
 ): string {
   const digits = whatsappNumber.replace(/\D/g, "");
   if (digits.length < 10)
     throw new Error(`Invalid WhatsApp number: ${whatsappNumber}`);
-  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+  // Sin mensaje, el link abre el chat y nada más.
+  return message === undefined
+    ? `https://wa.me/${digits}`
+    : `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
 }
