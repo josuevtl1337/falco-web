@@ -1,0 +1,10 @@
+---
+import { env } from "cloudflare:workers";
+
+const row = await env.DB.prepare("SELECT COUNT(*) AS total FROM products").first<{
+  total: number;
+}>();
+---
+
+<h1>Falco</h1>
+<p>Productos en la base: {row?.total ?? 0}</p>
