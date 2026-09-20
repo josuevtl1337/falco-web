@@ -33,6 +33,25 @@ Esta lista está acá porque el ledger de ejecución vive en `.superpowers/` (gi
 8. **Falta el formateador de `openingHours` para el JSON-LD.** El dominio da el estado abierto/
    cerrado, no el string del schema.org.
 
+## Marca y contenido (definido el 2026-09-20)
+
+M1. **El logo ya está en el repo**, convertido del PDF a vector: `design/brand/logo-falco.svg`
+    (fondo transparente, viewBox ajustado a la tinta), `logo-falco-sobre-carbon.svg` (con la
+    tarjeta) y `logo-falco-oscuro.svg` (para fondos claros). `design/brand/prueba.html` los
+    muestra a varios tamaños. Colores reales del vector: `#2A2A2C`, `#985D36`, `#ECE4CF`, `#FFF2E2`.
+M2. **PENDIENTE DE DECISIÓN: los colores del vector no son los tokens de la paleta.**
+    El tostado del logo es `#985D36` y el token dice `#885333` (lo sacó el dueño de una captura,
+    que le comió saturación); hueso `#ECE4CF` vs `#E8E2D0`; carbón `#2A2A2C` vs `#292A2C`.
+    Hay que decidir antes de maquetar el sitio: el logo va a estar al lado de esos colores.
+M3. **El logo solo funciona sobre fondo oscuro** (el wordmark es crema). Sobre hueso hay que usar
+    `logo-falco-oscuro.svg`.
+M4. **Falta la marca compacta para el favicon**: el murciélago solo. El wordmark completo es un
+    único path, no se puede recortar la "A" del archivo actual. Hay que pedirle el asset al dueño.
+M5. **La foto del Mahlkönig E65S no va** (decisión del 2026-09-20). El hueco que tenía reservado
+    en la home hay que resolverlo de otra manera en el Plan 2.
+M6. **Los productos y precios del seed son genéricos**: el dueño los carga a mano después, desde
+    el admin. No inventar catálogo real.
+
 ## Para el Plan 3 (panel de admin)
 
 9. **`packages/db` no exporta tipos de fila ni un mapper `snake_case → camelCase`.** La spec (3)
@@ -50,6 +69,12 @@ Esta lista está acá porque el ledger de ejecución vive en `.superpowers/` (gi
     Access.
 14. **`slugify` no resuelve unicidad** (y devuelve `""` con nombres sin letras latinas). El slug es
     `UNIQUE` en la base: el admin tiene que proponer, detectar el choque y sufijar.
+15b. **Las opciones de producto ya no son solo talles**: el café se vende en grano o molido, y la
+    elección se hace dentro del producto (el cuarto). La etiqueta se escribe entera en el admin
+    ("En grano", "Molido", "Talle M") porque el mensaje de WhatsApp la imprime tal cual. El
+    selector del sitio necesita un título; si se quiere ("Elegí la molienda" vs "Elegí el talle"),
+    hay que sumar una columna `option_label` en `products`.
+
 15. **`settingsSchema` es un objeto todo-o-nada** repartido entre dos pantallas del admin. Partirlo
     por clave o validar por campo.
 
