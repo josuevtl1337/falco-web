@@ -7,7 +7,7 @@
     "dev": "wrangler types && astro dev",
     "build": "astro build",
     "preview": "wrangler dev",
-    "typecheck": "astro check",
+    "typecheck": "wrangler types && astro check",
     "test": "vitest run"
   },
   "dependencies": {
