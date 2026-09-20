@@ -1,0 +1,24 @@
+:root {
+  --color-carbon: #292a2c;
+  --color-piedra: #313335;
+  --color-sombra: #1e1f21;
+  --color-tostado: #885333;
+  --color-hueso: #e8e2d0;
+  --color-ceniza: #9a9c9e;
+  --color-brasa: #f2c48b;
+
+  --angle-plate: -14deg;
+  --angle-button: -12deg;
+  --angle-menu: -8deg;
+  --angle-dialog: -6deg;
+  --angle-ticker: -1.6deg;
+
+  --ease-persona: cubic-bezier(0.2, 1.2, 0.4, 1);
+  --ease-ambient: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --font-display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Instrument Sans", system-ui, sans-serif;
+  --font-mono: "Martian Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  color-scheme: dark;
+}

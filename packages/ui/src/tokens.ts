@@ -1,0 +1,29 @@
+export const colors = {
+  carbon: "#292A2C",
+  piedra: "#313335",
+  sombra: "#1E1F21",
+  tostado: "#885333",
+  hueso: "#E8E2D0",
+  ceniza: "#9A9C9E",
+  brasa: "#F2C48B",
+} as const;
+
+/** Grados. Son fijos: no inventar ángulos nuevos. */
+export const angles = {
+  plate: -14,
+  button: -12,
+  menu: -8,
+  dialog: -6,
+  ticker: -1.6,
+} as const;
+
+export const easing = {
+  persona: "cubic-bezier(.2, 1.2, .4, 1)",
+  ambient: "cubic-bezier(.16, 1, .3, 1)",
+} as const;
+
+export const fonts = {
+  display: '"Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif',
+  body: '"Instrument Sans", system-ui, sans-serif',
+  mono: '"Martian Mono", ui-monospace, "SFMono-Regular", monospace',
+} as const;
