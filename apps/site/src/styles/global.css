@@ -83,6 +83,52 @@ a {
   cursor: pointer;
 }
 
+/*
+ * Igual que .boton: el cartel "Abierto ahora" vive en una isla de React
+ * (OpenNow.tsx), así que no puede tener un <style> con scope de Astro.
+ */
+.hud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-md) 0;
+}
+
+.abierto-ahora {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  letter-spacing: 0.04em;
+  color: var(--color-hueso);
+}
+
+.abierto-ahora .punto {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-ceniza);
+}
+
+.abierto-ahora[data-open="true"] .punto {
+  background: var(--color-brasa);
+  animation: latido var(--duration-slow) ease-in-out infinite;
+}
+
+@keyframes latido {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

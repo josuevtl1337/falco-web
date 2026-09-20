@@ -1,0 +1,40 @@
+---
+interface Props {
+  weekday: string;
+  day: number;
+  month: string;
+}
+
+const { weekday, day, month } = Astro.props;
+---
+
+<div class="calendario">
+  <span class="calendario__dia-semana">{weekday}</span>
+  <strong class="calendario__numero">{day}</strong>
+  <span class="calendario__mes">{month}</span>
+</div>
+
+<style>
+  .calendario {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-piedra);
+    border-radius: var(--radius-md);
+    rotate: var(--angle-plate);
+  }
+  .calendario__numero {
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    line-height: 1;
+  }
+  .calendario__dia-semana,
+  .calendario__mes {
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ceniza);
+  }
+</style>

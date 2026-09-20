@@ -1,15 +1,37 @@
 ---
 import { env } from "cloudflare:workers";
-import { getHopperCoffee } from "@falco/db";
+import { getUpcomingSpecialDays, getWeekHours } from "@falco/db";
+import { getOpenStatus, toArgentina } from "@falco/domain";
 import Base from "../layouts/Base.astro";
+import Calendario from "../components/Calendario.astro";
+import { OpenNow } from "../islands/OpenNow";
 
-const coffee = await getHopperCoffee(env.DB);
+const now = new Date();
+const week = await getWeekHours(env.DB);
+const today = toArgentina(now).date;
+const specials = await getUpcomingSpecialDays(env.DB, today, 30);
+const status = getOpenStatus(now, week, specials);
+
+const formatter = new Intl.DateTimeFormat("es-AR", {
+  timeZone: "America/Argentina/Buenos_Aires",
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+});
+const parts = formatter.formatToParts(now);
+const part = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
 ---
 
 <Base
   title="Falco · café de santoto"
   description="Café de especialidad en Santo Tomé. Mirá qué hay en la tolva y llevate un cuarto."
 >
-  <h1>Falco</h1>
-  {coffee && <p>En tolva: {coffee.name} · {coffee.country}</p>}
+  <header class="hud">
+    <Calendario
+      weekday={part("weekday")}
+      day={Number(part("day"))}
+      month={part("month")}
+    />
+    <OpenNow week={week} specials={specials} initial={status} client:idle />
+  </header>
 </Base>

@@ -25,8 +25,11 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "jsdom": "^25.0.1",
     "wrangler": "^4.135.0"
   }
 }
