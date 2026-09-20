@@ -1,4 +1,4 @@
-import type { DayHours, WeekHours } from "@falco/domain";
+import type { DayHours, Shift, SpecialDay, WeekHours } from "@falco/domain";
 import {
   toCoffee,
   toProduct,
@@ -106,59 +106,70 @@ export async function getProductBySlug(
   return product;
 }
 
+// Trae los 7 días y sus tramos en una sola consulta, con un LEFT JOIN: así un
+// día sin tramos (cerrado) sigue apareciendo, igual que withOptions trae las
+// opciones de todos los productos de una vez en vez de una consulta por día.
 export async function getWeekHours(db: ReadableDb): Promise<WeekHours> {
   const rows = await allRows<{
     weekday: number;
-    is_closed: number;
     opens_at: string | null;
     closes_at: string | null;
-  }>(db.prepare("SELECT * FROM business_hours ORDER BY weekday"));
+  }>(
+    db.prepare(
+      "SELECT bh.weekday AS weekday, bhs.opens_at AS opens_at, bhs.closes_at AS closes_at " +
+        "FROM business_hours bh " +
+        "LEFT JOIN business_hour_shifts bhs ON bhs.weekday = bh.weekday " +
+        "ORDER BY bh.weekday, bhs.opens_at",
+    ),
+  );
   // WeekHours es Readonly<Record<number, DayHours>>: se arma un objeto mutable
   // y recién al devolverlo toma el tipo de solo lectura.
   const week: Record<number, DayHours> = {};
   for (const row of rows) {
-    week[row.weekday] = {
-      isClosed: row.is_closed === 1,
-      opensAt: row.opens_at,
-      closesAt: row.closes_at,
-    };
+    const day = (week[row.weekday] ??= { shifts: [] });
+    if (row.opens_at !== null && row.closes_at !== null)
+      (day.shifts as Shift[]).push({
+        opensAt: row.opens_at,
+        closesAt: row.closes_at,
+      });
   }
   return week;
 }
 
 // `limit` es el tope de filas que pide el SQL LIMIT, no una cantidad de días:
-// con days = 400 puede haber un solo feriado, o ninguno.
+// con days = 400 puede traer varios tramos de un solo feriado, o ninguno.
 export async function getUpcomingSpecialDays(
   db: ReadableDb,
   fromDate: string,
   limit: number,
-): Promise<
-  {
-    date: string;
-    isClosed: boolean;
-    opensAt: string | null;
-    closesAt: string | null;
-    note?: string;
-  }[]
-> {
+): Promise<SpecialDay[]> {
   const rows = await allRows<{
     date: string;
-    is_closed: number;
+    note: string | null;
     opens_at: string | null;
     closes_at: string | null;
-    note: string | null;
   }>(
     db
       .prepare(
-        "SELECT * FROM special_days WHERE date >= ? ORDER BY date LIMIT ?",
+        "SELECT sd.date AS date, sd.note AS note, sds.opens_at AS opens_at, sds.closes_at AS closes_at " +
+          "FROM special_days sd " +
+          "LEFT JOIN special_day_shifts sds ON sds.date = sd.date " +
+          "WHERE sd.date >= ? ORDER BY sd.date, sds.opens_at LIMIT ?",
       )
       .bind(fromDate, limit),
   );
-  return rows.map((row) => ({
-    date: row.date,
-    isClosed: row.is_closed === 1,
-    opensAt: row.opens_at,
-    closesAt: row.closes_at,
-    note: row.note ?? undefined,
-  }));
+  const byDate = new Map<string, SpecialDay>();
+  for (const row of rows) {
+    let day = byDate.get(row.date);
+    if (!day) {
+      day = { date: row.date, note: row.note ?? undefined, shifts: [] };
+      byDate.set(row.date, day);
+    }
+    if (row.opens_at !== null && row.closes_at !== null)
+      (day.shifts as Shift[]).push({
+        opensAt: row.opens_at,
+        closesAt: row.closes_at,
+      });
+  }
+  return [...byDate.values()];
 }

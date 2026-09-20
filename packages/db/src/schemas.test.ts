@@ -28,43 +28,57 @@ describe("timeSchema", () => {
 });
 
 describe("dayHoursSchema", () => {
-  it("un día cerrado no necesita horas", () => {
-    expect(
-      dayHoursSchema.safeParse({
-        isClosed: true,
-        opensAt: null,
-        closesAt: null,
-      }).success,
-    ).toBe(true);
+  it("un día sin tramos es un día cerrado, y es válido", () => {
+    expect(dayHoursSchema.safeParse({ shifts: [] }).success).toBe(true);
   });
 
-  it("un día abierto necesita las dos horas", () => {
+  it("cada tramo exige las dos horas en formato HH:MM", () => {
     expect(
       firstError(
         dayHoursSchema.safeParse({
-          isClosed: false,
-          opensAt: "08:00",
-          closesAt: null,
+          shifts: [{ opensAt: "8:00", closesAt: "20:00" }],
         }),
       ),
-    ).toBe("Completá la hora de apertura y la de cierre.");
+    ).toBe("Usá el formato HH:MM, por ejemplo 08:30.");
   });
 
-  it("el cierre tiene que ser después de la apertura", () => {
+  it("el cierre de un tramo tiene que ser después de la apertura", () => {
     expect(
       firstError(
         dayHoursSchema.safeParse({
-          isClosed: false,
-          opensAt: "20:00",
-          closesAt: "08:00",
+          shifts: [{ opensAt: "20:00", closesAt: "08:00" }],
         }),
       ),
     ).toBe("La hora de cierre tiene que ser después de la de apertura.");
   });
+
+  it("los tramos de un mismo día no se pueden superponer", () => {
+    expect(
+      firstError(
+        dayHoursSchema.safeParse({
+          shifts: [
+            { opensAt: "08:00", closesAt: "12:30" },
+            { opensAt: "12:00", closesAt: "16:00" },
+          ],
+        }),
+      ),
+    ).toBe("Los horarios del día se superponen.");
+  });
+
+  it("dos tramos que no se tocan son válidos", () => {
+    expect(
+      dayHoursSchema.safeParse({
+        shifts: [
+          { opensAt: "08:00", closesAt: "12:30" },
+          { opensAt: "16:30", closesAt: "20:30" },
+        ],
+      }).success,
+    ).toBe(true);
+  });
 });
 
 describe("weekHoursSchema", () => {
-  const day = { isClosed: false, opensAt: "08:00", closesAt: "20:00" };
+  const day = { shifts: [{ opensAt: "08:00", closesAt: "20:00" }] };
 
   it("necesita los 7 días, del 0 al 6, sin repetir", () => {
     const week = [0, 1, 2, 3, 4, 5, 6].map((weekday) => ({ weekday, ...day }));
@@ -75,16 +89,33 @@ describe("weekHoursSchema", () => {
         .success,
     ).toBe(false);
   });
+
+  it("un día de la semana sin tramos es un día cerrado válido", () => {
+    const week = [0, 1, 2, 3, 4, 5, 6].map((weekday) => ({
+      weekday,
+      shifts: weekday === 0 ? [] : day.shifts,
+    }));
+    expect(weekHoursSchema.safeParse(week).success).toBe(true);
+  });
+
+  it("los tramos superpuestos de un día se rechazan", () => {
+    const week = [0, 1, 2, 3, 4, 5, 6].map((weekday) => ({ weekday, ...day }));
+    week[1] = {
+      weekday: 1,
+      shifts: [
+        { opensAt: "08:00", closesAt: "12:30" },
+        { opensAt: "12:00", closesAt: "16:00" },
+      ],
+    };
+    expect(firstError(weekHoursSchema.safeParse(week))).toBe(
+      "Los horarios del día se superponen.",
+    );
+  });
 });
 
 describe("specialDaySchema", () => {
   it("la nota puede venir vacía o en null", () => {
-    const base = {
-      date: "2026-12-25",
-      isClosed: true,
-      opensAt: null,
-      closesAt: null,
-    };
+    const base = { date: "2026-12-25", shifts: [] };
     expect(
       specialDaySchema.parse({ ...base, note: null }).note,
     ).toBeUndefined();
@@ -97,9 +128,7 @@ describe("specialDaySchema", () => {
     expect(
       specialDaySchema.safeParse({
         date: "2026-12-25",
-        isClosed: true,
-        opensAt: null,
-        closesAt: null,
+        shifts: [],
         note: "Navidad",
       }).success,
     ).toBe(true);
@@ -107,12 +136,28 @@ describe("specialDaySchema", () => {
       firstError(
         specialDaySchema.safeParse({
           date: "25/12/2026",
-          isClosed: true,
-          opensAt: null,
-          closesAt: null,
+          shifts: [],
         }),
       ),
     ).toBe("Usá una fecha válida.");
+  });
+
+  it("un día especial con un tramo se valida igual que un día de semana", () => {
+    expect(
+      specialDaySchema.safeParse({
+        date: "2026-12-25",
+        shifts: [{ opensAt: "16:00", closesAt: "20:00" }],
+        note: "Feriado",
+      }).success,
+    ).toBe(true);
+    expect(
+      firstError(
+        specialDaySchema.safeParse({
+          date: "2026-12-25",
+          shifts: [{ opensAt: "20:00", closesAt: "16:00" }],
+        }),
+      ),
+    ).toBe("La hora de cierre tiene que ser después de la de apertura.");
   });
 });
 

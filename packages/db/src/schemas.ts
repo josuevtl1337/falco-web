@@ -38,32 +38,53 @@ export const timeSchema = z
   .string()
   .regex(TIME, "Usá el formato HH:MM, por ejemplo 08:30.");
 
+const shiftShape = z.object({
+  opensAt: timeSchema,
+  closesAt: timeSchema,
+});
+
+type ShiftShape = z.infer<typeof shiftShape>;
+
 const dayHoursShape = z.object({
-  isClosed: z.boolean(),
-  opensAt: timeSchema.nullable(),
-  closesAt: timeSchema.nullable(),
+  shifts: z.array(shiftShape),
 });
 
 type DayHoursShape = z.infer<typeof dayHoursShape>;
 
-function checkDayHours(day: DayHoursShape, ctx: z.RefinementCtx): void {
-  if (day.isClosed) return;
-  if (!day.opensAt || !day.closesAt) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Completá la hora de apertura y la de cierre.",
-      path: ["opensAt"],
-    });
-    return;
-  }
-  // "HH:MM" se compara bien como texto, y "24:00" queda después de cualquier otra hora.
-  if (day.closesAt <= day.opensAt) {
+// "HH:MM" se compara bien como texto, y "24:00" queda después de cualquier otra hora.
+function checkShift(
+  shift: ShiftShape,
+  index: number,
+  ctx: z.RefinementCtx,
+): void {
+  if (shift.closesAt <= shift.opensAt) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: "La hora de cierre tiene que ser después de la de apertura.",
-      path: ["closesAt"],
+      path: ["shifts", index, "closesAt"],
     });
   }
+}
+
+function checkOverlaps(shifts: ShiftShape[], ctx: z.RefinementCtx): void {
+  const sorted = [...shifts].sort((a, b) => a.opensAt.localeCompare(b.opensAt));
+  for (let i = 1; i < sorted.length; i++) {
+    const previous = sorted[i - 1];
+    const current = sorted[i];
+    if (previous && current && current.opensAt < previous.closesAt) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Los horarios del día se superponen.",
+        path: ["shifts"],
+      });
+      return;
+    }
+  }
+}
+
+function checkDayHours(day: DayHoursShape, ctx: z.RefinementCtx): void {
+  day.shifts.forEach((shift, index) => checkShift(shift, index, ctx));
+  checkOverlaps(day.shifts, ctx);
 }
 
 export const dayHoursSchema = dayHoursShape.superRefine(checkDayHours);

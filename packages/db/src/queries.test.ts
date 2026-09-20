@@ -112,9 +112,26 @@ describe("getWeekHours", () => {
   it("devuelve los siete días, indexados por día de la semana", async () => {
     const week = await getWeekHours(db);
     expect(Object.keys(week)).toHaveLength(7);
-    expect(
-      week[1]?.isClosed === true || typeof week[1]?.opensAt === "string",
-    ).toBe(true);
+    expect(Array.isArray(week[1]?.shifts)).toBe(true);
+  });
+
+  it("trae los dos tramos de un día partido, ordenados por apertura", async () => {
+    const week = await getWeekHours(db);
+    // Lunes: mañana 08:00-12:30, tarde 16:30-20:30 (ver seed.sql).
+    expect(week[1]?.shifts).toEqual([
+      { opensAt: "08:00", closesAt: "12:30" },
+      { opensAt: "16:30", closesAt: "20:30" },
+    ]);
+  });
+
+  it("un día sin tramos llega con una lista vacía, no con undefined", async () => {
+    const real = new Database(":memory:");
+    real.exec(sql("../migrations/0001_init.sql"));
+    real.exec(sql("../seed/seed.sql"));
+    real.prepare("DELETE FROM business_hour_shifts WHERE weekday = 0").run();
+    const emptyDb = toReadableDb(real);
+    const week = await getWeekHours(emptyDb);
+    expect(week[0]?.shifts).toEqual([]);
   });
 });
 
@@ -124,5 +141,14 @@ describe("getUpcomingSpecialDays", () => {
     expect(days.length).toBeGreaterThan(0);
     const old = await getUpcomingSpecialDays(db, "2030-01-01", 30);
     expect(old).toHaveLength(0);
+  });
+
+  it("trae los tramos de cada feriado, con la nota", async () => {
+    const days = await getUpcomingSpecialDays(db, "2026-01-01", 400);
+    const christmas = days.find((day) => day.date === "2026-12-25");
+    expect(christmas?.note).toBe("Navidad");
+    expect(christmas?.shifts).toEqual([
+      { opensAt: "16:00", closesAt: "20:00" },
+    ]);
   });
 });

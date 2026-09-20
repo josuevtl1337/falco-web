@@ -52,10 +52,22 @@ const product = insert("products", {
   price_ars: "100",
 });
 
-// 2026-12-25 ya está en el seed, así que la probeta usa otra fecha.
+// Ninguna fecha del seed real (feriados fijos + Viernes Santo 2026-2027)
+// cae en noviembre, así que la probeta usa una fecha libre.
 const specialDay = insert("special_days", {
-  date: "'2027-01-01'",
-  is_closed: "1",
+  date: "'2026-11-15'",
+});
+
+const specialDayShift = insert("special_day_shifts", {
+  date: "'2026-11-15'",
+  opens_at: "'16:00'",
+  closes_at: "'20:00'",
+});
+
+const businessHourShift = insert("business_hour_shifts", {
+  weekday: "2",
+  opens_at: "'05:00'",
+  closes_at: "'06:00'",
 });
 
 const option = insert("product_options", {
@@ -71,20 +83,23 @@ describe("0001_init + seed", () => {
     expect(count("products")).toBe(5);
     expect(count("product_options")).toBe(7);
     expect(count("business_hours")).toBe(7);
-    expect(count("special_days")).toBe(1);
+    // Lunes a sábado con 2 tramos (mediodía y tarde) + domingo con 1 tramo.
+    expect(count("business_hour_shifts")).toBe(6 * 2 + 1);
     const hopper = db
       .prepare("SELECT value FROM settings WHERE key = 'hopper_coffee_id'")
       .get() as { value: string };
     expect(hopper.value).toBe("1");
   });
 
-  it("trae un feriado cerrado para probar el cartel de horarios", () => {
-    const holiday = one<{ date: string; is_closed: number; note: string }>(
-      "SELECT date, is_closed, note FROM special_days",
+  it("carga los feriados fijos 2026-2027 y el Viernes Santo de cada año", () => {
+    // 9 feriados fijos × 2 años + 2 Viernes Santo móviles.
+    expect(count("special_days")).toBe(9 * 2 + 2);
+    // Cada feriado tiene un solo tramo, el mismo horario que el domingo.
+    expect(count("special_day_shifts")).toBe(9 * 2 + 2);
+    const christmas = one<{ opens_at: string; closes_at: string }>(
+      "SELECT opens_at, closes_at FROM special_day_shifts WHERE date = '2026-12-25'",
     );
-    expect(holiday.is_closed).toBe(1);
-    expect(holiday.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    expect(holiday.note.length).toBeGreaterThan(0);
+    expect(christmas).toEqual({ opens_at: "16:00", closes_at: "20:00" });
   });
 
   it("trae un producto oculto, uno a consultar y un talle agotado", () => {
@@ -145,19 +160,31 @@ describe("0001_init + seed", () => {
     );
   });
 
-  it("un día abierto necesita hora de apertura y de cierre", () => {
-    expect(() =>
-      db
-        .prepare("UPDATE business_hours SET opens_at = NULL WHERE weekday = 1")
-        .run(),
+  it("un tramo con el cierre antes de la apertura se rechaza", () => {
+    expect(
+      businessHourShift({ opens_at: "'10:00'", closes_at: "'09:00'" }),
     ).toThrow(/CHECK/);
-    expect(() =>
-      db
-        .prepare(
-          "UPDATE business_hours SET is_closed = 1, opens_at = NULL, closes_at = NULL WHERE weekday = 1",
-        )
-        .run(),
-    ).not.toThrow();
+  });
+
+  it("dos tramos con la misma hora de apertura el mismo día se rechazan", () => {
+    // El seed ya tiene weekday = 1, opens_at = '08:00'.
+    expect(
+      businessHourShift({
+        weekday: "1",
+        opens_at: "'08:00'",
+        closes_at: "'09:00'",
+      }),
+    ).toThrow(/UNIQUE|PRIMARY KEY/);
+  });
+
+  it("al borrar un día se borran sus tramos", () => {
+    db.prepare("DELETE FROM business_hours WHERE weekday = 1").run();
+    expect(count("business_hour_shifts WHERE weekday = 1")).toBe(0);
+  });
+
+  it("al borrar un día especial se borran sus tramos", () => {
+    db.prepare("DELETE FROM special_days WHERE date = '2026-12-25'").run();
+    expect(count("special_day_shifts WHERE date = '2026-12-25'")).toBe(0);
   });
 });
 
@@ -166,7 +193,7 @@ describe("tipos estrictos", () => {
     const tables = db
       .prepare("SELECT name, sql FROM sqlite_master WHERE type = 'table'")
       .all() as { name: string; sql: string }[];
-    expect(tables).toHaveLength(6);
+    expect(tables).toHaveLength(8);
     for (const table of tables) expect(table.sql).toMatch(/\)\s*STRICT$/);
   });
 
@@ -256,11 +283,13 @@ describe("horas con formato HH:MM", () => {
   it("rechaza una hora que el dominio no sabe leer", () => {
     for (const time of badTimes) {
       expect(
-        run(`UPDATE business_hours SET opens_at = '${time}' WHERE weekday = 1`),
+        run(
+          `UPDATE business_hour_shifts SET opens_at = '${time}' WHERE weekday = 1 AND opens_at = '08:00'`,
+        ),
       ).toThrow(/CHECK/);
       expect(
         run(
-          `UPDATE business_hours SET closes_at = '${time}' WHERE weekday = 1`,
+          `UPDATE business_hour_shifts SET closes_at = '${time}' WHERE weekday = 1 AND opens_at = '08:00'`,
         ),
       ).toThrow(/CHECK/);
     }
@@ -268,23 +297,29 @@ describe("horas con formato HH:MM", () => {
 
   it("acepta 24:00 como cierre a la medianoche", () => {
     expect(
-      run("UPDATE business_hours SET closes_at = '24:00' WHERE weekday = 1"),
+      run(
+        "UPDATE business_hour_shifts SET closes_at = '24:00' WHERE weekday = 1 AND opens_at = '16:30'",
+      ),
     ).not.toThrow();
   });
 
   it("acepta los bordes del reloj", () => {
-    for (const time of ["00:00", "09:05", "23:59"])
-      expect(
-        run(`UPDATE business_hours SET opens_at = '${time}' WHERE weekday = 1`),
-      ).not.toThrow();
+    expect(
+      businessHourShift({ opens_at: "'00:00'", closes_at: "'00:30'" }),
+    ).not.toThrow();
+    expect(
+      businessHourShift({ opens_at: "'09:05'", closes_at: "'09:35'" }),
+    ).not.toThrow();
+    expect(
+      businessHourShift({ opens_at: "'23:59'", closes_at: "'24:00'" }),
+    ).not.toThrow();
   });
 
   it("un día especial exige el mismo formato de hora", () => {
+    specialDay()();
+    expect(specialDayShift({ opens_at: "'8:00'" })).toThrow(/CHECK/);
     expect(
-      specialDay({ is_closed: "0", opens_at: "'8:00'", closes_at: "'20:00'" }),
-    ).toThrow(/CHECK/);
-    expect(
-      specialDay({ is_closed: "0", opens_at: "'08:00'", closes_at: "'24:00'" }),
+      specialDayShift({ opens_at: "'08:00'", closes_at: "'24:00'" }),
     ).not.toThrow();
   });
 });
@@ -301,7 +336,7 @@ describe("fechas de los días especiales", () => {
   });
 
   it("acepta una fecha real, bisiesto incluido", () => {
-    expect(specialDay({ date: "'2027-05-01'" })).not.toThrow();
+    expect(specialDay({ date: "'2030-05-01'" })).not.toThrow();
     expect(specialDay({ date: "'2028-02-29'" })).not.toThrow();
   });
 });
