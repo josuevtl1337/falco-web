@@ -213,7 +213,7 @@ CREATE TABLE settings (
 
 ### Secciones
 
-Todo según los wireframes v7.6:
+Todo según los wireframes v7.9 (`design/persona/wireframes.html`):
 
 1. **Home:** calendario del día con entrada animada y "Abierto ahora", título, misión en caja de diálogo, tolva con placas, pentágono y foto del E65S. En el celular, la tarjeta chica con el pentágono sin etiquetas, el botón "Llevate un cuarto" y la hoja de detalle.
 2. **Tienda:** dos carruseles (Café · Kits y accesorios). Tocar una ficha abre el detalle.
@@ -351,14 +351,15 @@ El código del pedido que va en el mensaje permite contar a mano, en WhatsApp, c
 
 | Qué                                                     | De quién | Bloquea         |
 | ------------------------------------------------------- | -------- | --------------- |
-| Logo en SVG (script "Falco" + murciélago)               | Falco    | Lanzamiento     |
-| Foto del E65S del local (recortada, fondo transparente) | Falco    | Home            |
+| ~~Logo en SVG~~ — listo en `design/brand/logo-falco.svg`  | —        | —               |
+| Marca compacta (el murciélago solo) para el favicon      | Falco    | Favicon         |
+| ~~Foto del E65S~~ — decidido el 2026-09-20: **no va**    | —        | —               |
 | Fotos de productos                                      | Falco    | Tienda          |
 | Precios                                                 | Falco    | Tienda          |
 | Número de WhatsApp                                      | Falco    | Pedido          |
 | Horarios reales y feriados                              | Falco    | "Abierto ahora" |
 | Link del PDF de la carta en Drive                       | Falco    | `/carta`        |
-| Confirmar que el café se vende **solo en grano**        | Falco    | Tienda          |
+| ~~Confirmar grano~~ — va **en grano y molido**, se elige dentro del producto | — | — |
 | Disponibilidad de `falco.cafe`                          | Técnico  | Dominio         |
 
 ---
@@ -380,7 +381,7 @@ El código del pedido que va en el mensaje permite contar a mano, en WhatsApp, c
 - Proyecto independiente de `falco-app`: repo, base y admin propios.
 - Todo en Cloudflare: Workers, D1, R2 y Access.
 - Sin pagos: el pedido se arma en el sitio y se confirma por WhatsApp.
-- Varios productos por pedido. Solo retiro en el local. Café solo en grano (a confirmar).
+- Varios productos por pedido. Solo retiro en el local. El café va en grano o molido, y se elige dentro del producto.
 - La carta es un PDF en Drive, detrás de `falco.cafe/carta`.
 - Estilo: La Cueva × Persona, con máximo tres detalles Persona por pantalla, ángulos fijos y palabras fijas para el pedido.
 
