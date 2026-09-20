@@ -35,11 +35,14 @@ function usableLine(line: OrderLine, catalog: Catalog): UsableLine | undefined {
     line.optionId === undefined
       ? undefined
       : product.options?.find((o) => o.id === line.optionId);
-  // Si el talle que eligió la persona ya no está, se va la línea entera:
-  // el mensaje nunca puede cobrar una remera sin decir de qué talle es.
+  // Si la opción que eligió la persona ya no está, se va la línea entera: el
+  // mensaje nunca puede cobrar un café sin decir si va en grano o molido, ni
+  // una remera sin decir de qué talle es.
   if (line.optionId !== undefined && !option) return undefined;
   const parts = [`${line.qty} × ${product.name}`, product.detail];
-  if (option) parts.push(`talle ${option.label}`);
+  // La etiqueta se escribe entera en el admin ("Molido", "Talle M"), así que
+  // el mensaje la imprime tal cual: cada producto nombra su opción a su manera.
+  if (option) parts.push(option.label);
   return {
     text: `• ${parts.join(" · ")}`,
     amount: product.priceArs * line.qty,

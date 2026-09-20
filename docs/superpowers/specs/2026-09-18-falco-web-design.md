@@ -163,7 +163,7 @@ CREATE TABLE products (
   updated_by      TEXT
 );
 
--- Opciones de un producto (por ahora, talles de remera).
+-- Opciones de un producto: el café va en grano o molido; la remera, por talle.
 CREATE TABLE product_options (
   id              INTEGER PRIMARY KEY,
   product_id      INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
@@ -256,7 +256,7 @@ type Order = {
 ```
 ¡Buenas! Soy {nombre} y quiero hacer este pedido ({código}):
 
-• {qty} × {producto} · {detalle}[ · talle {opción}]
+• {qty} × {producto} · {detalle}[ · {opción}]
 …
 
 Total estimado: $ {total}

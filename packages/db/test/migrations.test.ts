@@ -69,7 +69,7 @@ describe("0001_init + seed", () => {
   it("carga los datos de prueba", () => {
     expect(count("coffees")).toBe(1);
     expect(count("products")).toBe(5);
-    expect(count("product_options")).toBe(5);
+    expect(count("product_options")).toBe(7);
     expect(count("business_hours")).toBe(7);
     expect(count("special_days")).toBe(1);
     const hopper = db
@@ -133,9 +133,10 @@ describe("0001_init + seed", () => {
     ).toThrow(/UNIQUE/);
   });
 
-  it("al borrar un producto se borran sus talles", () => {
+  it("al borrar un producto se borran sus opciones, y solo las suyas", () => {
     db.prepare("DELETE FROM products WHERE slug = 'remera-falco'").run();
-    expect(count("product_options")).toBe(0);
+    // Quedan las dos del café: en grano y molido.
+    expect(count("product_options")).toBe(2);
   });
 
   it("no deja borrar un café que usa un producto", () => {

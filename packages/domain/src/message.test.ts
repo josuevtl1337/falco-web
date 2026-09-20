@@ -16,8 +16,12 @@ const CATALOG: Catalog = new Map([
     {
       id: 1,
       name: "Huila · Colombia",
-      detail: "250 g · en grano",
+      detail: "250 g",
       priceArs: 12000,
+      options: [
+        { id: 11, label: "En grano" },
+        { id: 12, label: "Molido" },
+      ],
     },
   ],
   [
@@ -31,14 +35,14 @@ const CATALOG: Catalog = new Map([
       name: "Remera Falco",
       detail: "Algodón",
       priceArs: 16000,
-      options: [{ id: 31, label: "M" }],
+      options: [{ id: 31, label: "Talle M" }],
     },
   ],
 ]);
 
 function sampleOrder(): Order {
   let order = createOrder("F-7K2Q", T0);
-  order = addItem(order, { productId: 1 }, T0).order;
+  order = addItem(order, { productId: 1, optionId: 12 }, T0).order;
   order = addItem(order, { productId: 2 }, T0).order;
   order = addItem(order, { productId: 2 }, T0).order;
   order = addItem(order, { productId: 3, optionId: 31 }, T0).order;
@@ -77,9 +81,9 @@ describe("buildOrderMessage", () => {
       [
         "¡Buenas! Soy Sofía y quiero hacer este pedido (F-7K2Q):",
         "",
-        "• 1 × Huila · Colombia · 250 g · en grano",
+        "• 1 × Huila · Colombia · 250 g · Molido",
         "• 2 × Filtros V60 · 02 · Caja de 100",
-        "• 1 × Remera Falco · Algodón · talle M",
+        "• 1 × Remera Falco · Algodón · Talle M",
         "",
         "Total estimado: $ 41.000",
         "Lo retiraría en el local cuando me confirmen.",
@@ -111,13 +115,13 @@ describe("buildOrderMessage", () => {
       expect(message).not.toContain(word);
   });
 
-  it("si el talle elegido ya no está, saca la línea entera", () => {
+  it("si la opción elegida ya no está, saca la línea entera", () => {
     let order = createOrder("F-7K2Q", T0);
-    order = addItem(order, { productId: 1 }, T0).order;
+    order = addItem(order, { productId: 1, optionId: 11 }, T0).order;
     order = addItem(order, { productId: 3, optionId: 99 }, T0).order;
     const message = buildOrderMessage(order, CATALOG);
     expect(message).not.toContain("Remera");
-    expect(message).toContain("• 1 × Huila · Colombia · 250 g · en grano");
+    expect(message).toContain("• 1 × Huila · Colombia · 250 g · En grano");
     expect(message).toContain("Total estimado: $ 12.000");
   });
 

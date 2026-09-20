@@ -27,7 +27,8 @@ Admin (admin.falco.cafe)
 - Login con Cloudflare Access (código por mail, lista de mails permitidos).
 - Tolva: elegir qué café está en tolva.
 - Cafés: alta, edición y baja (origen, variedad, proceso, altura, notas, pentágono 1-5).
-- Productos: alta, edición, baja y orden; foto, precio, talles, Nuevo, visible,
+- Productos: alta, edición, baja y orden; foto, precio, opciones (grano/molido,
+  talles), Nuevo, visible,
   "Consultar stock".
 - Horarios: semana + días especiales (feriados).
 - Ajustes: número de WhatsApp, link de la carta, Instagram.
@@ -90,7 +91,7 @@ Abierto ahora
 
 Pedido
 
-- Se guarda en localStorage (falco.order.v1): productos, cantidades, talle,
+- Se guarda en localStorage (falco.order.v1): productos, cantidades, opción elegida,
   nombre, comentario, código (F-XXXX), fecha del último cambio y fecha de envío.
 - Vencimiento: sin enviar, se borra a los 3 días sin cambios; enviado, a las 48 horas;
   "Empezar otro pedido" lo borra en el momento.
@@ -104,7 +105,7 @@ Pedido
 ```text
 ¡Buenas! Soy {nombre} y quiero hacer este pedido ({código}):
 
-• {cantidad} × {producto} · {detalle}[ · talle {talle}]
+• {cantidad} × {producto} · {detalle}[ · {opción}]
 
 Total estimado: $ {total}
 Lo retiraría en el local cuando me confirmen.
