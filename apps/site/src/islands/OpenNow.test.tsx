@@ -4,13 +4,13 @@ import { describe, expect, it, vi, afterEach } from "vitest";
 import { OpenNow } from "./OpenNow";
 
 const WEEK = {
-  0: { isClosed: true, opensAt: null, closesAt: null },
-  1: { isClosed: false, opensAt: "08:00", closesAt: "20:00" },
-  2: { isClosed: false, opensAt: "08:00", closesAt: "20:00" },
-  3: { isClosed: false, opensAt: "08:00", closesAt: "20:00" },
-  4: { isClosed: false, opensAt: "08:00", closesAt: "20:00" },
-  5: { isClosed: false, opensAt: "08:00", closesAt: "20:00" },
-  6: { isClosed: false, opensAt: "09:00", closesAt: "13:00" },
+  0: { shifts: [] },
+  1: { shifts: [{ opensAt: "08:00", closesAt: "20:00" }] },
+  2: { shifts: [{ opensAt: "08:00", closesAt: "20:00" }] },
+  3: { shifts: [{ opensAt: "08:00", closesAt: "20:00" }] },
+  4: { shifts: [{ opensAt: "08:00", closesAt: "20:00" }] },
+  5: { shifts: [{ opensAt: "08:00", closesAt: "20:00" }] },
+  6: { shifts: [{ opensAt: "09:00", closesAt: "13:00" }] },
 };
 
 afterEach(() => {
