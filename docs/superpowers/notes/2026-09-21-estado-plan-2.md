@@ -94,7 +94,7 @@ fichas y el detalle; la 7 les agrega el botón "Sumar al pedido" encima.
 | Link de la carta | ✅ cargado — ⚠️ **la carpeta de Drive está vacía**: falta subir el PDF |
 | Foto del molino E65S | ❌ descartada por el dueño (2026-09-20) |
 | Fotos y precios de productos | ⬜ los carga el dueño **desde el admin**, o sea recién en el Plan 3 |
-| Dominio | ⬜ será `falcocafe.com.ar` por NIC Argentina, pendiente de clave fiscal |
+| Dominio | ⬜ **`falcocafe.com.ar`** por NIC Argentina (ARS 8.500/año), pendiente de la clave fiscal. Ya está puesto en `astro.config.mjs` y en la spec |
 
 ---
 

@@ -25,7 +25,7 @@ El sitio de Falco, café de especialidad en Iriondo 2153, Santo Tomé (Santa Fe)
 ### Fase 1 (lanzamiento)
 
 - Sitio público: home (hero + tolva), tienda, detalle de producto, pedido por WhatsApp, dónde estamos, y página de error 404.
-- `falco.cafe/carta`: redirige al PDF de Google Drive. El link se cambia desde el admin.
+- `falcocafe.com.ar/carta`: redirige al PDF de Google Drive. El link se cambia desde el admin.
 - Admin: tolva, catálogo de cafés, productos (con fotos y opciones), horarios y días especiales, ajustes.
 - Métricas con Umami, sin cookies.
 - Dominios, DNS y deploy en Cloudflare.
@@ -48,7 +48,7 @@ El sitio de Falco, café de especialidad en Iriondo 2153, Santo Tomé (Santa Fe)
 ## 3. Arquitectura
 
 ```
-                 falco.cafe                        admin.falco.cafe
+            falcocafe.com.ar                 admin.falcocafe.com.ar
                      │                                    │
           ┌──────────▼──────────┐          ┌──────────────▼──────────────┐
           │  apps/site (Astro)  │          │ Cloudflare Access (código   │
@@ -104,14 +104,13 @@ falco-web/
 
 | Dirección                  | Qué hace                                                                                              |
 | -------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `falco.cafe`               | Sitio público _(verificar disponibilidad y precio antes de comprar)_                                  |
-| `www.falco.cafe`           | Redirige a `falco.cafe`                                                                               |
-| `falcocafe.com.ar`         | Redirige a `falco.cafe` (ARS 8.500 por año, NIC Argentina)                                            |
-| `falco.cafe/carta`         | Redirige (302) al link del PDF guardado en los ajustes. Es la dirección que va en los QR de las mesas |
-| `falco.cafe/tienda/[slug]` | Detalle de un producto con dirección propia, para compartir por Instagram                             |
-| `admin.falco.cafe`         | Panel, detrás de Cloudflare Access                                                                    |
+| `falcocafe.com.ar`         | Sitio público. Se compra en NIC Argentina (ARS 8.500 por año)                                         |
+| `www.falcocafe.com.ar`     | Redirige a `falcocafe.com.ar`                                                                         |
+| `falcocafe.com.ar/carta`         | Redirige (302) al link del PDF guardado en los ajustes. Es la dirección que va en los QR de las mesas |
+| `falcocafe.com.ar/tienda/[slug]` | Detalle de un producto con dirección propia, para compartir por Instagram                             |
+| `admin.falcocafe.com.ar`         | Panel, detrás de Cloudflare Access                                                                    |
 
-Si falco.cafe no está disponible, se decide otro dominio antes de empezar la fase 1, porque aparece en los QR y en Instagram.
+El dominio elegido es `falcocafe.com.ar`, por NIC Argentina. La compra necesita la clave fiscal del titular. Aparece en los QR de las mesas y en Instagram, así que se define antes de imprimir nada.
 
 **Redirección de `/carta`:** se usa 302 y no 301. Un 301 queda guardado en el navegador de quien escaneó el QR, y si después cambian el link de Drive, esa persona seguiría yendo al archivo viejo.
 
@@ -290,7 +289,7 @@ Lo retiraría en el local cuando me confirmen.
 
 ## 7. Admin
 
-**Acceso:** en Cloudflare Access, una aplicación para `admin.falco.cafe` con una lista de mails permitidos y login con código por mail. Además, el Worker del admin valida el token de Access (`Cf-Access-Jwt-Assertion`) en cada pedido: si alguien llega salteando Access, la respuesta es 403. El mail del token se guarda en `updated_by`.
+**Acceso:** en Cloudflare Access, una aplicación para `admin.falcocafe.com.ar` con una lista de mails permitidos y login con código por mail. Además, el Worker del admin valida el token de Access (`Cf-Access-Jwt-Assertion`) en cada pedido: si alguien llega salteando Access, la respuesta es 403. El mail del token se guarda en `updated_by`.
 
 **Estilo:** la misma paleta y tipografías del sitio, pero sin los detalles de Persona. Es una herramienta, no una vidriera.
 
@@ -360,7 +359,7 @@ El código del pedido que va en el mensaje permite contar a mano, en WhatsApp, c
 | Horarios reales y feriados                              | Falco    | "Abierto ahora" |
 | Link del PDF de la carta en Drive                       | Falco    | `/carta`        |
 | ~~Confirmar grano~~ — va **en grano y molido**, se elige dentro del producto | — | — |
-| Disponibilidad de `falco.cafe`                          | Técnico  | Dominio         |
+| Comprar `falcocafe.com.ar` (necesita clave fiscal)      | Falco    | Dominio         |
 
 ---
 
@@ -382,14 +381,14 @@ El código del pedido que va en el mensaje permite contar a mano, en WhatsApp, c
 - Todo en Cloudflare: Workers, D1, R2 y Access.
 - Sin pagos: el pedido se arma en el sitio y se confirma por WhatsApp.
 - Varios productos por pedido. Solo retiro en el local. El café va en grano o molido, y se elige dentro del producto.
-- La carta es un PDF en Drive, detrás de `falco.cafe/carta`.
+- La carta es un PDF en Drive, detrás de `falcocafe.com.ar/carta`.
 - Estilo: La Cueva × Persona, con máximo tres detalles Persona por pantalla, ángulos fijos y palabras fijas para el pedido.
 
 ## 14. Riesgos
 
 | Riesgo                                       | Mitigación                                                                                                |
 | -------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `falco.cafe` no está disponible o es caro    | Definirlo antes de la fase 1; `falcocafe.com.ar` como alternativa                                         |
+| `falcocafe.com.ar` no está disponible o es caro    | Definirlo antes de la fase 1; `falcocafe.com.ar` como alternativa                                         |
 | Dependencia de Cloudflare                    | Los datos son SQLite estándar y se exportan todas las semanas; Astro corre en otros hostings              |
 | Se superan los límites gratis de D1          | Con la caché en el borde, muy lejano para este tráfico; si pasa, el plan pago de Workers es de bajo costo |
 | La gente igual va a retirar sin confirmación | Palabras fijas, pasos 1-2-3, "Esperando confirmación" y el código de pedido para detectar el caso         |

@@ -8,5 +8,5 @@ export default defineConfig({
   output: "server",
   adapter: cloudflare(),
   integrations: [react()],
-  site: "https://falco.cafe",
+  site: "https://falcocafe.com.ar",
 });

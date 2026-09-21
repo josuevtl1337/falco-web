@@ -87,16 +87,16 @@ Nada de rojo. El usuario rechazó el verde como color principal y el naranja `#E
 - **Todo en Cloudflare:** Astro con SSR en Workers, D1 como base, R2 para fotos, Cloudflare Access para el login del admin (código por mail).
 - Monorepo: `apps/site`, `apps/admin`, `packages/db`, `packages/ui`.
 - **Sin pagos.** Varios productos por pedido. **Solo retiro en el local.** Café **solo en grano** (falta que Falco lo confirme: el brief original decía "molido o en grano").
-- **La carta es un PDF en Google Drive**, detrás de `falco.cafe/carta` con redirección **302** (no 301, para que los QR de las mesas sigan andando si cambia el link).
+- **La carta es un PDF en Google Drive**, detrás de `falcocafe.com.ar/carta` con redirección **302** (no 301, para que los QR de las mesas sigan andando si cambia el link).
 - "Abierto ahora" con la hora de **America/Argentina/Buenos_Aires**. Los wireframes usan la hora del dispositivo: eso NO va a producción.
 - **Pedido en el navegador:** sin enviar vence a los 3 días; enviado, a las 48 horas. Máximo 2 unidades por producto (por stock). El mensaje arranca con "¡Buenas!". Borrarlo cuando Falco confirma la entrega queda para la fase 2 (pedidos guardados con estado).
 - Métricas con **Umami** (sin cookies). Nunca se manda el nombre ni el comentario del pedido.
-- Dominio: **`falco.cafe`** (falta verificar si está disponible) + `falcocafe.com.ar` que redirige (ARS 8.500 por año).
+- Dominio: **`falcocafe.com.ar`** (falta verificar si está disponible) + `falcocafe.com.ar` que redirige (ARS 8.500 por año).
 - Textos que ve el usuario en español; código, tablas y rutas en inglés.
 
 ## 6. Pendiente
 
-**Contenido que tiene que pasar Falco:** logo en SVG, foto del E65S del local, fotos y precios de productos, número de WhatsApp, horarios reales y feriados, link del PDF de la carta, confirmar lo de "solo en grano", disponibilidad de `falco.cafe`, decidir si va el murciélago en la pantalla de carga.
+**Contenido que tiene que pasar Falco:** logo en SVG, foto del E65S del local, fotos y precios de productos, número de WhatsApp, horarios reales y feriados, link del PDF de la carta, confirmar lo de "solo en grano", disponibilidad de `falcocafe.com.ar`, decidir si va el murciélago en la pantalla de carga.
 
 **Próximo paso:** que el usuario apruebe `SCOPE.md` y después escribir **el plan de implementación** (tareas chicas, en orden y verificables, siguiendo la sección 12 de la spec). Después, empezar a codear.
 
