@@ -105,6 +105,17 @@ Sin eso, el test pasa habiendo leído cero archivos.
 > Para confirmar que una isla se hidrató de verdad, Astro le saca el atributo `ssr` al elemento:
 > `!document.querySelector('astro-island').hasAttribute('ssr')` tiene que dar `true`.
 
+> **Los `@import` de CSS apuntan a un archivo, no a un paquete.** Escribir
+> `@import "@fontsource-variable/bricolage-grotesque";` anduvo en una máquina y en otra tiró
+> `ENOENT: no such file or directory`, porque sin nombre de archivo el resolvedor lo toma como ruta
+> relativa. Siempre la ruta completa: `@import "@fontsource-variable/bricolage-grotesque/wght.css";`
+>
+> Y cuando un `git pull` trae una dependencia nueva, hay que instalarla antes de levantar nada:
+>
+> ```bash
+> npm install
+> ```
+
 ### 3. Mirá la pantalla, no solo la consola
 
 Los dos defectos más visibles del proyecto —las placas del café pisándose y un nav de 201 px de alto
