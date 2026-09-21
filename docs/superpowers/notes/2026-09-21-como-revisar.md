@@ -124,6 +124,21 @@ en el celular— **no los agarró ningún test**. Aparecieron mirando la página
 Abrí el sitio, achicá la ventana a ancho de celular y fijate: ¿hay scroll horizontal? ¿se pisa algo?
 ¿lo importante entra en la primera pantalla?
 
+> **Una tipografía puede no estar dibujándose y nada te avisa.** Si el CSS pide una familia que no
+> existe, el navegador cae al siguiente de la lista **en silencio**: no hay error, no hay consola,
+> solo una página que se ve "rara". Pasó acá al cambiar a la fuente variable: el archivo registra
+> `"Bricolage Grotesque Variable"` y el token seguía pidiendo `"Bricolage Grotesque"`.
+>
+> **Ojo con cómo se verifica**, porque es fácil engañarse:
+>
+> | Pregunta | Qué contesta de verdad |
+> | --- | --- |
+> | `document.fonts` | qué se **descargó**, no qué se usa |
+> | `getComputedStyle(el).fontWeight` | qué se **pidió**, no qué se dibujó |
+> | `document.fonts.check('500 20px "Familia"')` | **si esa familia está disponible** ← esta |
+>
+> Las dos primeras dan verde con la tipografía rota. Yo me comí esa.
+
 ### 4. El diff, buscando lo que NO está
 
 ```bash
