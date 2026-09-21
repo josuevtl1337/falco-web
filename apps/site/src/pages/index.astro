@@ -189,10 +189,16 @@ const tickerText =
     justify-items: start;
   }
 
+  /* El héroe se mide contra SU columna, no contra la ventana: con `vw` crecía
+     hasta desbordarse y meterse debajo del panel de la tolva. */
+  .presentacion {
+    container-type: inline-size;
+  }
+
   .hero {
     margin: 0;
     font-family: var(--font-display);
-    font-size: var(--text-hero);
+    font-size: clamp(40px, 21cqw, 112px);
     line-height: 0.94;
     letter-spacing: -0.02em;
   }
@@ -297,8 +303,8 @@ const tickerText =
        entraba en la fila y el `justify-content: space-between` de una
        fila con un solo elemento lo dejaba pegado a la izquierda, debajo
        de la leyenda. */
-    flex-wrap: nowrap;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    justify-content: flex-start;
     align-items: center;
     gap: var(--space-sm) var(--space-md);
     width: 100%;
@@ -313,6 +319,7 @@ const tickerText =
   }
 
   .tolva__pie a {
+    margin-left: auto;
     flex-shrink: 0;
     font-size: var(--text-nano);
     color: var(--color-hueso);
@@ -327,7 +334,10 @@ const tickerText =
      entra el molino, que abajo de este ancho se oculta (Tarea 6). */
   @media (min-width: 1000px) {
     .home {
-      grid-template-columns: minmax(0, 1fr) minmax(360px, 460px);
+      /* Proporción, no ancho fijo: en la lámina el panel ocupa el 42 % de la
+         fila. Con un máximo en píxeles, a 1024px se comía la columna del
+         texto y el héroe quedaba diminuto. */
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
       grid-template-areas:
         "hud panel"
         "texto panel";
@@ -353,6 +363,11 @@ const tickerText =
       align-items: start;
     }
 
+  }
+
+  /* El molino recién entra cuando el panel tiene ancho de sobra: por debajo
+     le roba lugar al café, que es lo que la gente viene a leer. */
+  @media (min-width: 1240px) {
     .tolva__molino {
       display: grid;
       justify-items: center;
@@ -360,7 +375,9 @@ const tickerText =
     }
 
     .tolva__molino img {
-      width: 100px;
+      /* En la lámina el molino ocupa cerca del 37 % del ancho de la tarjeta.
+         A 100px leía como un ícono, no como una ilustración. */
+      width: 150px;
       height: auto;
     }
 
