@@ -1,0 +1,114 @@
+# Cómo correr los tests y qué mirar al revisar
+
+Todos los comandos de acá están verificados en este repo.
+
+## Lo básico, desde la raíz
+
+```bash
+npm test          # los 4 workspaces
+npm run typecheck # incluye astro check, que revisa el frontmatter de los .astro
+```
+
+Los dos tienen que estar en verde **y con el número de tests que esperás**. Un `0 passed` también
+es verde.
+
+## Ir a un lugar puntual
+
+```bash
+cd packages/domain
+npx vitest run order-storage   # filtra por nombre de ARCHIVO
+npx vitest run -t "unidades"   # filtra por el texto del it()
+npx vitest                     # modo watch: re-corre al guardar
+```
+
+> **Trampa:** si el filtro no matchea, vitest dice `72 skipped` y **sale con código 0**. Verde, pero
+> no corrió nada. Mirá el número, no el color.
+
+Como los nombres de los tests están en español y describen reglas del negocio, se busca por lo que
+importa: `-t "vencimiento"`, `-t "tolva"`, `-t "tramo"`.
+
+## Ver el sitio
+
+```bash
+cd apps/site && npm run dev      # http://localhost:4321 — no termina nunca, se corta con Ctrl+C
+```
+
+Para probar el Worker real, tal como corre en Cloudflare:
+
+```bash
+cd apps/site && npm run build && npx wrangler dev
+```
+
+La diferencia importa: `dev` usa Vite y es rápido; `wrangler dev` corre el bundle real sobre el
+runtime de Workers. Las cabeceras de caché solo se verifican bien en el segundo.
+
+La base local se prepara así:
+
+```bash
+cd apps/site
+npx wrangler d1 migrations apply falco --local
+npx wrangler d1 execute falco --local --file ../../packages/db/seed/seed.sql
+```
+
+## Qué mirar al revisar, en orden de rendimiento
+
+### 1. ¿El test puede fallar?
+
+Es la pregunta número uno. Rompé a propósito lo que el test dice proteger y confirmá que se pone
+rojo; después restauralo y confirmá que vuelve a verde.
+
+En este proyecto aparecieron **tres** tests que no podían fallar: uno que buscaba el prerender en el
+archivo equivocado, uno que no cubría tres escalas de tokens, y uno que solo chequeaba la forma de
+los horarios.
+
+> **Meta-trampa:** cuando rompas algo para probar, verificá que **realmente rompiste**. Pasó una vez
+> que la sustitución no matcheó, el código quedó intacto, y el "verde" no probaba nada.
+
+### 2. ¿El test verifica algo, o cuenta?
+
+Un `for` sobre una lista vacía pasa sin verificar nada. Por eso varios tests tienen una línea que
+parece tonta:
+
+```ts
+expect(files.length).toBeGreaterThan(0);
+```
+
+Sin eso, el test pasa habiendo leído cero archivos.
+
+### 3. Mirá la pantalla, no solo la consola
+
+Los dos defectos más visibles del proyecto —las placas del café pisándose y un nav de 201 px de alto
+en el celular— **no los agarró ningún test**. Aparecieron mirando la página a 375 px de ancho.
+
+Abrí el sitio, achicá la ventana a ancho de celular y fijate: ¿hay scroll horizontal? ¿se pisa algo?
+¿lo importante entra en la primera pantalla?
+
+### 4. El diff, buscando lo que NO está
+
+```bash
+git log --oneline main..HEAD
+git diff main..HEAD -- apps/site/src
+```
+
+¿Se agregó una dependencia sin declarar? ¿El código nuevo trae su test? ¿Hay un valor repetido en
+dos lados que se puede desincronizar?
+
+### 5. Específico de este proyecto: la zona horaria
+
+```bash
+TZ=Pacific/Kiritimati npm test --workspace @falco/domain
+```
+
+Kiritimati está en UTC+14: **es otro día del calendario**. Si algo se filtra la hora del dispositivo
+en vez de usar la de Argentina, ahí salta.
+
+## El resumen corto, antes de aprobar cualquier cosa
+
+```bash
+npm test && npm run typecheck
+```
+
+Los dos verdes, con los números esperados. Después abrí el sitio y miralo en celular. Y si algo te
+da desconfianza, rompelo a propósito y mirá si el test se da cuenta.
+
+**Un test que nunca viste fallar no es un test.**
