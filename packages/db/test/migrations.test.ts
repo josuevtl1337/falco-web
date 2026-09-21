@@ -49,7 +49,8 @@ const product = insert("products", {
   shelf: "'kits'",
   name: "'Probeta'",
   detail: "'Una prueba'",
-  price_ars: "100",
+  price_card_ars: "100",
+  price_cash_ars: "90",
 });
 
 // Ninguna fecha del seed real (feriados fijos + Viernes Santo 2026-2027)
@@ -71,8 +72,8 @@ const businessHourShift = insert("business_hour_shifts", {
 });
 
 const option = insert("product_options", {
-  product_id: "3",
-  label: "'XXL'",
+  product_id: "1",
+  label: "'Filtrado'",
 });
 
 const setting = insert("settings", { key: "'probeta'", value: "'si'" });
@@ -80,8 +81,29 @@ const setting = insert("settings", { key: "'probeta'", value: "'si'" });
 describe("0001_init + seed", () => {
   it("carga los datos de prueba", () => {
     expect(count("coffees")).toBe(1);
-    expect(count("products")).toBe(5);
-    expect(count("product_options")).toBe(7);
+    // Los 6 del catálogo real, el café de la tolva y el borrador oculto.
+    expect(count("products")).toBe(8);
+    // Las dos moliendas del café y las dos opciones del borrador.
+    expect(count("product_options")).toBe(4);
+    const labels = db
+      .prepare(
+        "SELECT label FROM product_options WHERE product_id = (SELECT id FROM products WHERE slug = 'huila-colombia')",
+      )
+      .all() as { label: string }[];
+    expect(labels.map((row) => row.label)).toEqual(["En grano", "Molido"]);
+
+    // El catálogo real se muestra entero: lo único oculto es el borrador.
+    expect(count("products WHERE is_visible = 0")).toBe(1);
+    expect(
+      one<{ slug: string }>("SELECT slug FROM products WHERE is_visible = 0")
+        .slug,
+    ).toBe("producto-de-prueba");
+    // Falco vende las dos moliendas: ninguna puede estar agotada en el seed.
+    expect(
+      count(
+        "product_options WHERE is_available = 0 AND product_id = (SELECT id FROM products WHERE slug = 'huila-colombia')",
+      ),
+    ).toBe(0);
     expect(count("business_hours")).toBe(7);
     // Lunes a sábado con 2 tramos (mediodía y tarde) + domingo con 1 tramo.
     expect(count("business_hour_shifts")).toBe(6 * 2 + 1);
@@ -102,10 +124,26 @@ describe("0001_init + seed", () => {
     expect(christmas).toEqual({ opens_at: "16:00", closes_at: "20:00" });
   });
 
-  it("trae un producto oculto, uno a consultar y un talle agotado", () => {
+  it("trae un producto oculto, uno a consultar y una opción agotada", () => {
     expect(count("products WHERE is_visible = 0")).toBe(1);
     expect(count("products WHERE ask_stock = 1")).toBe(1);
     expect(count("product_options WHERE is_available = 0")).toBe(1);
+  });
+
+  it("el efectivo nunca es más caro que la tarjeta en el seed", () => {
+    const products = db
+      .prepare(
+        "SELECT price_card_ars AS card, price_cash_ars AS cash FROM products",
+      )
+      .all() as { card: number; cash: number }[];
+    expect(products.length).toBeGreaterThan(0);
+    for (const { card, cash } of products)
+      expect(cash).toBeLessThanOrEqual(card);
+  });
+
+  it("rechaza un precio negativo en cualquiera de las dos columnas", () => {
+    expect(product({ price_card_ars: "-1" })).toThrow(/CHECK/);
+    expect(product({ price_cash_ars: "-1" })).toThrow(/CHECK/);
   });
 
   it("rechaza valores del pentágono fuera de 1 a 5", () => {
@@ -122,7 +160,7 @@ describe("0001_init + seed", () => {
     expect(() =>
       db
         .prepare(
-          "INSERT INTO products (slug, kind, shelf, name, detail, price_ars) VALUES ('x', 'mate', 'kits', 'X', 'X', 100)",
+          "INSERT INTO products (slug, kind, shelf, name, detail, price_card_ars, price_cash_ars) VALUES ('x', 'mate', 'kits', 'X', 'X', 100, 90)",
         )
         .run(),
     ).toThrow(/CHECK/);
@@ -132,7 +170,7 @@ describe("0001_init + seed", () => {
     expect(() =>
       db
         .prepare(
-          "INSERT INTO products (slug, kind, shelf, coffee_id, name, detail, price_ars) VALUES ('x', 'gear', 'kits', 1, 'X', 'X', 100)",
+          "INSERT INTO products (slug, kind, shelf, coffee_id, name, detail, price_card_ars, price_cash_ars) VALUES ('x', 'gear', 'kits', 1, 'X', 'X', 100, 90)",
         )
         .run(),
     ).toThrow(/CHECK/);
@@ -142,16 +180,21 @@ describe("0001_init + seed", () => {
     expect(() =>
       db
         .prepare(
-          "INSERT INTO products (slug, kind, shelf, name, detail, price_ars) VALUES ('remera-falco', 'apparel', 'kits', 'X', 'X', 100)",
+          "INSERT INTO products (slug, kind, shelf, name, detail, price_card_ars, price_cash_ars) VALUES ('prensa', 'gear', 'kits', 'X', 'X', 100, 90)",
         )
         .run(),
     ).toThrow(/UNIQUE/);
   });
 
   it("al borrar un producto se borran sus opciones, y solo las suyas", () => {
-    db.prepare("DELETE FROM products WHERE slug = 'remera-falco'").run();
-    // Quedan las dos del café: en grano y molido.
-    expect(count("product_options")).toBe(2);
+    product()();
+    const probe = one<{ id: number }>(
+      "SELECT id FROM products WHERE slug = 'probeta'",
+    );
+    option({ product_id: String(probe.id), label: "'Grande'" })();
+    db.prepare("DELETE FROM products WHERE slug = 'probeta'").run();
+    // Quedan las dos del café y las dos del borrador: se borraron solo las suyas.
+    expect(count("product_options")).toBe(4);
   });
 
   it("no deja borrar un café que usa un producto", () => {
@@ -198,13 +241,19 @@ describe("tipos estrictos", () => {
   });
 
   it("rechaza un precio escrito como texto", () => {
-    expect(product({ price_ars: "'muchos'" })).toThrow(
+    expect(product({ price_card_ars: "'muchos'" })).toThrow(
+      /cannot store TEXT value in INTEGER column/,
+    );
+    expect(product({ price_cash_ars: "'muchos'" })).toThrow(
       /cannot store TEXT value in INTEGER column/,
     );
   });
 
   it("rechaza un precio con centavos", () => {
-    expect(product({ price_ars: "1600.5" })).toThrow(
+    expect(product({ price_card_ars: "1600.5" })).toThrow(
+      /cannot store REAL value in INTEGER column/,
+    );
+    expect(product({ price_cash_ars: "1600.5" })).toThrow(
       /cannot store REAL value in INTEGER column/,
     );
   });
@@ -345,19 +394,19 @@ describe("textos obligatorios", () => {
   it("rechaza un slug que el sitio no podría rutear", () => {
     for (const slug of [
       "",
-      "Remera",
-      "remera falco",
-      "remera_falco",
-      "-remera",
-      "remera-",
-      "re--mera",
-      "remerá",
+      "Prensa",
+      "filtro aeropress",
+      "filtro_aeropress",
+      "-prensa",
+      "prensa-",
+      "co--ffeepress",
+      "prensá",
     ])
       expect(product({ slug: `'${slug}'` })).toThrow(/CHECK/);
   });
 
   it("acepta un slug de minúsculas, números y guiones simples", () => {
-    expect(product({ slug: "'remera-falco-2'" })).not.toThrow();
+    expect(product({ slug: "'prensa-2'" })).not.toThrow();
   });
 
   it("rechaza un texto obligatorio vacío o en blanco", () => {

@@ -2,21 +2,31 @@ INSERT INTO coffees (id, name, farm, country, variety, process, altitude_masl, t
 VALUES (1, 'Huila', 'Finca La Esperanza', 'Colombia', 'Caturra', 'Lavado', 1750, 'Durazno, panela, cítrico',
         'Luminoso y dulce. Se parece a un té de durazno, sin amargor.', 4, 5, 2, 4, 3);
 
--- Los últimos dos productos son casos de prueba: uno escondido del sitio
--- (is_visible = 0) y uno que se pide consultando stock (ask_stock = 1).
-INSERT INTO products (id, slug, kind, shelf, coffee_id, name, detail, price_ars, is_new, is_visible, ask_stock, sort_order) VALUES
-  (1, 'huila-colombia', 'coffee', 'coffee', 1, 'Huila · Colombia', '250 g', 12000, 1, 1, 0, 1),
-  (2, 'filtros-v60-02', 'gear', 'kits', NULL, 'Filtros V60 · 02', 'Caja de 100', 6500, 0, 1, 0, 1),
-  (3, 'remera-falco', 'apparel', 'kits', NULL, 'Remera Falco', 'Algodón', 16000, 0, 1, 0, 2),
-  (4, 'prensa-francesa', 'gear', 'kits', NULL, 'Prensa francesa', '350 ml', 28000, 0, 0, 0, 3),
-  (5, 'kit-filtrado', 'kit', 'kits', NULL, 'Kit de filtrado', 'V60 + filtros + jarra', 52000, 0, 1, 1, 4);
+-- El catálogo real que mandó el dueño el 2026-09-21. price_card_ars es lo
+-- que se cobra con crédito o débito; price_cash_ars, con efectivo o
+-- transferencia (siempre el más barato de los dos).
+-- Coffeepress queda oculto (is_visible = 0, todavía sin foto) y Kit V60 · 2
+-- se pide consultando stock (ask_stock = 1): son los dos casos de prueba
+-- que ya cubría el seed, repartidos entre los productos reales.
+INSERT INTO products (id, slug, kind, shelf, coffee_id, name, detail, price_card_ars, price_cash_ars, is_new, is_visible, ask_stock, sort_order) VALUES
+  (1, 'huila-colombia', 'coffee', 'coffee', 1, 'Huila · Colombia', '250 g', 13000, 12000, 1, 1, 0, 1),
+  (2, 'prensa', 'gear', 'kits', NULL, 'Prensa', 'Cafetera de émbolo', 35000, 33000, 0, 1, 0, 1),
+  (3, 'filtro-aeropress', 'gear', 'kits', NULL, 'Filtro Aeropress', 'Filtro para Aeropress', 28000, 26000, 0, 1, 0, 2),
+  (4, 'filtros-v60-2', 'gear', 'kits', NULL, 'Filtros V60 · 2', 'Filtros de papel para V60', 28000, 26000, 0, 1, 0, 3),
+  (5, 'kit-v60-1', 'kit', 'kits', NULL, 'Kit V60 · 1', 'V60 tamaño 1 + filtros', 53500, 50500, 0, 1, 0, 4),
+  (6, 'kit-v60-2', 'kit', 'kits', NULL, 'Kit V60 · 2', 'V60 tamaño 2 + filtros', 66000, 62000, 0, 1, 0, 5),
+  (7, 'coffeepress', 'gear', 'kits', NULL, 'Coffeepress', 'Para café filtrado', 67500, 64500, 0, 1, 0, 6),
+  -- Borrador oculto: existe para que las pruebas tengan un producto
+  -- invisible, uno con "Consultar stock" y una opción agotada, sin
+  -- mentir sobre el catálogo real. Al estar oculto, no se ve en el sitio.
+  (8, 'producto-de-prueba', 'gear', 'kits', NULL, 'Producto de prueba', 'Solo para probar el sitio', 1000, 900, 0, 0, 1, 99);
 
--- El café se elige en grano o molido; la remera, por talle.
--- El talle XS va agotado (is_available = 0) para poder probar pruneUnavailable.
+-- El café se elige en grano o molido; es la única opción real hoy, porque
+-- la ropa quedó para más adelante.
 INSERT INTO product_options (product_id, label, is_available, sort_order) VALUES
   (1, 'En grano', 1, 0), (1, 'Molido', 1, 1),
-  (3, 'Talle XS', 0, 0), (3, 'Talle S', 1, 1), (3, 'Talle M', 1, 2),
-  (3, 'Talle L', 1, 3), (3, 'Talle XL', 1, 4);
+  -- La opción agotada vive en el borrador oculto, no en el café.
+  (8, 'Con caja', 1, 0), (8, 'Sin caja', 0, 1);
 
 -- Horario real: corta al mediodía y reabre a la tarde. weekday: 0 = domingo.
 INSERT INTO business_hours (weekday) VALUES (0), (1), (2), (3), (4), (5), (6);

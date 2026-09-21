@@ -198,12 +198,13 @@ describe("coffeeInputSchema", () => {
 
 describe("productInputSchema", () => {
   const valid = {
-    slug: "remera-falco",
-    kind: "apparel",
+    slug: "coffeepress",
+    kind: "gear",
     shelf: "kits",
-    name: "Remera Falco",
-    detail: "Algodón",
-    priceArs: 16000,
+    name: "Coffeepress",
+    detail: "Para café filtrado",
+    priceCardArs: 67500,
+    priceCashArs: 64500,
   };
 
   it("acepta un producto y completa los valores por defecto", () => {
@@ -216,9 +217,19 @@ describe("productInputSchema", () => {
     });
   });
 
-  it("el precio es un entero en pesos, sin centavos", () => {
+  it("el precio de tarjeta es un entero en pesos, sin centavos", () => {
     expect(
-      firstError(productInputSchema.safeParse({ ...valid, priceArs: 1600.5 })),
+      firstError(
+        productInputSchema.safeParse({ ...valid, priceCardArs: 1600.5 }),
+      ),
+    ).toBe("Poné el precio en pesos, sin centavos.");
+  });
+
+  it("el precio de efectivo es un entero en pesos, sin centavos", () => {
+    expect(
+      firstError(
+        productInputSchema.safeParse({ ...valid, priceCashArs: 1600.5 }),
+      ),
     ).toBe("Poné el precio en pesos, sin centavos.");
   });
 
@@ -243,7 +254,7 @@ describe("productInputSchema", () => {
   it("el slug solo lleva minúsculas, números y guiones", () => {
     expect(
       firstError(
-        productInputSchema.safeParse({ ...valid, slug: "Remera Falco" }),
+        productInputSchema.safeParse({ ...valid, slug: "Coffeepress" }),
       ),
     ).toBe("Usá solo minúsculas, números y guiones.");
   });

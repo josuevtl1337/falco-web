@@ -90,7 +90,7 @@ describe("saveOrder y loadOrder", () => {
     expect(storage.data[ORDER_STORAGE_KEY]).toBeUndefined();
   });
 
-  it("borra y descarta un producto con más unidades que el tope, repartidas en talles", () => {
+  it("borra y descarta un producto con más unidades que el tope, repartidas en moliendas", () => {
     const storage = memoryStorage({
       [ORDER_STORAGE_KEY]: JSON.stringify({
         code: "F-7K2Q",
@@ -105,7 +105,7 @@ describe("saveOrder y loadOrder", () => {
     expect(storage.data[ORDER_STORAGE_KEY]).toBeUndefined();
   });
 
-  it("acepta los talles de un mismo producto mientras no pasen el tope", () => {
+  it("acepta las moliendas de un mismo producto mientras no pasen el tope", () => {
     const valid = {
       code: "F-7K2Q",
       items: [

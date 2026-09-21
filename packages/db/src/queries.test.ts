@@ -71,10 +71,10 @@ describe("getHopperCoffee", () => {
 
 describe("listShelf", () => {
   it("trae solo los productos visibles, en su orden, con las opciones", async () => {
-    const products = await listShelf(db, "kits");
+    const products = await listShelf(db, "coffee");
     expect(products.every((p) => p.isVisible)).toBe(true);
-    const shirt = products.find((p) => p.slug === "remera-falco");
-    expect(shirt?.options.map((o) => o.label)).toContain("Talle M");
+    const coffee = products.find((p) => p.slug === "huila-colombia");
+    expect(coffee?.options.map((o) => o.label)).toEqual(["En grano", "Molido"]);
   });
 
   it("nunca devuelve un producto oculto", async () => {
@@ -100,10 +100,9 @@ describe("getProductBySlug", () => {
   });
 
   it("un producto oculto no se sirve por su dirección", async () => {
-    // El seed (packages/db/seed/seed.sql) marca is_visible = 0 en la prensa
-    // francesa, no en un "kit-regalo-oculto": ese slug no existe en la base
-    // real, así que la prueba usa el producto oculto que sí está.
-    const hidden = await getProductBySlug(db, "prensa-francesa");
+    // El único is_visible = 0 del seed es el borrador de prueba: el catálogo
+    // real se muestra entero, así que no hay ningún producto de verdad oculto.
+    const hidden = await getProductBySlug(db, "producto-de-prueba");
     expect(hidden).toBeUndefined();
   });
 });

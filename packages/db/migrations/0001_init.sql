@@ -32,7 +32,8 @@ CREATE TABLE products (
   name            TEXT NOT NULL CHECK (length(trim(name)) > 0),
   detail          TEXT NOT NULL CHECK (length(trim(detail)) > 0),
   description     TEXT,
-  price_ars       INTEGER NOT NULL CHECK (price_ars >= 0),
+  price_card_ars  INTEGER NOT NULL CHECK (price_card_ars >= 0),
+  price_cash_ars  INTEGER NOT NULL CHECK (price_cash_ars >= 0),
   image_key       TEXT,
   is_new          INTEGER NOT NULL DEFAULT 0 CHECK (is_new IN (0, 1)),
   is_visible      INTEGER NOT NULL DEFAULT 1 CHECK (is_visible IN (0, 1)),
@@ -44,7 +45,7 @@ CREATE TABLE products (
   CHECK (kind = 'coffee' OR coffee_id IS NULL)
 ) STRICT;
 
--- Opciones de un producto (por ahora, talles de remera).
+-- Opciones de un producto: hoy, la molienda del café (en grano o molido).
 CREATE TABLE product_options (
   id              INTEGER PRIMARY KEY,
   product_id      INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,

@@ -25,7 +25,8 @@ export type ProductRow = {
   name: string;
   detail: string;
   description: string | null;
-  price_ars: number;
+  price_card_ars: number;
+  price_cash_ars: number;
   image_key: string | null;
   is_new: number;
   is_visible: number;
@@ -79,7 +80,8 @@ export type Product = {
   name: string;
   detail: string;
   description?: string;
-  priceArs: number;
+  priceCardArs: number;
+  priceCashArs: number;
   imageKey?: string;
   isNew: boolean;
   isVisible: boolean;
@@ -126,7 +128,8 @@ export function toProduct(row: ProductRow): Product {
     name: row.name,
     detail: row.detail,
     description: maybe(row.description),
-    priceArs: row.price_ars,
+    priceCardArs: row.price_card_ars,
+    priceCashArs: row.price_cash_ars,
     imageKey: maybe(row.image_key),
     isNew: bool(row.is_new),
     isVisible: bool(row.is_visible),

@@ -145,7 +145,11 @@ export const productInputSchema = z
     name: requiredText(60),
     detail: requiredText(80),
     description: optionalText(600),
-    priceArs: z
+    priceCardArs: z
+      .number({ invalid_type_error: "Poné el precio en pesos, sin centavos." })
+      .int("Poné el precio en pesos, sin centavos.")
+      .min(0, "El precio no puede ser negativo."),
+    priceCashArs: z
       .number({ invalid_type_error: "Poné el precio en pesos, sin centavos." })
       .int("Poné el precio en pesos, sin centavos.")
       .min(0, "El precio no puede ser negativo."),

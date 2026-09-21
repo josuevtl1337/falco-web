@@ -58,14 +58,15 @@ describe("toProduct", () => {
   it("los enteros 0/1 de SQLite llegan como booleanos", () => {
     const product = toProduct({
       id: 3,
-      slug: "remera-falco",
-      kind: "apparel",
+      slug: "coffeepress",
+      kind: "gear",
       shelf: "kits",
       coffee_id: null,
-      name: "Remera Falco",
-      detail: "Algodón",
+      name: "Coffeepress",
+      detail: "Para café filtrado",
       description: null,
-      price_ars: 16000,
+      price_card_ars: 67500,
+      price_cash_ars: 64500,
       image_key: null,
       is_new: 0,
       is_visible: 1,
@@ -76,5 +77,7 @@ describe("toProduct", () => {
     expect(product.isVisible).toBe(true);
     expect(product.askStock).toBe(true);
     expect(product.coffeeId).toBeUndefined();
+    expect(product.priceCardArs).toBe(67500);
+    expect(product.priceCashArs).toBe(64500);
   });
 });

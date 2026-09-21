@@ -60,7 +60,7 @@ describe("addItem", () => {
     expect(result.order).toBe(order);
   });
 
-  it("el mismo producto con otro talle es otra línea", () => {
+  it("el mismo producto con otra molienda es otra línea", () => {
     let order = createOrder("F-7K2Q", T0);
     order = addItem(order, { productId: 3, optionId: 31 }, T0).order;
     order = addItem(order, { productId: 3, optionId: 32 }, T0).order;
@@ -70,7 +70,7 @@ describe("addItem", () => {
     ]);
   });
 
-  it("dos talles del mismo producto ya son las 2 unidades permitidas", () => {
+  it("dos moliendas del mismo producto ya son las 2 unidades permitidas", () => {
     let order = createOrder("F-7K2Q", T0);
     order = addItem(order, { productId: 3, optionId: 31 }, T0).order;
     order = addItem(order, { productId: 3, optionId: 32 }, T0).order;
@@ -93,7 +93,7 @@ describe("addItem", () => {
     expect(result.order.items).toHaveLength(ORDER_LIMITS.maxProducts);
   });
 
-  it("otro talle de un producto que ya está no cuenta como producto nuevo", () => {
+  it("otra molienda de un producto que ya está no cuenta como producto nuevo", () => {
     let order = createOrder("F-7K2Q", T0);
     for (let id = 1; id <= ORDER_LIMITS.maxProducts; id++)
       order = addItem(order, { productId: id }, T0).order;
@@ -151,17 +151,17 @@ describe("setQty y removeItem", () => {
     expect(setQty(base, { productId: 1 }, 1, later(1000))).toBe(base);
   });
 
-  it("un talle se limita a lo que queda libre del producto", () => {
+  it("una molienda se limita a lo que queda libre del producto", () => {
     let order = createOrder("F-7K2Q", T0);
     order = addItem(order, { productId: 3, optionId: 31 }, T0).order;
     order = addItem(order, { productId: 3, optionId: 32 }, T0).order;
 
-    // El otro talle ya ocupa una unidad: pedir 5 deja la línea en 1.
+    // La otra molienda ya ocupa una unidad: pedir 5 deja la línea en 1.
     expect(setQty(order, { productId: 3, optionId: 31 }, 5, later(1000))).toBe(
       order,
     );
 
-    // Si el otro talle se va, el que queda puede llegar a 2.
+    // Si la otra molienda se va, la que queda puede llegar a 2.
     const freed = removeItem(order, { productId: 3, optionId: 32 }, T0);
     expect(setQty(freed, { productId: 3, optionId: 31 }, 5, T0).items).toEqual([
       { productId: 3, optionId: 31, qty: 2 },
@@ -170,7 +170,7 @@ describe("setQty y removeItem", () => {
 });
 
 describe("unitsForProduct", () => {
-  it("suma las unidades de todos los talles de un producto", () => {
+  it("suma las unidades de todas las moliendas de un producto", () => {
     let order = createOrder("F-7K2Q", T0);
     order = addItem(order, { productId: 3, optionId: 31 }, T0).order;
     order = addItem(order, { productId: 3, optionId: 32 }, T0).order;
