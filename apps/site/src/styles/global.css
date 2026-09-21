@@ -135,7 +135,10 @@ a {
 .direccion {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: var(--text-micro);
+  /* La lámina usa un gris más apagado (#75777A), que sobre carbón da 3,20:1 y
+     NO pasa AA en texto chico. Se respeta el tamaño y se mantiene ceniza,
+     que da 5,21:1. El wireframe es una maqueta, no una auditoría. */
+  font-size: var(--text-nano);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-ceniza);
@@ -197,6 +200,31 @@ a {
    (medido en la lámina: -12°, el mismo ángulo que --angle-button). */
 .chip.estado::before {
   transform: skewX(var(--angle-button));
+}
+
+/* Las dos mitades del cartel usan tipografías distintas a propósito: la
+   jerarquía la da la familia, no un separador. Medido en la lámina. */
+.estado {
+  gap: var(--space-sm);
+  padding-inline: var(--space-md);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.estado__label {
+  font-family: var(--font-display);
+  font-size: var(--text-lead);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+.estado__sub {
+  font-family: var(--font-mono);
+  font-size: var(--text-nano);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
 }
 
 /*

@@ -40,12 +40,16 @@ export function OpenNow({ week, specials, initial }: Props) {
   return (
     <p
       role="status"
+      /* El texto se parte en dos para el estilo, y visualmente los separa el
+         gap. Un lector de pantalla no ve ese gap: aria-label le devuelve la
+         etiqueta entera y bien puntuada. */
+      aria-label={status.label}
       data-open={open}
       className={`chip estado ${open ? "chip--lit" : "chip--fill"}`}
     >
       <span className="punto" aria-hidden="true" />
       <span className="estado__label">{primary}</span>
-      {sub && <span className="estado__sub"> · {sub}</span>}
+      {sub && <span className="estado__sub">{sub}</span>}
     </p>
   );
 }

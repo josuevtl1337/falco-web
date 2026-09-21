@@ -72,8 +72,12 @@ const { weekday, day, month, moment, previousDay } = Astro.props;
 
   .fecha__dia {
     grid-area: 1 / 1;
-    font-size: var(--text-display);
-    font-weight: 700;
+    font-size: var(--text-dia);
+    font-weight: 800;
+    line-height: 1;
+    /* La sombra dura, sin desenfoque, es lo que le da volumen al número:
+       medida en la lámina como tostado a 4px. */
+    text-shadow: 4px 4px 0 var(--color-tostado);
   }
 
   .fecha__dia--old {
@@ -86,8 +90,11 @@ const { weekday, day, month, moment, previousDay } = Astro.props;
 
   .fecha__mes {
     margin-left: 2px;
-    font-family: var(--font-mono);
-    font-size: var(--text-micro);
+    /* En la lámina el mes es la misma familia del número, no monoespaciada. */
+    font-family: var(--font-display);
+    font-size: var(--text-diaMes);
+    font-weight: 800;
+    line-height: 1;
     color: var(--color-ceniza);
     animation: slideIn 0.45s var(--ease-persona) 0.7s both;
   }
@@ -98,7 +105,12 @@ const { weekday, day, month, moment, previousDay } = Astro.props;
     justify-items: start;
   }
 
+  /* El chip del día va en la tipografía de títulos, no en la monoespaciada. */
   .fecha__chip {
+    font-family: var(--font-display);
+    font-size: var(--text-small);
+    font-weight: 700;
+    letter-spacing: 0.04em;
     animation: chipIn 0.45s var(--ease-persona) 0.82s both;
   }
 
@@ -117,7 +129,7 @@ const { weekday, day, month, moment, previousDay } = Astro.props;
 
   .fecha__momento {
     font-family: var(--font-mono);
-    font-size: var(--text-micro);
+    font-size: var(--text-nano);
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-ceniza);

@@ -34,12 +34,16 @@ describe("OpenNow", () => {
         }}
       />,
     );
-    // El chip parte el texto en dos <span> para el estilo (ver forma del
-    // componente), así que se compara el textContent completo del cartel
-    // en vez de buscar el string entero en un solo nodo.
-    expect(screen.getByRole("status").textContent).toBe(
+    // El cartel parte el texto en dos <span> con tipografías distintas, y
+    // visualmente los separa un gap. Quien no ve la pantalla no ve ese gap,
+    // así que el nombre accesible tiene que traer la etiqueta entera y bien
+    // puntuada: eso es lo que se verifica.
+    const cartel = screen.getByRole("status");
+    expect(cartel.getAttribute("aria-label")).toBe(
       "Abierto ahora · cierra 20:00",
     );
+    expect(cartel.textContent).toContain("Abierto ahora");
+    expect(cartel.textContent).toContain("cierra 20:00");
   });
 
   it("corrige el cartel si el HTML venía cacheado con un estado viejo", () => {

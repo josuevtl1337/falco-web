@@ -26,12 +26,15 @@
   --space-lg: 24px;
   --space-xl: 40px;
   --space-xxl: 72px;
+  --text-nano: 10px;
   --text-micro: 12px;
   --text-small: 14px;
   --text-body: 16px;
   --text-lead: 20px;
   --text-title: 28px;
   --text-display: 44px;
+  --text-dia: 72px;
+  --text-diaMes: 38px;
   --text-hero: clamp(56px, 9vw, 112px);
   /* Unidades del lienzo del pentágono (viewBox chico), no píxeles de
      página: no es comparable al resto de la escala, pero tiene que vivir

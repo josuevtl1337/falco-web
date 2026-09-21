@@ -38,12 +38,15 @@ export const space = {
 } as const;
 
 export const text = {
+  nano: "10px",
   micro: "12px",
   small: "14px",
   body: "16px",
   lead: "20px",
   title: "28px",
   display: "44px",
+  dia: "72px",
+  diaMes: "38px",
   hero: "clamp(56px, 9vw, 112px)",
   // Unidades del viewBox del pentágono, no píxeles de página (ver tokens.css).
   svg: "5px",
