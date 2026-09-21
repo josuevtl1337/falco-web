@@ -123,39 +123,84 @@ a {
 }
 
 /*
- * Igual que .boton: el cartel "Abierto ahora" vive en una isla de React
- * (OpenNow.tsx), así que no puede tener un <style> con scope de Astro.
+ * El calendario del encabezado y el cartel "Abierto ahora" (una isla de
+ * React, OpenNow.tsx) viven acá apilados: los dos necesitan la misma
+ * columna, y una isla no puede tener un <style> con scope de Astro.
  */
 .hud {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  display: grid;
   gap: var(--space-md);
-  padding: var(--space-lg) var(--space-md) 0;
+  justify-items: start;
 }
 
-.abierto-ahora {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-sm);
+.direccion {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: var(--text-small);
-  letter-spacing: 0.04em;
+  font-size: var(--text-micro);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ceniza);
+}
+
+/*
+ * El chip con corte diagonal: el idioma compartido del sitio. Vive acá y no
+ * en un <style> de componente porque lo usan la home, la isla OpenNow, la
+ * tienda y el pedido (Tarea 7) por igual, y el scoping de Astro haría que no
+ * se pudiera compartir.
+ */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0;
+  padding: 6px var(--space-md) 5px var(--space-sm);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+/* Lleno: EN TOLVA AHORA, ORIGEN, A QUÉ SABE, TOSTADERO, FALCO, LUN, NUEVO. */
+.chip--fill {
+  background: var(--color-tostado);
   color: var(--color-hueso);
 }
 
-.abierto-ahora .punto {
-  width: 10px;
-  height: 10px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--color-ceniza);
+/* Encendido: solo el estado "abierto ahora". Brasa/carbón, 8,92:1. */
+.chip--lit {
+  background: var(--color-brasa);
+  color: var(--color-carbon);
 }
 
-.abierto-ahora[data-open="true"] .punto {
-  background: var(--color-brasa);
+/*
+ * El cartel de estado del local: mismo chip, con el punto y el detalle
+ * ("cierra 20:00") en un tono más apagado, sin abandonar el chip.
+ */
+.estado .punto {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+.estado[data-open="true"] .punto {
+  opacity: 1;
   animation: latido var(--duration-slow) ease-in-out infinite;
+}
+
+.estado__sub {
+  font-weight: 400;
+}
+
+/* Carbón al 85% de opacidad sobre brasa: 6,26:1, medido (ver reporte). */
+.chip--lit .estado__sub {
+  opacity: 0.85;
 }
 
 @keyframes latido {
@@ -166,6 +211,56 @@ a {
   50% {
     opacity: 0.4;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .estado[data-open="true"] .punto {
+    animation: none;
+  }
+}
+
+/*
+ * El panel: la caja que agrupa la tolva. Compartido con la tienda (Tarea 7),
+ * así que no puede vivir en el <style> de una página.
+ */
+.panel {
+  border: 1px solid var(--color-sombra);
+  background: var(--color-piedra);
+  padding: var(--space-lg);
+}
+
+/*
+ * El ticker: franja estática de ancho completo. Sin animación: la cinta que
+ * se mueve sola es del Plan 4, acá el contenido repetido alcanza para llenar
+ * el ancho.
+ */
+.ticker {
+  overflow: hidden;
+  padding-block: var(--space-md);
+}
+
+.ticker__banda {
+  margin-inline: calc(var(--space-xl) * -1);
+  padding-inline: var(--space-xl);
+  background: var(--color-tostado);
+  rotate: var(--angle-ticker);
+}
+
+.ticker__cinta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-md);
+  padding-block: var(--space-sm);
+  overflow: hidden;
+}
+
+.ticker__cinta span {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-hueso);
+  white-space: nowrap;
 }
 
 @media (prefers-reduced-motion: reduce) {
