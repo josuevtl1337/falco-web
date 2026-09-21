@@ -7,17 +7,26 @@ interface Props {
   day: number;
   month: number;
   moment: DayMoment;
+  /** El día de ayer: un detalle de la lámina (el número anterior sale
+   * volando cuando entra el de hoy), no un dato que venga de la base. */
+  previousDay: number;
 }
 
-const { weekday, day, month, moment } = Astro.props;
+const { weekday, day, month, moment, previousDay } = Astro.props;
 ---
 
 <div class="fecha">
   <p class="fecha__numero">
-    <strong>{day}</strong><span class="fecha__mes">/{month}</span>
+    <span class="fecha__dd">
+      <strong class="fecha__dia fecha__dia--old" aria-hidden="true"
+        >{previousDay}</strong
+      >
+      <strong class="fecha__dia fecha__dia--new">{day}</strong>
+    </span>
+    <span class="fecha__mes">/{month}</span>
   </p>
   <div class="fecha__semana">
-    <span class="chip chip--fill">{WEEKDAY_LABELS[weekday]}</span>
+    <span class="chip chip--fill fecha__chip">{WEEKDAY_LABELS[weekday]}</span>
     <span class="fecha__momento">{moment}</span>
   </div>
 </div>
@@ -32,6 +41,8 @@ const { weekday, day, month, moment } = Astro.props;
 
   .fecha__numero {
     grid-row: 1 / span 2;
+    position: relative;
+    isolation: isolate;
     margin: 0;
     display: flex;
     align-items: flex-end;
@@ -39,9 +50,38 @@ const { weekday, day, month, moment } = Astro.props;
     line-height: 1;
   }
 
-  .fecha__numero strong {
+  /* La franja que barre detrás del número al entrar: medida en la lámina. */
+  .fecha__numero::before {
+    content: "";
+    position: absolute;
+    left: -12%;
+    right: -18%;
+    top: 16%;
+    height: 64%;
+    z-index: -1;
+    background: var(--color-tostado);
+    transform: skewX(-18deg) scaleX(0);
+    transform-origin: left center;
+    animation: sweep 0.62s cubic-bezier(0.7, 0, 0.3, 1) 0.1s both;
+  }
+
+  .fecha__dd {
+    position: relative;
+    display: inline-grid;
+  }
+
+  .fecha__dia {
+    grid-area: 1 / 1;
     font-size: var(--text-display);
     font-weight: 700;
+  }
+
+  .fecha__dia--old {
+    animation: dateOut 0.38s cubic-bezier(0.6, 0, 0.8, 0.4) 0.18s both;
+  }
+
+  .fecha__dia--new {
+    animation: dateIn 0.6s var(--ease-persona) 0.46s both;
   }
 
   .fecha__mes {
@@ -49,6 +89,7 @@ const { weekday, day, month, moment } = Astro.props;
     font-family: var(--font-mono);
     font-size: var(--text-micro);
     color: var(--color-ceniza);
+    animation: slideIn 0.45s var(--ease-persona) 0.7s both;
   }
 
   .fecha__semana {
@@ -57,11 +98,29 @@ const { weekday, day, month, moment } = Astro.props;
     justify-items: start;
   }
 
+  .fecha__chip {
+    animation: chipIn 0.45s var(--ease-persona) 0.82s both;
+  }
+
+  .fecha__chip::before {
+    animation: plateIn 0.45s var(--ease-persona) 0.82s both;
+  }
+
+  @keyframes chipIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
   .fecha__momento {
     font-family: var(--font-mono);
     font-size: var(--text-micro);
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-ceniza);
+    animation: slideIn 0.45s var(--ease-persona) 0.94s both;
   }
 </style>

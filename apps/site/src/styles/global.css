@@ -1,6 +1,5 @@
 @import "@fontsource/bricolage-grotesque/700.css";
 @import "@fontsource/instrument-sans/400.css";
-@import "@fontsource/instrument-sans/600.css";
 @import "@fontsource/martian-mono/400.css";
 @import "@falco/ui/tokens.css";
 
@@ -143,18 +142,24 @@ a {
 }
 
 /*
- * El chip con corte diagonal: el idioma compartido del sitio. Vive acá y no
- * en un <style> de componente porque lo usan la home, la isla OpenNow, la
- * tienda y el pedido (Tarea 7) por igual, y el scoping de Astro haría que no
- * se pudiera compartir.
+ * El chip: el idioma compartido del sitio. Vive acá y no en un <style> de
+ * componente porque lo usan la home, la isla OpenNow, la tienda y el pedido
+ * (Tarea 7) por igual, y el scoping de Astro haría que no se pudiera
+ * compartir.
+ *
+ * La lámina lo inclina con `skewX`, nunca con `rotate` sobre el elemento
+ * entero: eso arrastraría el texto y lo dejaría torcido. Acá el corte
+ * diagonal vive en un ::before (el "plato") detrás del texto; el `.chip`
+ * mismo, y por lo tanto su contenido, queda sin transformar.
  */
 .chip {
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
   gap: 2px;
   margin: 0;
   padding: 6px var(--space-md) 5px var(--space-sm);
-  clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
   font-family: var(--font-mono);
   font-size: var(--text-micro);
   font-weight: 600;
@@ -164,16 +169,34 @@ a {
   white-space: nowrap;
 }
 
-/* Lleno: EN TOLVA AHORA, ORIGEN, A QUÉ SABE, TOSTADERO, FALCO, LUN, NUEVO. */
-.chip--fill {
+.chip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transform: skewX(var(--angle-plate));
+}
+
+/* Lleno: EN TOLVA AHORA, ORIGEN, A QUÉ SABE, TOSTADERO, LUN, NUEVO. */
+.chip--fill::before {
   background: var(--color-tostado);
+}
+.chip--fill {
   color: var(--color-hueso);
 }
 
 /* Encendido: solo el estado "abierto ahora". Brasa/carbón, 8,92:1. */
-.chip--lit {
+.chip--lit::before {
   background: var(--color-brasa);
+}
+.chip--lit {
   color: var(--color-carbon);
+}
+
+/* El cartel de estado usa un corte más parado que el resto de los chips
+   (medido en la lámina: -12°, el mismo ángulo que --angle-button). */
+.chip.estado::before {
+  transform: skewX(var(--angle-button));
 }
 
 /*
@@ -191,7 +214,7 @@ a {
 
 .estado[data-open="true"] .punto {
   opacity: 1;
-  animation: latido var(--duration-slow) ease-in-out infinite;
+  animation: beat 1.6s ease-in-out infinite;
 }
 
 .estado__sub {
@@ -203,14 +226,14 @@ a {
   opacity: 0.85;
 }
 
-@keyframes latido {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.4;
-  }
+/* La entrada del cartel de estado: se enciende de golpe si está abierto
+   (como un tubo de neón), o desliza si está cerrado. Tiempos de la lámina. */
+.estado[data-open="true"] {
+  animation: lightOn 0.9s steps(1) 1.15s both;
+}
+
+.estado[data-open="false"] {
+  animation: slideIn 0.45s var(--ease-persona) 1.1s both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -230,9 +253,9 @@ a {
 }
 
 /*
- * El ticker: franja estática de ancho completo. Sin animación: la cinta que
- * se mueve sola es del Plan 4, acá el contenido repetido alcanza para llenar
- * el ancho.
+ * El ticker: franja de ancho completo con la cinta en movimiento continuo.
+ * El contenido va duplicado en el marcado (index.astro) para que el bucle de
+ * -50% no corte la lectura.
  */
 .ticker {
   overflow: hidden;
@@ -248,10 +271,12 @@ a {
 
 .ticker__cinta {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  width: max-content;
   gap: 0 var(--space-md);
   padding-block: var(--space-sm);
   overflow: hidden;
+  animation: slide 38s linear infinite;
 }
 
 .ticker__cinta span {
@@ -261,6 +286,277 @@ a {
   text-transform: uppercase;
   color: var(--color-hueso);
   white-space: nowrap;
+}
+
+/*
+ * El pozo de luz: la idea central de "La Cueva". Va detrás del contenido,
+ * sin interceptar clics, y respira despacio. Tamaño y posición medidos en la
+ * lámina (desktop 1440 y celular 390); el contenedor que lo use necesita
+ * `position: relative` y conviene que tenga `overflow: hidden` para no
+ * generar scroll horizontal.
+ */
+.glow {
+  position: absolute;
+  top: -320px;
+  left: -120px;
+  width: 1100px;
+  height: 860px;
+  pointer-events: none;
+  z-index: -1;
+  background: radial-gradient(
+    closest-side,
+    rgba(242, 196, 139, 0.16),
+    rgba(242, 196, 139, 0.04) 55%,
+    rgba(242, 196, 139, 0) 78%
+  );
+  animation: breathe 9s ease-in-out infinite;
+}
+
+@media (max-width: 640px) {
+  .glow {
+    top: -200px;
+    left: -60px;
+    width: 520px;
+    height: 520px;
+  }
+}
+
+/*
+ * El grano de película: una textura muy sutil sobre todo lo que lleve esta
+ * clase. El elemento que la use necesita `position: relative` (u otro
+ * position distinto de static) para que el ::after se recorte a su tamaño.
+ */
+.grainy {
+  position: relative;
+}
+
+.grainy::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  pointer-events: none;
+  z-index: 20;
+  opacity: 0.55;
+  background-image: radial-gradient(
+    rgba(232, 226, 208, 0.055) 1px,
+    transparent 1px
+  );
+  background-size: 3px 3px;
+  /* Medido en la lámina: steps(3), no steps(1) (ver reporte). */
+  animation: grain 0.9s steps(3) infinite;
+}
+
+/*
+ * El vocabulario de movimiento de la home ("Persona"): la coreografía de
+ * entrada del HUD, la respiración del pozo de luz y de la tolva, el grano,
+ * el murciélago que cuelga y parpadea, y el resto de las animaciones
+ * ambiente. Vive acá, centralizado, porque distintos componentes (Astro y
+ * la isla de React) necesitan referenciar el mismo nombre de @keyframes, y
+ * Astro no comparte los @keyframes declarados dentro del <style> con scope
+ * de un componente.
+ */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes grain {
+  100% {
+    background-position: 3px 3px;
+  }
+}
+
+@keyframes sweep {
+  0% {
+    transform: skewX(-18deg) scaleX(0);
+    transform-origin: left center;
+  }
+  45% {
+    transform: skewX(-18deg) scaleX(1);
+    transform-origin: left center;
+  }
+  55% {
+    transform: skewX(-18deg) scaleX(1);
+    transform-origin: right center;
+  }
+  100% {
+    transform: skewX(-18deg) scaleX(0);
+    transform-origin: right center;
+  }
+}
+
+@keyframes dateOut {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-18%, -45%) rotate(-14deg);
+  }
+}
+
+@keyframes dateIn {
+  0% {
+    opacity: 0;
+    transform: translateY(40%) scale(1.7) rotate(10deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.92) rotate(-2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-22px) skewX(-10deg);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Versión a escala del lienzo del pentágono (ver Pentagono.astro): mismo
+   idioma, desplazamiento más chico para no salirse del SVG. */
+@keyframes slideInSvg {
+  0% {
+    opacity: 0;
+    transform: translateX(-6px) skewX(-10deg);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes plateIn {
+  0% {
+    transform: skewX(var(--angle-plate)) scaleX(0);
+    transform-origin: left center;
+  }
+  100% {
+    transform: skewX(var(--angle-plate)) scaleX(1);
+    transform-origin: left center;
+  }
+}
+
+@keyframes lightOn {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  30% {
+    opacity: 0.2;
+  }
+  45% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 0.5;
+  }
+  70%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes wipe {
+  0% {
+    clip-path: inset(0 100% 0 0);
+  }
+  100% {
+    clip-path: inset(0);
+  }
+}
+
+@keyframes rise {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(7px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+@keyframes beat {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.6);
+    opacity: 0.55;
+  }
+}
+
+@keyframes nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+@keyframes hang {
+  0%,
+  100% {
+    transform: rotate(-1.4deg);
+  }
+  50% {
+    transform: rotate(1.4deg);
+  }
+}
+
+@keyframes blink {
+  0%,
+  93%,
+  100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.08);
+  }
+}
+
+@keyframes slide {
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fillIn {
+  from {
+    fill-opacity: 0;
+  }
+  to {
+    fill-opacity: 0.55;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

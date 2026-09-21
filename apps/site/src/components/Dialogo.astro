@@ -11,11 +11,19 @@
 </div>
 
 <style>
+  /*
+   * La caja se inclina con skewX (medido en la lámina: -6°) y el texto de
+   * adentro se contra-inclina para quedar derecho — el mismo idioma que el
+   * chip, no un `rotate` sobre todo el bloque, que arrastraría el párrafo.
+   * La etiqueta "Falco" es la excepción: en la lámina gira entera (-5°,
+   * matrix(0.996195, -0.0871557, …)), sin skew, porque el texto es corto y
+   * girarlo entero no lo vuelve ilegible.
+   */
   .dialogo {
     position: relative;
     padding-top: var(--space-md);
     max-width: 46ch;
-    rotate: var(--angle-dialog);
+    animation: rise 1s var(--ease-ambient) 0.85s both;
   }
 
   .dialogo__etiqueta {
@@ -23,15 +31,24 @@
     left: var(--space-md);
     top: 0;
     z-index: 1;
+    transform: rotate(-5deg);
+  }
+
+  /* Cancela el skew que .chip::before le da al resto de los chips: acá la
+     etiqueta entera rota, no se corta en diagonal. */
+  .dialogo__etiqueta::before {
+    transform: none;
   }
 
   .dialogo__caja {
     position: relative;
     padding: var(--space-lg) var(--space-xl) var(--space-lg) var(--space-lg);
     background: var(--color-tostado);
+    transform: skewX(-6deg);
   }
 
-  /* El "doble borde" de la lámina: un marco de línea desplazado por detrás. */
+  /* El "doble borde" de la lámina: un marco de línea desplazado por detrás.
+     No se contra-inclina: acompaña el mismo corte que la caja. */
   .dialogo__caja::before {
     content: "";
     position: absolute;
@@ -45,14 +62,18 @@
     margin: 0;
     color: var(--color-hueso);
     font-size: var(--text-lead);
+    transform: skewX(6deg);
   }
 
+  /* Sin tamaño propio (hereda var(--text-body) del documento): un tamaño
+     menos en la auditoría tipográfica de la tarea 6, y la flecha es chica
+     de por sí. */
   .dialogo__flecha {
     position: absolute;
     right: var(--space-md);
     bottom: var(--space-sm);
     color: var(--color-hueso);
-    font-size: var(--text-small);
+    animation: nudge 1s ease-in-out infinite;
   }
 
   @media (max-width: 640px) {

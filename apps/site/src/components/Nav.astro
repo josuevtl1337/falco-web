@@ -65,7 +65,6 @@ const path = Astro.url.pathname;
     gap: var(--space-lg);
     margin: 0;
     padding: 0;
-    rotate: var(--angle-menu);
   }
 
   .nav a {
@@ -89,9 +88,9 @@ const path = Astro.url.pathname;
     padding-inline: var(--space-md);
   }
 
-  /* En el celular el menú se endereza (inclinado y envuelto se vuelve ilegible)
-     y queda en una sola fila: apilado se comía un cuarto de la primera pantalla,
-     y lo primero que hay que ver es qué café hay en la tolva. */
+  /* En el celular el menú queda en una sola fila: apilado se comía un cuarto
+     de la primera pantalla, y lo primero que hay que ver es qué café hay en
+     la tolva. */
   @media (max-width: 640px) {
     .nav {
       flex-wrap: nowrap;
@@ -100,7 +99,6 @@ const path = Astro.url.pathname;
     }
 
     .nav ul {
-      rotate: none;
       flex-wrap: nowrap;
       gap: var(--space-md);
     }

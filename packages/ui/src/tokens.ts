@@ -45,6 +45,8 @@ export const text = {
   title: "28px",
   display: "44px",
   hero: "clamp(56px, 9vw, 112px)",
+  // Unidades del viewBox del pentágono, no píxeles de página (ver tokens.css).
+  svg: "5px",
 } as const;
 
 export const radius = { sm: "4px", md: "8px", lg: "16px" } as const;

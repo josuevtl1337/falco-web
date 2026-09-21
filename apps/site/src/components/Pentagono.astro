@@ -32,6 +32,14 @@ const half = pentagonPolygon({
   finish: 3,
 });
 
+// El pentágono se dibuja al aparecer: el perímetro del polígono de valores
+// es el dasharray, y anima el dashoffset de ese mismo largo hasta 0.
+const shapePoints = pentagonPoints(profile);
+const perimeter = shapePoints.reduce((total, point, index) => {
+  const next = shapePoints[(index + 1) % shapePoints.length]!;
+  return total + Math.hypot(next.x - point.x, next.y - point.y);
+}, 0);
+
 const CENTRE = 50;
 // Las etiquetas se apoyan en las mismas cinco posiciones que pentagonPoints
 // calcula para el pentágono completo (el "guide"), estiradas un poco hacia
@@ -71,20 +79,24 @@ const description = PENTAGON_AXES.map(
       stroke-width="0.5"></polygon>
     <polygon
       points={shape}
+      class="pentagono__forma"
       fill="var(--color-tostado)"
       fill-opacity="0.55"
       stroke="var(--color-brasa)"
       stroke-width="1.5"
-      stroke-linejoin="round"></polygon>
+      stroke-linejoin="round"
+      stroke-dasharray={perimeter.toFixed(2)}
+      stroke-dashoffset={perimeter.toFixed(2)}></polygon>
     {
       labels &&
-        axisLabels.map((label) => (
+        axisLabels.map((label, index) => (
           <text
             x={label.x}
             y={label.y}
             text-anchor={label.anchor}
             dominant-baseline={label.baseline}
             class="pentagono__etiqueta"
+            style={`animation-delay:${(1 + index * 0.08).toFixed(2)}s`}
           >
             {PENTAGON_LABELS[label.axis].toUpperCase()}{" "}
             <tspan class="pentagono__valor">{label.value}</tspan>
@@ -109,13 +121,29 @@ const description = PENTAGON_AXES.map(
 
   .pentagono__etiqueta {
     font-family: var(--font-mono);
-    font-size: 5px;
+    font-size: var(--text-svg);
     letter-spacing: 0.05em;
     fill: var(--color-hueso);
+    opacity: 0;
+    animation: slideInSvg 0.45s var(--ease-persona) both;
   }
 
   .pentagono__valor {
     fill: var(--color-brasa);
     font-weight: 700;
+  }
+
+  /* Se dibuja al aparecer (stroke-dasharray/dashoffset ya vienen calculados
+     desde el frontmatter) y el relleno sube con un fade corto después. */
+  .pentagono__forma {
+    animation:
+      draw 1s var(--ease-persona) 0.2s both,
+      fillIn 0.4s linear 1.1s both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pentagono__etiqueta {
+      opacity: 1;
+    }
   }
 </style>

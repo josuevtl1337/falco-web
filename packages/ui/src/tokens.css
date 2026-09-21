@@ -33,6 +33,10 @@
   --text-title: 28px;
   --text-display: 44px;
   --text-hero: clamp(56px, 9vw, 112px);
+  /* Unidades del lienzo del pentágono (viewBox chico), no píxeles de
+     página: no es comparable al resto de la escala, pero tiene que vivir
+     acá igual para que ningún tamaño quede suelto (tarea 6). */
+  --text-svg: 5px;
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 16px;
