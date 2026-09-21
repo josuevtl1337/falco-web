@@ -1,6 +1,6 @@
 /* Fuente variable: trae todos los pesos. Con los estáticos pedíamos 500 y
    800 sin tenerlos, y el navegador inventaba una negrita falsa. */
-@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/bricolage-grotesque/wght.css";
 @import "@fontsource/instrument-sans/400.css";
 @import "@fontsource/martian-mono/400.css";
 @import "@falco/ui/tokens.css";
