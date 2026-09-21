@@ -87,6 +87,11 @@ expect(files.length).toBeGreaterThan(0);
 
 Sin eso, el test pasa habiendo leído cero archivos.
 
+> **Ojo con el servidor fantasma.** Si cambiás un estilo y el navegador sigue mostrando el anterior,
+> no estás loco: el dev server puede seguir sirviendo la versión vieja. Antes de dar por roto un
+> cambio visual, reiniciá (`npx astro dev stop` y de nuevo `npm run dev`) y recargá con la URL
+> cambiada (`?bust=1`). Perdí un rato buscando un bug de CSS que no existía.
+
 ### 3. Mirá la pantalla, no solo la consola
 
 Los dos defectos más visibles del proyecto —las placas del café pisándose y un nav de 201 px de alto

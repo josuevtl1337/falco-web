@@ -83,6 +83,24 @@ a {
   cursor: pointer;
 }
 
+/* El aire de una página. Vive acá y no en el <style> de cada una, porque
+   Astro encapsula los estilos de componente y habría que repetirlo. */
+.pagina {
+  padding: var(--space-xl) var(--space-lg);
+}
+
+@media (min-width: 900px) {
+  .pagina {
+    padding-inline: var(--space-xxl);
+  }
+}
+
+@media (max-width: 640px) {
+  .pagina {
+    padding: var(--space-lg) var(--space-md);
+  }
+}
+
 /*
  * Igual que .boton: el cartel "Abierto ahora" vive en una isla de React
  * (OpenNow.tsx), así que no puede tener un <style> con scope de Astro.

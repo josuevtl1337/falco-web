@@ -20,9 +20,10 @@ const shelves = [
   description="Café de especialidad, kits y accesorios para llevar de Falco, en Santo Tomé."
 >
   <Nav slot="nav" />
-  <h1>La tienda</h1>
-  {
-    shelves.map((shelf) => (
+  <div class="pagina">
+    <h1>La tienda</h1>
+    {
+      shelves.map((shelf) => (
       <section aria-labelledby={`estante-${shelf.title}`}>
         <h2 id={`estante-${shelf.title}`}>{shelf.title}</h2>
         {shelf.products.length === 0 ? (
@@ -42,6 +43,7 @@ const shelves = [
       </section>
     ))
   }
+  </div>
 </Base>
 
 <style>
