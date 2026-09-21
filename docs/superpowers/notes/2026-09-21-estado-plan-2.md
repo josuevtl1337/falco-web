@@ -92,6 +92,7 @@ maquetar el pedido dos veces.
 | **Cada producto tiene dos precios** | Falco cobra distinto con tarjeta que en efectivo o transferencia. `price_ars` se partió en `price_card_ars` y `price_cash_ars`, las dos obligatorias y sin alias; `orderTotal` devuelve `{ cash, card }` y el mensaje muestra los dos, con el de efectivo primero. Mostrar uno solo te deja parecer más caro de lo que sos, o sorprender a alguien en la caja. |
 | **Las remeras quedaron para más adelante** | Se fueron del seed junto con los talles, pero el **mecanismo de opciones se quedó entero**: es el que usa el café para grano y molido. `kind` conserva `'apparel'`, así que volver no toca el esquema. |
 | **El seed se parece a la realidad** | El catálogo real se muestra entero: nada oculto, nada con "Consultar stock" inventado, las dos moliendas disponibles. Los casos raros que las pruebas necesitan viven en un **borrador oculto** (`producto-de-prueba`), que no se ve en el sitio. |
+| **La tolva no lleva notas de cata ni descripción** | El pentágono con sus cinco etiquetas dice lo mismo sin pedir vocabulario. Decisión del dueño (2026-09-21): su público no es técnico. Las columnas quedan en la base, pero hoy no las lee nadie — ver el arrastre, punto 15c, antes de armar el admin. |
 | **El café se vende en grano y molido** | La opción se elige dentro del producto. El mensaje de WhatsApp imprime la etiqueta tal cual, que se escribe entera en el admin. |
 
 ---
