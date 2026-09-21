@@ -43,7 +43,7 @@ const tickerText =
   <Nav slot="nav" />
 
   <div class="home">
-    <header class="hud">
+    <header class="hud zona-hud">
       <Calendario
         weekday={nowAR.weekday}
         day={Number(dayText)}
@@ -54,7 +54,7 @@ const tickerText =
       <p class="direccion">Iriondo 2153 · Santo Tomé, Santa Fe</p>
     </header>
 
-    <section class="presentacion">
+    <section class="presentacion zona-texto">
       <h1 class="hero"><span>café de</span><span>santoto</span></h1>
       <p class="bajada">
         Somos una cafetería de especialidad en una esquina de Santo Tomé.
@@ -71,7 +71,7 @@ const tickerText =
 
     {
       coffee && (
-        <section class="panel tolva" aria-label="En tolva ahora">
+        <section class="panel tolva zona-panel" aria-label="En tolva ahora">
           <span class="chip chip--fill">En tolva ahora</span>
 
           <Origen coffee={coffee} />
@@ -201,7 +201,34 @@ const tickerText =
     padding-bottom: 2px;
   }
 
-  @media (min-width: 900px) {
+  /* En escritorio la tolva va al costado, como en la lámina: el texto a la
+     izquierda y el panel a la derecha, ocupando las dos filas. Apilado se
+     pierde la composición y la tolva queda debajo del pliegue. */
+  @media (min-width: 1000px) {
+    .home {
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 460px);
+      grid-template-areas:
+        "hud panel"
+        "texto panel";
+      align-items: start;
+      column-gap: var(--space-xxl);
+      padding-inline: var(--space-xxl);
+    }
+
+    .zona-hud {
+      grid-area: hud;
+    }
+
+    .zona-texto {
+      grid-area: texto;
+    }
+
+    .zona-panel {
+      grid-area: panel;
+    }
+  }
+
+  @media (min-width: 900px) and (max-width: 999px) {
     .home {
       padding-inline: var(--space-xxl);
     }

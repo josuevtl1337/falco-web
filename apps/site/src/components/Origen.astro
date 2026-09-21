@@ -9,7 +9,11 @@ const { coffee } = Astro.props;
 
 // Primera línea: de dónde sale el café. Segunda línea, más chica: cómo es.
 // Cada dato es opcional según lo que el café tenga cargado.
-const principal = [coffee.farm, coffee.country].filter(Boolean).join(" · ");
+// El nombre del café es la región ("Huila") y va junto al país, como en la
+// lámina: [Finca La Esperanza] · [Huila, Colombia]. Sin él, la tolva no dice
+// qué café hay, que es lo único que la gente viene a mirar.
+const lugar = [coffee.name, coffee.country].filter(Boolean).join(", ");
+const principal = [coffee.farm, lugar].filter(Boolean).join(" · ");
 const secundaria = [
   coffee.variety,
   coffee.process,
