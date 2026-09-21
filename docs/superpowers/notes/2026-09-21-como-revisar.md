@@ -92,6 +92,19 @@ Sin eso, el test pasa habiendo leído cero archivos.
 > cambio visual, reiniciá (`npx astro dev stop` y de nuevo `npm run dev`) y recargá con la URL
 > cambiada (`?bust=1`). Perdí un rato buscando un bug de CSS que no existía.
 
+> **Y mirá la consola del navegador, no solo la pantalla.** Una isla de React puede renderizar bien
+> en el servidor y **fallar al hidratarse**: el HTML aparece, React explota, y el elemento
+> desaparece sin dejar rastro en la pantalla. Los tests no lo ven, porque corren en jsdom y no
+> hidratan. La señal es un error tipo `dispatcher.getOwner is not a function`, que suele ser el
+> **caché de dependencias de Vite** desactualizado:
+>
+> ```bash
+> cd apps/site && npx astro dev stop && rm -rf node_modules/.vite .astro && npm run dev
+> ```
+>
+> Para confirmar que una isla se hidrató de verdad, Astro le saca el atributo `ssr` al elemento:
+> `!document.querySelector('astro-island').hasAttribute('ssr')` tiene que dar `true`.
+
 ### 3. Mirá la pantalla, no solo la consola
 
 Los dos defectos más visibles del proyecto —las placas del café pisándose y un nav de 201 px de alto
