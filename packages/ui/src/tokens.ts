@@ -44,6 +44,7 @@ export const text = {
   lead: "20px",
   title: "28px",
   display: "44px",
+  hero: "clamp(56px, 9vw, 112px)",
 } as const;
 
 export const radius = { sm: "4px", md: "8px", lg: "16px" } as const;
