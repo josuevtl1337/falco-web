@@ -1,0 +1,39 @@
+---
+import { env } from "cloudflare:workers";
+import { getProductBySlug } from "@falco/db";
+import Base from "../../layouts/Base.astro";
+import Nav from "../../components/Nav.astro";
+import { priceLabel } from "../../components/precio";
+
+const { slug } = Astro.params;
+const product = slug ? await getProductBySlug(env.DB, slug) : undefined;
+
+if (!product) {
+  return Astro.redirect("/404", 302);
+}
+---
+
+<Base
+  title={`${product.name} · Falco`}
+  description={product.description ?? product.detail}
+>
+  <Nav slot="nav" />
+  <article class="detalle">
+    <h1>{product.name}</h1>
+    <p class="detalle__detalle">{product.detail}</p>
+    <p class="detalle__precio">{priceLabel(product)}</p>
+    {product.description && <p>{product.description}</p>}
+    {
+      product.options.length > 0 && (
+        <ul class="detalle__opciones">
+          {product.options.map((option) => (
+            <li data-disponible={option.isAvailable}>
+              {option.label}
+              {!option.isAvailable && <span> · sin stock</span>}
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </article>
+</Base>

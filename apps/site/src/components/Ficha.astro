@@ -1,0 +1,49 @@
+---
+import type { ProductWithOptions } from "@falco/db";
+import { priceLabel } from "./precio";
+
+interface Props {
+  product: ProductWithOptions;
+}
+
+const { product } = Astro.props;
+---
+
+<article class="ficha">
+  <a href={`/tienda/${product.slug}`}>
+    {product.isNew && <span class="ficha__chip">Nuevo</span>}
+    <h3>{product.name}</h3>
+    <p class="ficha__detalle">{product.detail}</p>
+    <p class="ficha__precio">{priceLabel(product)}</p>
+  </a>
+</article>
+
+<style>
+  .ficha a {
+    display: grid;
+    gap: var(--space-xs);
+    padding: var(--space-md);
+    min-height: var(--touch-min);
+    background: var(--color-piedra);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+  }
+  .ficha__chip {
+    justify-self: start;
+    padding: 2px var(--space-sm);
+    background: var(--color-brasa);
+    color: var(--color-carbon);
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    text-transform: uppercase;
+    rotate: var(--angle-button);
+  }
+  .ficha__detalle {
+    color: var(--color-ceniza);
+    margin: 0;
+  }
+  .ficha__precio {
+    font-family: var(--font-mono);
+    margin: 0;
+  }
+</style>
