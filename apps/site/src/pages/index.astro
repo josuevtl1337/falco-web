@@ -37,7 +37,7 @@ const tickerText =
     "Iriondo 2153 · Santo Tomé",
   ]
     .filter((item): item is string => Boolean(item))
-    .join(" ◆ ") + " ◆";
+    .join("\u2003◆\u2003") + "\u2003◆\u2003";
 ---
 
 <Base
@@ -198,6 +198,8 @@ const tickerText =
   .hero {
     margin: 0;
     font-family: var(--font-display);
+    /* La lámina pesa 500: con 700 el título se empasta. */
+    font-weight: 500;
     font-size: clamp(40px, 21cqw, 112px);
     line-height: 0.94;
     letter-spacing: -0.02em;

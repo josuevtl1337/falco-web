@@ -1,4 +1,6 @@
-@import "@fontsource/bricolage-grotesque/700.css";
+/* Fuente variable: trae todos los pesos. Con los estáticos pedíamos 500 y
+   800 sin tenerlos, y el navegador inventaba una negrita falsa. */
+@import "@fontsource-variable/bricolage-grotesque";
 @import "@fontsource/instrument-sans/400.css";
 @import "@fontsource/martian-mono/400.css";
 @import "@falco/ui/tokens.css";
@@ -261,6 +263,15 @@ a {
 }
 
 /* Carbón al 85% de opacidad sobre brasa: 6,26:1, medido (ver reporte). */
+/* Dos sombras: la dura tostada que ya usan los otros carteles, y un
+   resplandor de brasa desenfocado que hace que el cartel parezca encendido.
+   Medido en la lámina: 0 0 34px 2px rgba(242,196,139,.34). */
+.estado.chip--lit::before {
+  box-shadow:
+    5px 5px 0 var(--color-tostado),
+    0 0 34px 2px rgba(242, 196, 139, 0.34);
+}
+
 .chip--lit .estado__sub {
   opacity: 0.85;
 }

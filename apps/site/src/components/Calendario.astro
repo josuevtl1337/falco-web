@@ -26,7 +26,7 @@ const { weekday, day, month, moment, previousDay } = Astro.props;
     <span class="fecha__mes">/{month}</span>
   </p>
   <div class="fecha__semana">
-    <span class="chip chip--fill fecha__chip">{WEEKDAY_LABELS[weekday]}</span>
+    <span class="chip chip--fill chip--shadow fecha__chip">{WEEKDAY_LABELS[weekday]}</span>
     <span class="fecha__momento">{moment}</span>
   </div>
 </div>
