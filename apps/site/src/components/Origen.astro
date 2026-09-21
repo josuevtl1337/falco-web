@@ -1,0 +1,45 @@
+---
+import type { Coffee } from "@falco/db";
+
+interface Props {
+  coffee: Coffee;
+}
+
+const { coffee } = Astro.props;
+
+// Primera línea: de dónde sale el café. Segunda línea, más chica: cómo es.
+// Cada dato es opcional según lo que el café tenga cargado.
+const principal = [coffee.farm, coffee.country].filter(Boolean).join(" · ");
+const secundaria = [
+  coffee.variety,
+  coffee.process,
+  coffee.altitudeMasl ? `${coffee.altitudeMasl} msnm` : undefined,
+]
+  .filter(Boolean)
+  .join(" · ");
+---
+
+<div class="origen">
+  <span class="chip chip--fill">Origen</span>
+  <p class="origen__principal">{principal}</p>
+  {secundaria && <p class="origen__secundaria">{secundaria}</p>}
+</div>
+
+<style>
+  .origen {
+    display: grid;
+    gap: var(--space-xs);
+    justify-items: start;
+  }
+
+  .origen__principal {
+    margin: var(--space-xs) 0 0;
+    font-size: var(--text-body);
+  }
+
+  .origen__secundaria {
+    margin: 0;
+    font-size: var(--text-small);
+    color: var(--color-ceniza);
+  }
+</style>

@@ -30,14 +30,22 @@ export function OpenNow({ week, specials, initial }: Props) {
     return () => clearInterval(timer);
   }, [week, specials]);
 
+  // Solo se parte el texto para el estilo (el chip encendido lleva el
+  // detalle en un tono más apagado): el contenido completo sigue siendo el
+  // mismo `status.label` que ya calculó getOpenStatus.
+  const open = status.state === "open";
+  const [primary, ...rest] = status.label.split(" · ");
+  const sub = rest.length > 0 ? rest.join(" · ") : null;
+
   return (
     <p
       role="status"
-      data-open={status.state === "open"}
-      className="abierto-ahora"
+      data-open={open}
+      className={`chip estado ${open ? "chip--lit" : "chip--fill"}`}
     >
       <span className="punto" aria-hidden="true" />
-      {status.label}
+      <span className="estado__label">{primary}</span>
+      {sub && <span className="estado__sub"> · {sub}</span>}
     </p>
   );
 }

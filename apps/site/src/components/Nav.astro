@@ -2,7 +2,11 @@
 const links = [
   { href: "/tienda", label: "La tienda" },
   { href: "/donde-estamos", label: "Dónde estamos" },
-  { href: "https://www.instagram.com/falco.cafe/", label: "@falco.cafe" },
+  {
+    href: "https://www.instagram.com/falco.cafe/",
+    label: "@falco.cafe",
+    boxed: true,
+  },
 ];
 
 const path = Astro.url.pathname;
@@ -21,6 +25,7 @@ const path = Astro.url.pathname;
         <li>
           <a
             href={link.href}
+            class={link.boxed ? "nav__caja" : undefined}
             aria-current={path === link.href ? "page" : undefined}
           >
             {link.label}
@@ -77,6 +82,11 @@ const path = Astro.url.pathname;
 
   .nav a[aria-current="page"] {
     color: var(--color-brasa);
+  }
+
+  .nav__caja {
+    border: 1px solid var(--color-tostado);
+    padding-inline: var(--space-md);
   }
 
   /* En el celular el menú se endereza (inclinado y envuelto se vuelve ilegible)

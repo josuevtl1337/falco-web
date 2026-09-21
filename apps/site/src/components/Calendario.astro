@@ -1,36 +1,63 @@
 ---
+import { WEEKDAY_LABELS, type DayMoment } from "./fecha";
+
 interface Props {
-  weekday: string;
+  /** 0 = domingo … 6 = sábado, igual que toArgentina().weekday. */
+  weekday: number;
   day: number;
-  month: string;
+  month: number;
+  moment: DayMoment;
 }
 
-const { weekday, day, month } = Astro.props;
+const { weekday, day, month, moment } = Astro.props;
 ---
 
-<div class="calendario">
-  <span class="calendario__dia-semana">{weekday}</span>
-  <strong class="calendario__numero">{day}</strong>
-  <span class="calendario__mes">{month}</span>
+<div class="fecha">
+  <p class="fecha__numero">
+    <strong>{day}</strong><span class="fecha__mes">/{month}</span>
+  </p>
+  <div class="fecha__semana">
+    <span class="chip chip--fill">{WEEKDAY_LABELS[weekday]}</span>
+    <span class="fecha__momento">{moment}</span>
+  </div>
 </div>
 
 <style>
-  .calendario {
+  .fecha {
     display: grid;
-    justify-items: center;
-    gap: var(--space-xs);
-    padding: var(--space-sm) var(--space-md);
-    background: var(--color-piedra);
-    border-radius: var(--radius-md);
-    rotate: var(--angle-plate);
+    grid-template-columns: auto auto;
+    gap: 2px var(--space-md);
+    align-items: end;
   }
-  .calendario__numero {
+
+  .fecha__numero {
+    grid-row: 1 / span 2;
+    margin: 0;
+    display: flex;
+    align-items: flex-end;
     font-family: var(--font-display);
-    font-size: var(--text-display);
     line-height: 1;
   }
-  .calendario__dia-semana,
-  .calendario__mes {
+
+  .fecha__numero strong {
+    font-size: var(--text-display);
+    font-weight: 700;
+  }
+
+  .fecha__mes {
+    margin-left: 2px;
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    color: var(--color-ceniza);
+  }
+
+  .fecha__semana {
+    display: grid;
+    gap: var(--space-xs);
+    justify-items: start;
+  }
+
+  .fecha__momento {
     font-family: var(--font-mono);
     font-size: var(--text-micro);
     letter-spacing: 0.12em;

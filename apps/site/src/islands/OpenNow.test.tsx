@@ -34,7 +34,12 @@ describe("OpenNow", () => {
         }}
       />,
     );
-    expect(screen.getByText("Abierto ahora · cierra 20:00")).toBeTruthy();
+    // El chip parte el texto en dos <span> para el estilo (ver forma del
+    // componente), así que se compara el textContent completo del cartel
+    // en vez de buscar el string entero en un solo nodo.
+    expect(screen.getByRole("status").textContent).toBe(
+      "Abierto ahora · cierra 20:00",
+    );
   });
 
   it("corrige el cartel si el HTML venía cacheado con un estado viejo", () => {

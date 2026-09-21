@@ -1,34 +1,35 @@
 ---
 import { env } from "cloudflare:workers";
-import {
-  getHopperCoffee,
-  getUpcomingSpecialDays,
-  getWeekHours,
-} from "@falco/db";
+import { getHopperCoffee, getUpcomingSpecialDays, getWeekHours } from "@falco/db";
 import { getOpenStatus, toArgentina } from "@falco/domain";
 import Base from "../layouts/Base.astro";
 import Calendario from "../components/Calendario.astro";
 import Dialogo from "../components/Dialogo.astro";
+import { dayMoment } from "../components/fecha";
 import Nav from "../components/Nav.astro";
+import Origen from "../components/Origen.astro";
 import Pentagono from "../components/Pentagono.astro";
-import Placas from "../components/Placas.astro";
 import { OpenNow } from "../islands/OpenNow";
 
 const now = new Date();
 const week = await getWeekHours(env.DB);
-const today = toArgentina(now).date;
-const specials = await getUpcomingSpecialDays(env.DB, today, 30);
+const nowAR = toArgentina(now);
+const specials = await getUpcomingSpecialDays(env.DB, nowAR.date, 30);
 const status = getOpenStatus(now, week, specials);
 const coffee = await getHopperCoffee(env.DB);
 
-const formatter = new Intl.DateTimeFormat("es-AR", {
-  timeZone: "America/Argentina/Buenos_Aires",
-  weekday: "short",
-  day: "numeric",
-  month: "short",
-});
-const parts = formatter.formatToParts(now);
-const part = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+// nowAR.date siempre es "AAAA-MM-DD": partirlo evita una segunda pasada por
+// Intl solo para el número de día y de mes.
+const [, monthText, dayText] = nowAR.date.split("-");
+
+const tickerText =
+  [
+    coffee && `En tolva ${coffee.country}`,
+    coffee && `Tostadero ${coffee.roaster}`,
+    "Iriondo 2153 · Santo Tomé",
+  ]
+    .filter((item): item is string => Boolean(item))
+    .join(" ◆ ") + " ◆";
 ---
 
 <Base
@@ -37,118 +38,193 @@ const part = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
 >
   <Nav slot="nav" />
 
-  <header class="hud">
-    <Calendario
-      weekday={part("weekday")}
-      day={Number(part("day"))}
-      month={part("month")}
-    />
-    <OpenNow week={week} specials={specials} initial={status} client:idle />
-  </header>
+  <div class="home">
+    <header class="hud">
+      <Calendario
+        weekday={nowAR.weekday}
+        day={Number(dayText)}
+        month={Number(monthText)}
+        moment={dayMoment(nowAR.minutes)}
+      />
+      <OpenNow week={week} specials={specials} initial={status} client:idle />
+      <p class="direccion">Iriondo 2153 · Santo Tomé, Santa Fe</p>
+    </header>
 
-  <section class="mision">
-    <h1>Traer el mundo del café a Santo Tomé</h1>
-    <Dialogo>
-      <p>
-        Nuestra misión siempre fue la misma: traer el mundo del café a Santo
-        Tomé.
+    <section class="presentacion">
+      <h1 class="hero"><span>café de</span><span>santoto</span></h1>
+      <p class="bajada">
+        Somos una cafetería de especialidad en una esquina de Santo Tomé.
+        Tostamos con <b>Puerto Blest</b> y servimos café que se puede entender
+        sin saber nada de café.
       </p>
-    </Dialogo>
-  </section>
+      <Dialogo>
+        <p>
+          Nuestra misión siempre fue la misma: traer el mundo del café a
+          Santo Tomé.
+        </p>
+      </Dialogo>
+    </section>
 
-  {
-    coffee && (
-      <section class="tolva" aria-labelledby="tolva-titulo">
-        <div class="tolva__texto">
-          <p class="tolva__eyebrow">En tolva</p>
-          <h2 id="tolva-titulo">{coffee.name}</h2>
-          {coffee.tastingNotes && (
-            <p class="tolva__notas">{coffee.tastingNotes}</p>
-          )}
-          {coffee.description && <p>{coffee.description}</p>}
-          <Placas coffee={coffee} />
-          <a class="boton" href="/tienda">
-            Llevate un cuarto
-          </a>
-        </div>
+    {
+      coffee && (
+        <section class="panel tolva" aria-label="En tolva ahora">
+          <span class="chip chip--fill">En tolva ahora</span>
 
-        <div class="tolva__pentagono">
-          <Pentagono profile={coffee.profile} />
-        </div>
-      </section>
-    )
-  }
+          <Origen coffee={coffee} />
+
+          <div class="tolva__sabor">
+            <span class="chip chip--fill">A qué sabe</span>
+            <Pentagono profile={coffee.profile} />
+          </div>
+
+          <div class="tolva__tostadero">
+            <span class="chip chip--fill">Tostadero</span>
+            <p>{coffee.roaster}</p>
+          </div>
+
+          <div class="tolva__pie">
+            <span>Cambia cada vez que cambiamos el grano</span>
+            <a href="/tienda">Llevate un cuarto →</a>
+          </div>
+        </section>
+      )
+    }
+  </div>
+
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__banda">
+      <div class="ticker__cinta">
+        <span>{tickerText}</span>
+        <span>{tickerText}</span>
+      </div>
+    </div>
+  </div>
 </Base>
 
 <style>
-  .mision,
-  .tolva {
+  .home {
+    position: relative;
+    display: grid;
+    gap: var(--space-xl);
     padding: var(--space-xl) var(--space-lg);
   }
 
-  .mision h1 {
-    font-size: var(--text-display);
-    max-width: 18ch;
-    margin-bottom: var(--space-lg);
+  /* La cara del murciélago, muy tenue, arriba al centro: no compite con el
+     contraste del texto porque va casi invisible y detrás de todo. */
+  .home::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 480px;
+    background-image: url("/falco-face.svg");
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: 380px auto;
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .presentacion {
+    display: grid;
+    gap: var(--space-lg);
+    justify-items: start;
+  }
+
+  .hero {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-hero);
+    line-height: 0.94;
+    letter-spacing: -0.02em;
+  }
+
+  .hero span {
+    display: block;
+  }
+
+  .bajada {
+    margin: 0;
+    max-width: 46ch;
+    font-size: var(--text-lead);
+    color: var(--color-ceniza);
+  }
+
+  .bajada b {
+    color: var(--color-hueso);
+    font-weight: 600;
   }
 
   .tolva {
     display: grid;
-    gap: var(--space-xl);
-    align-items: start;
-    border-top: 1px solid var(--color-sombra);
-  }
-
-  .tolva__texto {
-    display: grid;
-    gap: var(--space-md);
+    gap: var(--space-lg);
     justify-items: start;
   }
 
-  .tolva__eyebrow {
+  .tolva__sabor,
+  .tolva__tostadero {
+    display: grid;
+    gap: var(--space-sm);
+    justify-items: start;
+  }
+
+  .tolva__tostadero p {
     margin: 0;
+    font-size: var(--text-body);
+  }
+
+  .tolva__pie {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-sm) var(--space-md);
+    width: 100%;
+    margin-top: var(--space-sm);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-sombra);
     font-family: var(--font-mono);
     font-size: var(--text-micro);
-    letter-spacing: 0.14em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--color-ceniza);
   }
 
-  .tolva h2 {
-    font-size: var(--text-title);
-    margin: 0;
-  }
-
-  .tolva__notas {
-    margin: 0;
-    font-size: var(--text-lead);
-    color: var(--color-brasa);
-  }
-
-  .tolva p {
-    margin: 0;
-    max-width: 52ch;
+  .tolva__pie a {
+    color: var(--color-hueso);
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-tostado);
+    padding-bottom: 2px;
   }
 
   @media (min-width: 900px) {
-    .mision,
-    .tolva {
+    .home {
       padding-inline: var(--space-xxl);
-    }
-
-    .tolva {
-      grid-template-columns: minmax(0, 1fr) auto;
     }
   }
 
   @media (max-width: 640px) {
-    .mision,
-    .tolva {
+    .home {
+      gap: var(--space-md);
       padding: var(--space-lg) var(--space-md);
     }
 
-    .mision h1 {
-      font-size: var(--text-title);
+    .home::before {
+      height: 320px;
+      background-size: 260px auto;
+    }
+
+    .presentacion {
+      gap: var(--space-sm);
+    }
+
+    .bajada {
+      font-size: var(--text-body);
+    }
+
+    .panel.tolva {
+      padding: var(--space-md);
+      gap: var(--space-md);
     }
   }
 </style>

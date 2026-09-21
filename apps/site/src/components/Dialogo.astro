@@ -3,21 +3,65 @@
 ---
 
 <div class="dialogo">
-  <slot />
+  <span class="chip chip--fill dialogo__etiqueta">Falco</span>
+  <div class="dialogo__caja">
+    <slot />
+    <span class="dialogo__flecha" aria-hidden="true">▼</span>
+  </div>
 </div>
 
 <style>
   .dialogo {
-    padding: var(--space-lg);
-    background: var(--color-piedra);
-    border-left: 3px solid var(--color-tostado);
-    border-radius: 0;
-    rotate: var(--angle-dialog);
+    position: relative;
+    padding-top: var(--space-md);
     max-width: 46ch;
+    rotate: var(--angle-dialog);
   }
 
-  .dialogo :global(p) {
+  .dialogo__etiqueta {
+    position: absolute;
+    left: var(--space-md);
+    top: 0;
+    z-index: 1;
+  }
+
+  .dialogo__caja {
+    position: relative;
+    padding: var(--space-lg) var(--space-xl) var(--space-lg) var(--space-lg);
+    background: var(--color-tostado);
+  }
+
+  /* El "doble borde" de la lámina: un marco de línea desplazado por detrás. */
+  .dialogo__caja::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    translate: var(--space-sm) var(--space-sm);
+    border: 1px solid var(--color-hueso);
+    z-index: -1;
+  }
+
+  .dialogo__caja :global(p) {
     margin: 0;
+    color: var(--color-hueso);
     font-size: var(--text-lead);
+  }
+
+  .dialogo__flecha {
+    position: absolute;
+    right: var(--space-md);
+    bottom: var(--space-sm);
+    color: var(--color-hueso);
+    font-size: var(--text-small);
+  }
+
+  @media (max-width: 640px) {
+    .dialogo__caja {
+      padding: var(--space-md) var(--space-lg) var(--space-md) var(--space-md);
+    }
+
+    .dialogo__caja :global(p) {
+      font-size: var(--text-body);
+    }
   }
 </style>
