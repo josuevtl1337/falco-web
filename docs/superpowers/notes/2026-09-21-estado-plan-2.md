@@ -21,8 +21,9 @@ El detalle completo de cada tarea, con su código, está en
 | 4 | "Abierto ahora" | ✅ terminada — ⚠️ sin review independiente |
 | 5 | La home | ✅ terminada — ⚠️ sin review independiente |
 | — | *(extra)* El día pasa a tener varios tramos | ✅ terminada |
-| 6 | **La tienda y el detalle de cada producto** | ⬜ **pendiente — es la que sigue** |
-| 7 | **El pedido** | ⬜ pendiente |
+| 6 | La tienda y el detalle de cada producto | ✅ terminada |
+| 10 | **La identidad visual** *(tarea que faltaba en el plan)* | 🔄 **en curso** |
+| 7 | **El pedido** | ⬜ pendiente — después de la 10 |
 | 8 | Dónde estamos, la carta y el 404 | ⬜ pendiente |
 | 9 | Caché en el borde | ⬜ pendiente |
 | — | Review final de toda la rama | ⬜ pendiente |
@@ -31,11 +32,20 @@ El detalle completo de cada tarea, con su código, está en
 **Por qué 6 antes que 7:** el pedido necesita productos que se puedan tocar. La 6 construye las
 fichas y el detalle; la 7 les agrega el botón "Sumar al pedido" encima.
 
+**Por qué la 10 antes que la 7:** el pedido es la superficie de interfaz más grande del sitio y
+usa el mismo vocabulario visual (chips, corte diagonal, paneles). Definirlo primero evita
+maquetar el pedido dos veces.
+
 ---
 
 ## 2. Deuda conocida (no son bugs, son cosas que decidimos postergar)
 
 ### Deuda de proceso
+
+- **El plan no especificó la identidad visual.** Las tareas 3 a 6 detallaron componentes y ninguna
+  detalló composición: el sitio quedó funcionando bien y sin parecerse a los wireframes. Lo detectó
+  el dueño, no el proceso. La Tarea 10 lo corrige. **Lección: un plan que solo describe piezas
+  produce piezas, no un diseño.**
 
 - **Las tareas 4 y 5 no tuvieron review independiente.** La 4 se revisó después de que dos despachos
   se colgaran; la 5 la implementó quien coordina. **La review final de rama tiene que cubrirlas.**
