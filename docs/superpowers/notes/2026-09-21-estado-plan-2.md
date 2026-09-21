@@ -3,8 +3,8 @@
 > **Este archivo es el lugar donde mirar qué falta, sin preguntarle a nadie.**
 > Se actualiza al cerrar cada tarea. Si está desactualizado, el commit más reciente manda.
 
-Última actualización: **2026-09-21** · rama `feat/plan-2-site` · 17 commits sobre `main`
-**184 tests en verde** (73 db + 79 domain + 20 ui + 12 site) · typecheck limpio en los 4 workspaces
+Última actualización: **2026-09-21** · rama `feat/plan-2-site` · 21 commits sobre `main`
+**187 tests en verde** (76 db + 79 domain + 20 ui + 12 site) · typecheck limpio en los 4 workspaces
 
 ---
 
@@ -79,6 +79,9 @@ fichas y el detalle; la 7 les agrega el botón "Sumar al pedido" encima.
 | **El cartel "Abierto ahora" se recalcula al montar** | El HTML se cachea 60 s en el borde, así que el estado del servidor puede llegar atrasado. Sin eso, el cartel podía mentir casi dos minutos. Los efectos de React corren **después** del pintado, así que esto no afecta la primera pintura. |
 | **El día tiene N tramos, y `isClosed` desapareció** | El local corta al mediodía. `isClosed: true` con un horario cargado era un estado contradecible; una lista vacía no se puede contradecir. |
 | **El día y sus tramos van en tablas separadas** | Un día especial **cerrado** tiene que existir para pisar al horario semanal, y no tiene ningún tramo que lo represente. |
+| **Cada producto tiene dos precios** | Falco cobra distinto con tarjeta que en efectivo o transferencia. `price_ars` se partió en `price_card_ars` y `price_cash_ars`, las dos obligatorias y sin alias; `orderTotal` devuelve `{ cash, card }` y el mensaje muestra los dos, con el de efectivo primero. Mostrar uno solo te deja parecer más caro de lo que sos, o sorprender a alguien en la caja. |
+| **Las remeras quedaron para más adelante** | Se fueron del seed junto con los talles, pero el **mecanismo de opciones se quedó entero**: es el que usa el café para grano y molido. `kind` conserva `'apparel'`, así que volver no toca el esquema. |
+| **El seed se parece a la realidad** | El catálogo real se muestra entero: nada oculto, nada con "Consultar stock" inventado, las dos moliendas disponibles. Los casos raros que las pruebas necesitan viven en un **borrador oculto** (`producto-de-prueba`), que no se ve en el sitio. |
 | **El café se vende en grano y molido** | La opción se elige dentro del producto. El mensaje de WhatsApp imprime la etiqueta tal cual, que se escribe entera en el admin. |
 
 ---
@@ -93,7 +96,9 @@ fichas y el detalle; la 7 les agrega el botón "Sumar al pedido" encima.
 | Horarios reales y feriados | ✅ 13 tramos semanales + 20 feriados de 2026 y 2027 |
 | Link de la carta | ✅ cargado — ⚠️ **la carpeta de Drive está vacía**: falta subir el PDF |
 | Foto del molino E65S | ❌ descartada por el dueño (2026-09-20) |
-| Fotos y precios de productos | ⬜ los carga el dueño **desde el admin**, o sea recién en el Plan 3 |
+| Precios de accesorios | ✅ los 6 productos reales, con precio de tarjeta y de efectivo |
+| Precio del cuarto de café | ⬜ **falta**: el Huila sigue con precio de prueba ($ 13.000 / $ 12.000) |
+| Fotos de productos y textos | ⬜ los carga el dueño **desde el admin**, o sea recién en el Plan 3 |
 | Dominio | ⬜ **`falcocafe.com.ar`** por NIC Argentina (ARS 8.500/año), pendiente de la clave fiscal. Ya está puesto en `astro.config.mjs` y en la spec |
 
 ---
