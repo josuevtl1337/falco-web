@@ -1,6 +1,10 @@
 ---
 import { env } from "cloudflare:workers";
-import { getHopperCoffee, getUpcomingSpecialDays, getWeekHours } from "@falco/db";
+import {
+  getHopperCoffee,
+  getUpcomingSpecialDays,
+  getWeekHours,
+} from "@falco/db";
 import { getOpenStatus, toArgentina } from "@falco/domain";
 import Base from "../layouts/Base.astro";
 import Calendario from "../components/Calendario.astro";
