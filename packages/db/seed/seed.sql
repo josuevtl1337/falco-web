@@ -5,9 +5,9 @@ VALUES (1, 'Huila', 'Finca La Esperanza', 'Colombia', 'Caturra', 'Lavado', 1750,
 -- El catálogo real que mandó el dueño el 2026-09-21. price_card_ars es lo
 -- que se cobra con crédito o débito; price_cash_ars, con efectivo o
 -- transferencia (siempre el más barato de los dos).
--- Coffeepress queda oculto (is_visible = 0, todavía sin foto) y Kit V60 · 2
--- se pide consultando stock (ask_stock = 1): son los dos casos de prueba
--- que ya cubría el seed, repartidos entre los productos reales.
+-- El catálogo real se muestra entero. Los casos que las pruebas necesitan
+-- (un producto invisible, uno con "Consultar stock" y una opción agotada)
+-- viven en el borrador oculto del final, que nunca se ve en el sitio.
 INSERT INTO products (id, slug, kind, shelf, coffee_id, name, detail, price_card_ars, price_cash_ars, is_new, is_visible, ask_stock, sort_order) VALUES
   (1, 'huila-colombia', 'coffee', 'coffee', 1, 'Huila · Colombia', '250 g', 13000, 12000, 1, 1, 0, 1),
   (2, 'prensa', 'gear', 'kits', NULL, 'Prensa', 'Cafetera de émbolo', 35000, 33000, 0, 1, 0, 1),

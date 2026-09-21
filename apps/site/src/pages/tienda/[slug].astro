@@ -3,7 +3,7 @@ import { env } from "cloudflare:workers";
 import { getProductBySlug } from "@falco/db";
 import Base from "../../layouts/Base.astro";
 import Nav from "../../components/Nav.astro";
-import { priceLabel } from "../../components/precio";
+import { priceParts } from "../../components/precio";
 
 const { slug } = Astro.params;
 const product = slug ? await getProductBySlug(env.DB, slug) : undefined;
@@ -21,7 +21,9 @@ if (!product) {
   <article class="detalle pagina">
     <h1>{product.name}</h1>
     <p class="detalle__detalle">{product.detail}</p>
-    <p class="detalle__precio">{priceLabel(product)}</p>
+    <p class="precio">
+      {priceParts(product).map((parte) => <span>{parte}</span>)}
+    </p>
     {product.description && <p>{product.description}</p>}
     {
       product.options.length > 0 && (

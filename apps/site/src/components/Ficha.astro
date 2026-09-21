@@ -14,7 +14,7 @@ const { product } = Astro.props;
     {product.isNew && <span class="ficha__chip">Nuevo</span>}
     <h3>{product.name}</h3>
     <p class="ficha__detalle">{product.detail}</p>
-    <p class="ficha__precio">
+    <p class="precio">
       {priceParts(product).map((parte) => <span>{parte}</span>)}
     </p>
   </a>
@@ -43,23 +43,5 @@ const { product } = Astro.props;
   .ficha__detalle {
     color: var(--color-ceniza);
     margin: 0;
-  }
-  .ficha__precio {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px var(--space-sm);
-    font-family: var(--font-mono);
-    font-size: var(--text-micro);
-    margin: 0;
-  }
-
-  /* Cada precio entero, y el punto separador solo entre piezas. */
-  .ficha__precio span {
-    white-space: nowrap;
-  }
-
-  .ficha__precio span + span::before {
-    content: "· ";
-    color: var(--color-ceniza);
   }
 </style>

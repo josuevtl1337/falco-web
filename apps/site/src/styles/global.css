@@ -83,6 +83,27 @@ a {
   cursor: pointer;
 }
 
+/* Cada precio entero: el texto se corta donde entra, y "$ 35.000" separado
+   de "tarjeta" deja de leerse como un precio. Se usa en la ficha y en el
+   detalle, así que no puede vivir en el <style> de un componente. */
+.precio {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px var(--space-sm);
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+}
+
+.precio span {
+  white-space: nowrap;
+}
+
+.precio span + span::before {
+  content: "· ";
+  color: var(--color-ceniza);
+}
+
 /* El aire de una página. Vive acá y no en el <style> de cada una, porque
    Astro encapsula los estilos de componente y habría que repetirlo. */
 .pagina {
