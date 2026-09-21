@@ -11,7 +11,7 @@ const { product } = Astro.props;
 
 <article class="ficha">
   <a href={`/tienda/${product.slug}`}>
-    {product.isNew && <span class="ficha__chip">Nuevo</span>}
+    {product.isNew && <span class="chip chip--lit">Nuevo</span>}
     <h3>{product.name}</h3>
     <p class="ficha__detalle">{product.detail}</p>
     <p class="precio">
@@ -30,15 +30,8 @@ const { product } = Astro.props;
     border-radius: var(--radius-md);
     text-decoration: none;
   }
-  .ficha__chip {
+  .ficha .chip {
     justify-self: start;
-    padding: 2px var(--space-sm);
-    background: var(--color-brasa);
-    color: var(--color-carbon);
-    font-family: var(--font-mono);
-    font-size: var(--text-micro);
-    text-transform: uppercase;
-    rotate: var(--angle-button);
   }
   .ficha__detalle {
     color: var(--color-ceniza);
