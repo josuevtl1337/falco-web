@@ -8,7 +8,8 @@
     "build": "astro build",
     "preview": "wrangler dev",
     "typecheck": "wrangler types && astro check",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:reset": "node -e \"require('node:fs').rmSync('.wrangler/state/v3/d1',{recursive:true,force:true})\" && wrangler d1 migrations apply falco --local && wrangler d1 execute falco --local --file ../../packages/db/seed/seed.sql"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.3.2",

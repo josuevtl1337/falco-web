@@ -42,13 +42,25 @@ cd apps/site && npm run build && npx wrangler dev
 La diferencia importa: `dev` usa Vite y es rápido; `wrangler dev` corre el bundle real sobre el
 runtime de Workers. Las cabeceras de caché solo se verifican bien en el segundo.
 
-La base local se prepara así:
+La base local se prepara —o se repara— con un solo comando, desde la raíz:
 
 ```bash
-cd apps/site
-npx wrangler d1 migrations apply falco --local
-npx wrangler d1 execute falco --local --file ../../packages/db/seed/seed.sql
+npm run db:reset --workspace @falco/site
 ```
+
+Borra la base local, aplica la migración desde cero y carga el seed. Usa `node` para borrar en vez
+de `rm -rf`, así que funciona igual en Windows.
+
+> **Por qué hace falta borrar y no solo aplicar.** Mientras el proyecto no esté desplegado, el
+> esquema se edita **dentro de `0001_init.sql`** en lugar de ir agregando migraciones. Pero wrangler
+> lleva la cuenta de lo aplicado **por nombre de archivo**: ve `0001_init.sql`, da por hecho que ya
+> corrió y contesta `No migrations to apply!`, aunque el contenido haya cambiado por completo. El
+> síntoma es un error de D1 en la primera consulta, del estilo `no such table: business_hour_shifts`.
+> **Después de cada `git pull` que toque la migración, corré `db:reset`.**
+
+> **Dev server zombi.** Astro 7 deja el servidor corriendo en segundo plano, y el viejo sigue con la
+> conexión anterior a la base: arreglás el esquema y seguís viendo el mismo error. Se para con
+> `cd apps/site && npx astro dev stop`.
 
 ## Qué mirar al revisar, en orden de rendimiento
 
