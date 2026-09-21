@@ -16,7 +16,7 @@
   --ease-persona: cubic-bezier(0.2, 1.2, 0.4, 1);
   --ease-ambient: cubic-bezier(0.16, 1, 0.3, 1);
 
-  --font-display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
   --font-body: "Instrument Sans", system-ui, sans-serif;
   --font-mono: "Martian Mono", ui-monospace, "SFMono-Regular", monospace;
 

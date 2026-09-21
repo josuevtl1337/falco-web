@@ -23,7 +23,8 @@ export const easing = {
 } as const;
 
 export const fonts = {
-  display: '"Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif',
+  display:
+    '"Bricolage Grotesque Variable", "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif',
   body: '"Instrument Sans", system-ui, sans-serif',
   mono: '"Martian Mono", ui-monospace, "SFMono-Regular", monospace',
 } as const;
