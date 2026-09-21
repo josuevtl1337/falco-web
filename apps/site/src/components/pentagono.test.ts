@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pentagonPoints } from "./pentagono";
+import { pentagonPoints, pentagonPolygon } from "./pentagono";
 
 const distanceFromCentre = (point: { x: number; y: number }) =>
   Math.hypot(point.x - 50, point.y - 50);
@@ -81,5 +81,43 @@ describe("pentagonPoints", () => {
     expect(keys.size).toBe(5);
     for (const point of points)
       expect(distanceFromCentre(point)).toBeCloseTo(32, 1);
+  });
+});
+
+// El pentágono dibuja un punto por vértice (panel de la tolva) con las
+// coordenadas que devuelve pentagonPoints: si el punto se calculara por
+// separado, podría desalinearse del polígono que representa y mentir sobre
+// el perfil del café, igual que un vértice mal calculado.
+describe("los puntos de vértice del pentágono", () => {
+  it("hay exactamente cinco, uno por eje", () => {
+    const points = pentagonPoints({
+      acidity: 4,
+      sweetness: 2,
+      body: 5,
+      aroma: 3,
+      finish: 1,
+    });
+    expect(points).toHaveLength(5);
+  });
+
+  it("cada punto cae sobre el vértice del polígono del perfil", () => {
+    const profile = {
+      acidity: 4,
+      sweetness: 2,
+      body: 5,
+      aroma: 3,
+      finish: 1,
+    };
+    const points = pentagonPoints(profile);
+    const vertices = pentagonPolygon(profile)
+      .split(" ")
+      .map((pair) => pair.split(",").map(Number) as [number, number]);
+
+    expect(vertices).toHaveLength(5);
+    points.forEach((point, index) => {
+      const [vx, vy] = vertices[index]!;
+      expect(point.x).toBeCloseTo(vx, 2);
+      expect(point.y).toBeCloseTo(vy, 2);
+    });
   });
 });

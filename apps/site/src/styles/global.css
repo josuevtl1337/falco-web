@@ -188,6 +188,17 @@ a {
   color: var(--color-hueso);
 }
 
+/*
+ * Sombra dura, sin desenfoque, solo en el chip que encabeza el panel de la
+ * tolva ("En tolva ahora"). Va sobre el ::before -el plato inclinado con
+ * skewX- y no sobre el .chip, que queda sin transformar para que el texto
+ * no se tuerza: si la sombra fuera al elemento recto, quedaría derecha
+ * detrás de un plato inclinado y se notaría. Medido en la lámina.
+ */
+.chip--shadow::before {
+  box-shadow: 5px 5px 0 var(--color-hueso);
+}
+
 /* Encendido: solo el estado "abierto ahora". Brasa/carbón, 8,92:1. */
 .chip--lit::before {
   background: var(--color-brasa);

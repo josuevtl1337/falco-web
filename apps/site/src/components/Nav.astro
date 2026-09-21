@@ -62,7 +62,8 @@ const path = Astro.url.pathname;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-lg);
+    /* 40px entre opciones, medido en la lámina. */
+    gap: var(--space-xl);
     margin: 0;
     padding: 0;
   }
@@ -72,11 +73,14 @@ const path = Astro.url.pathname;
     align-items: center;
     min-height: var(--touch-min);
     font-family: var(--font-mono);
-    font-size: var(--text-micro);
-    letter-spacing: 0.12em;
+    /* Medido en la lámina (persona/wireframes.html, 01 · Home): 10px,
+       1,8px de espaciado entre letras (0,18em a ese tamaño) y ceniza,
+       que sobre carbón da 5,21:1 y pasa AA. */
+    font-size: var(--text-nano);
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     text-decoration: none;
-    color: var(--color-hueso);
+    color: var(--color-ceniza);
   }
 
   .nav a[aria-current="page"] {
@@ -86,6 +90,15 @@ const path = Astro.url.pathname;
   .nav__caja {
     border: 1px solid var(--color-tostado);
     padding-inline: var(--space-md);
+  }
+
+  /* Selector más específico que ".nav a" a propósito: si no, la regla de
+     arriba (que baja el menú a ceniza) le gana por especificidad y la caja
+     con borde se queda sin su hueso. La caja con borde mantiene hueso: en
+     la lámina es la única opción del menú que no baja a ceniza (es un
+     enlace externo, no una sección). */
+  .nav a.nav__caja {
+    color: var(--color-hueso);
   }
 
   /* En el celular el menú queda en una sola fila: apilado se comía un cuarto

@@ -88,6 +88,17 @@ const description = PENTAGON_AXES.map(
       stroke-dasharray={perimeter.toFixed(2)}
       stroke-dashoffset={perimeter.toFixed(2)}></polygon>
     {
+      shapePoints.map((point) => (
+        <circle
+          cx={point.x}
+          cy={point.y}
+          r="3.5"
+          class="pentagono__punto"
+          fill="var(--color-hueso)"
+        />
+      ))
+    }
+    {
       labels &&
         axisLabels.map((label, index) => (
           <text

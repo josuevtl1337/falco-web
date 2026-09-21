@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg role="img" aria-label="Molino Mahlkönig E65S"
+            viewBox="0 0 240 560"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="rgba(232,226,208,0.03)" />
+                <stop offset="30%" stop-color="rgba(232,226,208,0.13)" />
+                <stop offset="55%" stop-color="rgba(232,226,208,0.03)" />
+                <stop offset="100%" stop-color="rgba(232,226,208,0.09)" />
+              </linearGradient>
+              <linearGradient id="bodyg" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="rgba(232,226,208,0.03)" />
+                <stop offset="38%" stop-color="rgba(232,226,208,0.12)" />
+                <stop offset="100%" stop-color="rgba(232,226,208,0.02)" />
+              </linearGradient>
+              <linearGradient id="chrome" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="rgba(232,226,208,0.25)" />
+                <stop offset="35%" stop-color="rgba(232,226,208,0.62)" />
+                <stop offset="70%" stop-color="rgba(232,226,208,0.2)" />
+                <stop offset="100%" stop-color="rgba(232,226,208,0.45)" />
+              </linearGradient>
+              <clipPath id="cone">
+                <path d="M46,46 L194,46 L146,206 L94,206 Z"></path>
+              </clipPath>
+              <clipPath id="scr">
+                <rect x="66" y="292" width="52" height="28"></rect>
+              </clipPath>
+            </defs>
+
+            <!-- ===== BASE / BANDEJA ===== -->
+            <ellipse
+              cx="116"
+              cy="516"
+              rx="88"
+              ry="26"
+              fill="#2b2d30"
+              stroke="rgba(232,226,208,0.34)"
+              stroke-width="1.5"
+            ></ellipse>
+            <ellipse
+              cx="116"
+              cy="512"
+              rx="70"
+              ry="18"
+              fill="none"
+              stroke="rgba(232,226,208,0.18)"
+              stroke-width="1.2"
+            ></ellipse>
+
+            <!-- ===== TOLVA CÓNICA (vidrio) ===== -->
+            <path
+              d="M46,46 L194,46 L146,206 L94,206 Z"
+              fill="url(#glass)"
+              stroke="rgba(232,226,208,0.46)"
+              stroke-width="1.6"
+              stroke-linejoin="round"
+            ></path>
+
+            <!-- granos dentro del cono -->
+            <g clip-path="url(#cone)" fill="#885333">
+              <g>
+                <ellipse
+                  class="sv"
+                  cx="104"
+                  cy="196"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 4.2s ease-in-out infinite"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="126"
+                  cy="198"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 5.1s ease-in-out infinite 0.5s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="115"
+                  cy="184"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 4.6s ease-in-out infinite 1s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="136"
+                  cy="184"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 5.4s ease-in-out infinite 0.3s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="94"
+                  cy="182"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 4.9s ease-in-out infinite 1.4s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="105"
+                  cy="170"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 5.6s ease-in-out infinite 0.8s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="127"
+                  cy="170"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 4.4s ease-in-out infinite 1.7s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="148"
+                  cy="172"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 5.2s ease-in-out infinite 0.2s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="84"
+                  cy="168"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 4.8s ease-in-out infinite 2.1s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="116"
+                  cy="156"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 5.8s ease-in-out infinite 1.2s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="94"
+                  cy="154"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 4.5s ease-in-out infinite 0.6s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="139"
+                  cy="156"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 5.3s ease-in-out infinite 1.9s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="106"
+                  cy="142"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 5s ease-in-out infinite 2.4s"
+                ></ellipse>
+                <ellipse
+                  class="sv"
+                  cx="128"
+                  cy="142"
+                  rx="10"
+                  ry="6.8"
+                  style="animation: settle 4.7s ease-in-out infinite 0.9s"
+                ></ellipse>
+              </g>
+              <!-- granos nuevos cayendo -->
+              <ellipse
+                class="sv"
+                cx="110"
+                cy="130"
+                rx="10"
+                ry="6.8"
+                style="
+                  animation: drop 4.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+                "
+              ></ellipse>
+              <ellipse
+                class="sv"
+                cx="134"
+                cy="128"
+                rx="10"
+                ry="6.8"
+                style="
+                  animation: drop 4.4s cubic-bezier(0.45, 0, 0.55, 1) infinite
+                    1.5s;
+                "
+              ></ellipse>
+              <ellipse
+                class="sv"
+                cx="90"
+                cy="132"
+                rx="10"
+                ry="6.8"
+                style="
+                  animation: drop 4.4s cubic-bezier(0.45, 0, 0.55, 1) infinite
+                    3s;
+                "
+              ></ellipse>
+            </g>
+
+            <!-- borde superior + tapa -->
+            <ellipse
+              cx="120"
+              cy="46"
+              rx="74"
+              ry="13"
+              fill="none"
+              stroke="rgba(232,226,208,0.46)"
+              stroke-width="1.6"
+            ></ellipse>
+            <path
+              d="M44,38 Q44,24 120,24 Q196,24 196,38 L196,46 Q196,58 120,58 Q44,58 44,46 Z"
+              fill="#33353a"
+              stroke="rgba(232,226,208,0.46)"
+              stroke-width="1.6"
+            ></path>
+            <ellipse
+              cx="120"
+              cy="30"
+              rx="16"
+              ry="4.5"
+              fill="rgba(232,226,208,0.22)"
+            ></ellipse>
+            <!-- compuerta de la tolva -->
+            <path
+              d="M104,58 L136,58 L130,86 L110,86 Z"
+              fill="#33353a"
+              stroke="rgba(232,226,208,0.4)"
+              stroke-width="1.4"
+            ></path>
+
+            <!-- ===== CUELLO + COLLAR DE MOLIENDA ===== -->
+            <path
+              d="M94,206 L146,206 L146,224 L94,224 Z"
+              fill="#33353a"
+              stroke="rgba(232,226,208,0.42)"
+              stroke-width="1.5"
+            ></path>
+            <!-- hombro negro redondeado -->
+            <path
+              d="M56,262 L56,244 Q56,224 84,224 L156,224 Q184,224 184,244 L184,262 Z"
+              fill="#33353a"
+              stroke="rgba(232,226,208,0.44)"
+              stroke-width="1.5"
+              stroke-linejoin="round"
+            ></path>
+            <!-- anillo cromado: el ajuste stepless -->
+            <g
+              class="sv"
+              style="animation: collar 9s cubic-bezier(0.7, 0, 0.3, 1) infinite"
+            >
+              <path
+                d="M56,262 L184,262 L184,286 L56,286 Z"
+                fill="url(#chrome)"
+                stroke="rgba(232,226,208,0.5)"
+                stroke-width="1.5"
+              ></path>
+              <g stroke="rgba(41,42,44,0.45)" stroke-width="1.2">
+                <path d="M78,266 L78,282"></path>
+                <path d="M100,266 L100,282"></path>
+                <path d="M122,266 L122,282"></path>
+                <path d="M144,266 L144,282"></path>
+                <path d="M166,266 L166,282"></path>
+              </g>
+            </g>
+
+            <!-- ===== CUERPO ===== -->
+            <path
+              d="M58,286 L182,286 L182,486 Q182,496 172,496 L68,496 Q58,496 58,486 Z"
+              fill="url(#bodyg)"
+              stroke="rgba(232,226,208,0.44)"
+              stroke-width="1.5"
+              stroke-linejoin="round"
+            ></path>
+
+            <!-- display arriba a la izquierda, como el real -->
+            <rect
+              x="64"
+              y="290"
+              width="56"
+              height="32"
+              rx="2.5"
+              fill="#17191b"
+              stroke="rgba(232,226,208,0.3)"
+              stroke-width="1.2"
+            ></rect>
+            <g clip-path="url(#scr)">
+              <g style="animation: shot 5s steps(7) infinite">
+                <text
+                  x="92"
+                  y="312"
+                  text-anchor="middle"
+                  fill="#f2c48b"
+                  font-family="Martian Mono, monospace"
+                  font-size="15"
+                >
+                  0.0
+                </text>
+                <text
+                  x="92"
+                  y="340"
+                  text-anchor="middle"
+                  fill="#f2c48b"
+                  font-family="Martian Mono, monospace"
+                  font-size="15"
+                >
+                  1.2
+                </text>
+                <text
+                  x="92"
+                  y="368"
+                  text-anchor="middle"
+                  fill="#f2c48b"
+                  font-family="Martian Mono, monospace"
+                  font-size="15"
+                >
+                  2.6
+                </text>
+                <text
+                  x="92"
+                  y="396"
+                  text-anchor="middle"
+                  fill="#f2c48b"
+                  font-family="Martian Mono, monospace"
+                  font-size="15"
+                >
+                  3.9
+                </text>
+                <text
+                  x="92"
+                  y="424"
+                  text-anchor="middle"
+                  fill="#f2c48b"
+                  font-family="Martian Mono, monospace"
+                  font-size="15"
+                >
+                  5.1
+                </text>
+                <text
+                  x="92"
+                  y="452"
+                  text-anchor="middle"
+                  fill="#f2c48b"
+                  font-family="Martian Mono, monospace"
+                  font-size="15"
+                >
+                  6.3
+                </text>
+                <text
+                  x="92"
+                  y="480"
+                  text-anchor="middle"
+                  fill="#f2c48b"
+                  font-family="Martian Mono, monospace"
+                  font-size="15"
+                >
+                  6.8
+                </text>
+                <text
+                  x="92"
+                  y="508"
+                  text-anchor="middle"
+                  fill="#f2c48b"
+                  font-family="Martian Mono, monospace"
+                  font-size="15"
+                >
+                  6.8
+                </text>
+              </g>
+            </g>
+            <text
+              x="115"
+              y="318"
+              text-anchor="end"
+              fill="rgba(242,196,139,0.55)"
+              font-family="Martian Mono, monospace"
+              font-size="8"
+            >
+              s
+            </text>
+            <circle
+              cx="132"
+              cy="306"
+              r="2.6"
+              fill="#f2c48b"
+              style="animation: led 1.6s ease-in-out infinite"
+            ></circle>
+
+            <!-- ===== SALIDA / CHUTE ===== -->
+            <path
+              d="M100,342 Q142,338 148,352 Q152,364 138,374 L114,382 Q100,384 98,372 Z"
+              fill="#3a3c40"
+              stroke="rgba(232,226,208,0.44)"
+              stroke-width="1.5"
+              stroke-linejoin="round"
+            ></path>
+            <ellipse
+              cx="123"
+              cy="350"
+              rx="20"
+              ry="7"
+              transform="rotate(-6 123 350)"
+              fill="#1d1f21"
+              stroke="rgba(232,226,208,0.34)"
+              stroke-width="1.2"
+            ></ellipse>
+
+            <!-- molido cayendo -->
+            <g
+              stroke="#f2c48b"
+              stroke-width="1.6"
+              fill="none"
+              stroke-linecap="round"
+            >
+              <path
+                class="sv"
+                d="M112,384 L111,396"
+                style="animation: grind 1.5s linear infinite"
+              ></path>
+              <path
+                class="sv"
+                d="M120,384 L120,398"
+                style="animation: grind 1.5s linear infinite 0.42s"
+              ></path>
+              <path
+                class="sv"
+                d="M128,384 L129,396"
+                style="animation: grind 1.5s linear infinite 0.84s"
+              ></path>
+            </g>
+
+            <!-- aroma -->
+            <g stroke="rgba(242,196,139,0.55)" stroke-width="1.2" fill="none">
+              <path
+                class="sv"
+                d="M104,430 C98,418 110,412 104,400"
+                style="animation: aroma 5s ease-out infinite"
+              ></path>
+              <path
+                class="sv"
+                d="M136,430 C142,418 130,412 136,400"
+                style="animation: aroma 5s ease-out infinite 2.5s"
+              ></path>
+            </g>
+
+            <!-- ===== HORQUILLA CROMADA DEL PORTAFILTRO ===== -->
+            <g
+              stroke="url(#chrome)"
+              stroke-width="4"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M74,412 L74,462"></path>
+              <path d="M166,412 L166,462"></path>
+              <path d="M74,418 L166,418"></path>
+              <path d="M74,458 L166,458"></path>
+              <path d="M96,418 L96,458"></path>
+              <path d="M144,418 L144,458"></path>
+            </g>
+            <circle
+              cx="120"
+              cy="438"
+              r="7"
+              fill="#3a3c40"
+              stroke="rgba(232,226,208,0.45)"
+              stroke-width="1.4"
+            ></circle>
+            <!-- palanca lateral -->
+            <g
+              stroke="url(#chrome)"
+              stroke-width="3.5"
+              fill="none"
+              stroke-linecap="round"
+            >
+              <path d="M74,440 L52,452 L52,474"></path>
+            </g>
+
+            <!-- marca -->
+            <text
+              x="120"
+              y="480"
+              text-anchor="middle"
+              fill="rgba(232,226,208,0.5)"
+              font-family="Martian Mono, monospace"
+              font-size="8.5"
+              letter-spacing="2.2"
+            >
+              MAHLKÖNIG E65S
+            </text>
+          </svg>
