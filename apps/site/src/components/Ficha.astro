@@ -1,6 +1,7 @@
 ---
 import type { ProductWithOptions } from "@falco/db";
 import { formatArs } from "@falco/domain";
+import { NEW_BADGE_STAR } from "./estrella";
 
 interface Props {
   product: ProductWithOptions;
@@ -13,7 +14,16 @@ const { product, shelfLabel } = Astro.props;
 
 <article class="ficha">
   <a class="ficha__cara" href={`/tienda/${product.slug}`}>
-    {product.isNew && <span class="ficha__nuevo">Nuevo</span>}
+    {
+      product.isNew && (
+        <span
+          class="ficha__nuevo"
+          style={`clip-path: polygon(${NEW_BADGE_STAR})`}
+        >
+          Nuevo
+        </span>
+      )
+    }
 
     <!-- El hueco de la foto. Todavía no hay fotos de producto: en la lámina
          este espacio es un degradado con una luz arriba, que se lee como algo
@@ -154,18 +164,20 @@ const { product, shelfLabel } = Astro.props;
     color: var(--color-ceniza);
   }
 
-  /* El sello de "Nuevo": un cuadrado de hueso girado que se balancea. Sale
+  /* El sello de "Nuevo": una estrella de hueso de doce puntas, inclinada, que
+     se balancea. La forma la recorta el clip-path que arma estrella.ts. Sale
      de la caja por arriba y a la derecha, por eso el riel le deja aire
-     arriba. */
+     arriba. Un poco más grande que la caja de la lámina porque el recorte se
+     come las esquinas: la palabra tiene que seguir entrando. */
   .ficha__nuevo {
     position: absolute;
-    right: -14px;
-    top: -20px;
+    right: -18px;
+    top: -24px;
     z-index: 5;
     display: grid;
     place-items: center;
-    width: 66px;
-    height: 66px;
+    width: 76px;
+    height: 76px;
     background: var(--color-hueso);
     color: var(--color-carbon);
     font-family: var(--font-display);

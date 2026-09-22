@@ -100,20 +100,46 @@ const path = Astro.url.pathname;
 <script>
   import { conectarDialogo } from "../scripts/dialogo";
 
-  conectarDialogo(
-    document.querySelector<HTMLDialogElement>("#menu-movil"),
-    document.querySelector<HTMLElement>("[data-menu-abrir]"),
-  );
+  const menu = document.querySelector<HTMLDialogElement>("#menu-movil");
+
+  conectarDialogo(menu, document.querySelector<HTMLElement>("[data-menu-abrir]"));
+
+  // Una opción que lleva a una sección de esta misma página cierra el menú
+  // antes de ir: si no, el scroll pasa por detrás de un modal abierto y quedás
+  // mirando el menú sobre una página que ya se movió.
+  menu?.addEventListener("click", (evento) => {
+    const enlace =
+      evento.target instanceof Element
+        ? evento.target.closest<HTMLAnchorElement>("a[href*='#']")
+        : null;
+    if (!enlace) return;
+
+    const destino = new URL(enlace.href, location.href);
+    if (destino.pathname === location.pathname && destino.hash) menu.close();
+  });
 </script>
 
 <style>
+  /*
+   * La barra queda arriba mientras se scrollea: desde la tienda se tiene que
+   * poder volver al inicio sin subir a mano.
+   *
+   * Va con `sticky` y no con `fixed` porque sticky sigue ocupando su lugar en
+   * el flujo: así la home puede medir "una ventana menos la barra" sin que
+   * nada se superponga. El alto sale del token, que es quien manda.
+   */
   .nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    box-sizing: border-box;
+    height: var(--alto-nav);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
     gap: var(--space-md);
-    padding: var(--space-md) var(--space-lg);
+    padding-inline: var(--space-lg);
+    background: var(--color-carbon);
   }
 
   .nav__logo {
@@ -206,21 +232,13 @@ const path = Astro.url.pathname;
     }
   }
 
-  /* Ventana baja: la home entera tiene que entrar en una pantalla y la barra
-     también paga su parte. */
-  @media (max-height: 820px) {
-    .nav {
-      padding-block: var(--space-sm);
-    }
-  }
-
   /* En el celular la barra es el logo y el botón: las tres opciones sueltas
-     no entraban sin encogerlas hasta volverlas ilegibles. */
+     no entraban sin encogerlas hasta volverlas ilegibles. El alto ya lo bajó
+     el token --alto-nav. */
   @media (max-width: 640px) {
     .nav {
-      flex-wrap: nowrap;
       gap: var(--space-sm);
-      padding: var(--space-sm) var(--space-md);
+      padding-inline: var(--space-md);
     }
 
     .nav > ul {

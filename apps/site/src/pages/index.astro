@@ -95,13 +95,14 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
   description="Café de especialidad en Santo Tomé. Mirá qué hay en la tolva y llevate un cuarto."
 >
   <!--
-    La barra va adentro de la primera pantalla y no en el slot de arriba: la
-    home tiene que medir exactamente una pantalla, y con la barra afuera habría
-    que restarle una altura adivinada. Adentro, el flex reparte lo que hay.
+    La barra queda arriba de la primera pantalla y sigue visible al scrollear
+    (position: sticky, en Nav.astro). Como sticky ocupa su lugar en el flujo,
+    la primera pantalla es la ventana menos el alto de la barra, que está
+    declarado en el token --alto-nav y no medido a ojo.
   -->
-  <div class="pantalla">
-    <Nav />
+  <Nav />
 
+  <div class="pantalla">
     <div class="home grainy">
     <div class="glow" aria-hidden="true"></div>
     <svg
@@ -316,7 +317,7 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
    * verdad se ve en este momento.
    */
   .pantalla {
-    min-height: 100dvh;
+    min-height: calc(100dvh - var(--alto-nav));
     display: flex;
     flex-direction: column;
   }

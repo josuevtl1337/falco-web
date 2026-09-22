@@ -72,6 +72,47 @@ a {
  * marcó en los carteles del HUD-. Ángulo, colores y sombra medidos en la
  * lámina (.btn / .btn.a): -12°, hueso sobre carbón, sombra dura tostada.
  */
+/*
+ * El alto de la barra se DECLARA, no se mide.
+ *
+ * La primera pantalla de la home tiene que valer exactamente una ventana, y
+ * para eso hay que restarle la barra. Adivinar ese número fue el error de la
+ * primera versión; ahora el token es la fuente y la barra se ajusta a él.
+ */
+:root {
+  --alto-nav: 80px;
+}
+
+@media (max-height: 820px) {
+  :root {
+    --alto-nav: 64px;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --alto-nav: 62px;
+  }
+}
+
+/* Ir a una sección se ve, no aparece de golpe. Con el movimiento reducido, el
+   salto vuelve a ser instantáneo. */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* La barra queda fija arriba y taparía el comienzo de la sección: el destino
+   de un salto se corre hacia abajo lo que ella mide. */
+[id] {
+  scroll-margin-top: calc(var(--alto-nav) + var(--space-md));
+}
+
 .boton {
   position: relative;
   isolation: isolate;
