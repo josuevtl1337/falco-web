@@ -1,12 +1,15 @@
 ---
-import type { ProductWithOptions } from "@falco/db";
+import type { Coffee, ProductWithOptions } from "@falco/db";
 import Ficha from "./Ficha.astro";
+import PanelDetalle from "./PanelDetalle.astro";
 
 interface Props {
   shelves: { title: string; products: ProductWithOptions[] }[];
+  /** Los cafés por id: de ahí sale el perfil de cata de cada detalle. */
+  coffees: Map<number, Coffee>;
 }
 
-const { shelves } = Astro.props;
+const { shelves, coffees } = Astro.props;
 
 // El ancho de una ficha más su separación, medido en la lámina (250 + 22).
 const CARD_STRIDE = 272;
@@ -116,6 +119,31 @@ const shelvesWithRail = shelves.map((shelf, index) => {
     ))
   }
 </section>
+
+{
+  /*
+    Un panel por producto, servidos desde el servidor. El detalle abre en el
+    acto, sin pedir nada, y si el script no corre las fichas siguen siendo
+    enlaces a su propia página.
+  */
+  shelvesWithRail.flatMap((shelf) =>
+    shelf.products.map((product) => (
+      <PanelDetalle
+        product={product}
+        coffee={product.coffeeId ? coffees.get(product.coffeeId) : undefined}
+        shelfLabel={shelf.title}
+      />
+    )),
+  )
+}
+
+<script>
+  import { conectarDetalle } from "../scripts/detalle";
+  import { conectarPedido } from "../scripts/pedido";
+
+  conectarDetalle();
+  conectarPedido();
+</script>
 
 <style>
   .tienda {

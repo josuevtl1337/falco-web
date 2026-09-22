@@ -56,6 +56,33 @@ export async function getHopperCoffee(
   return row ? toCoffee(row) : undefined;
 }
 
+/**
+ * Los cafés de una lista de ids, en una sola consulta.
+ *
+ * El detalle de un producto de café muestra su perfil de cata, que vive en
+ * `coffees` y no en `products`. Pedirlo producto por producto sería una
+ * consulta por ficha; acá van todos juntos.
+ */
+export async function listCoffeesByIds(
+  db: ReadableDb,
+  ids: readonly number[],
+): Promise<Coffee[]> {
+  // Sin ids no hay nada que preguntar, y un `IN ()` vacío es SQL inválido.
+  const unique = [...new Set(ids)];
+  if (unique.length === 0) return [];
+
+  const rows = await allRows<CoffeeRow>(
+    db
+      .prepare(
+        "SELECT * FROM coffees WHERE id IN (" +
+          unique.map(() => "?").join(", ") +
+          ")",
+      )
+      .bind(...unique),
+  );
+  return rows.map(toCoffee);
+}
+
 async function withOptions(
   db: ReadableDb,
   rows: ProductRow[],

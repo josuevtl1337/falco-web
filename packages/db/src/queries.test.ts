@@ -7,6 +7,7 @@ import {
   getSettings,
   getUpcomingSpecialDays,
   getWeekHours,
+  listCoffeesByIds,
   listShelf,
   type PreparedLike,
   type ReadableDb,
@@ -66,6 +67,32 @@ describe("getHopperCoffee", () => {
     const coffee = await getHopperCoffee(db);
     expect(coffee?.name).toBe("Huila");
     expect(coffee?.profile.acidity).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe("listCoffeesByIds", () => {
+  it("trae los cafés pedidos, con su perfil", async () => {
+    const [coffee] = await listCoffeesByIds(db, [1]);
+    expect(coffee?.name).toBe("Huila");
+    expect(coffee?.profile.acidity).toBeGreaterThanOrEqual(1);
+  });
+
+  // Un `IN ()` vacío es SQL inválido: sin ids la consulta ni se hace. Si
+  // alguien saca ese atajo, esto explota en vez de devolver [].
+  it("sin ids no consulta nada y devuelve vacío", async () => {
+    expect(await listCoffeesByIds(db, [])).toEqual([]);
+  });
+
+  // El detalle pide un café por producto: si dos productos comparten café, la
+  // lista trae ids repetidos y el IN tendría el mismo id dos veces.
+  it("no repite un café aunque el id venga dos veces", async () => {
+    const coffees = await listCoffeesByIds(db, [1, 1, 1]);
+    expect(coffees).toHaveLength(1);
+  });
+
+  it("ignora los ids que no existen en vez de fallar", async () => {
+    const coffees = await listCoffeesByIds(db, [1, 9999]);
+    expect(coffees.map((coffee) => coffee.id)).toEqual([1]);
   });
 });
 

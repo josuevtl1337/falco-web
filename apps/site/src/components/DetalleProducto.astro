@@ -1,0 +1,293 @@
+---
+import type { Coffee, ProductWithOptions } from "@falco/db";
+import { formatArs, ORDER_LIMITS } from "@falco/domain";
+import Pentagono from "./Pentagono.astro";
+
+interface Props {
+  product: ProductWithOptions;
+  /** El café del producto, si lo tiene: de ahí sale el perfil de cata. */
+  coffee?: Coffee;
+  shelfLabel: string;
+  /** En el modal el título es un h2; en su propia página, el h1. */
+  titleTag?: "h1" | "h2";
+}
+
+const { product, coffee, shelfLabel, titleTag = "h2" } = Astro.props;
+
+const Titulo = titleTag;
+const marca = [shelfLabel, coffee?.country].filter(Boolean).join(" · ");
+
+// Las opciones que no tienen stock se muestran igual, apagadas: esconderlas
+// haría que el producto pareciera no tener esa molienda nunca.
+const disponibles = product.options.filter((option) => option.isAvailable);
+const porDefecto = disponibles[0]?.id;
+---
+
+<div
+  class="detalle"
+  data-producto={product.id}
+  data-nombre={product.name}
+  data-tope={ORDER_LIMITS.maxUnitsPerProduct}
+>
+  <span class="chip chip--fill chip--shadow">{marca}</span>
+
+  <div class="detalle__titulo">
+    <Titulo class="detalle__nombre">{product.name}</Titulo>
+    <p class="detalle__meta">{product.detail}</p>
+  </div>
+
+  {product.description && <p class="detalle__texto">{product.description}</p>}
+
+  {coffee && <Pentagono profile={coffee.profile} />}
+
+  {
+    product.options.length > 0 && (
+      <fieldset class="detalle__opciones">
+        <legend class="detalle__meta">Elegí cómo lo querés</legend>
+        <div class="detalle__chips">
+          {product.options.map((option) => (
+            <button
+              class="opcion"
+              type="button"
+              data-opcion={option.id}
+              disabled={!option.isAvailable}
+              aria-pressed={option.id === porDefecto}
+            >
+              {option.label}
+              {!option.isAvailable && <small> · sin stock</small>}
+            </button>
+          ))}
+        </div>
+      </fieldset>
+    )
+  }
+
+  <div class="detalle__compra">
+    <p class="detalle__precio">
+      <span>{formatArs(product.priceCashArs)} efectivo</span>
+      <span>{formatArs(product.priceCardArs)} tarjeta</span>
+    </p>
+
+    <div class="cantidad">
+      <button
+        class="cantidad__boton"
+        type="button"
+        data-cantidad="-1"
+        aria-label={`Quitar una unidad de ${product.name}`}>−</button
+      >
+      <b data-cantidad-valor aria-live="polite">1</b>
+      <button
+        class="cantidad__boton"
+        type="button"
+        data-cantidad="1"
+        aria-label={`Sumar una unidad de ${product.name}`}>+</button
+      >
+    </div>
+  </div>
+
+  <button class="boton detalle__sumar" type="button" data-sumar>
+    Sumar al pedido
+  </button>
+
+  <p class="detalle__aviso" data-aviso role="status">
+    El stock se confirma por WhatsApp antes de retirar
+  </p>
+</div>
+
+<style>
+  .detalle {
+    display: grid;
+    gap: var(--space-lg);
+    justify-items: start;
+    align-content: start;
+  }
+
+  .detalle__titulo {
+    display: grid;
+    gap: var(--space-sm);
+  }
+
+  .detalle__nombre {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(28px, 4.2vw, 40px);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .detalle__meta {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-nano);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ceniza);
+  }
+
+  .detalle__texto {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: rgb(179, 180, 182);
+  }
+
+  .detalle__opciones {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: grid;
+    gap: var(--space-sm);
+    justify-items: start;
+  }
+
+  .detalle__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /*
+   * La opción (grano / molido). Es un cartel inclinado más, con el mismo corte
+   * de -12° que el botón y el estado. No se llama .chip para no chocar con el
+   * cartel del resto del sitio, que es otra cosa.
+   */
+  .opcion {
+    position: relative;
+    isolation: isolate;
+    min-width: 50px;
+    min-height: var(--touch-min);
+    padding-inline: var(--space-md);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    background: none;
+    border: 0;
+    color: var(--color-hueso);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-body);
+  }
+
+  /* La caja inclinada va en el ::before y el botón queda recto: la etiqueta
+     ("En grano") es un nodo de texto suelto, así que un contra-skew sobre los
+     hijos no la alcanzaría y quedaría torcida. */
+  .opcion::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border: 1px solid rgba(232, 226, 208, 0.35);
+    transform: skewX(var(--angle-button));
+  }
+
+  .opcion[aria-pressed="true"] {
+    color: var(--color-carbon);
+  }
+
+  .opcion[aria-pressed="true"]::before {
+    background: var(--color-hueso);
+    border-color: var(--color-hueso);
+    box-shadow: 4px 4px 0 var(--color-tostado);
+  }
+
+  .opcion[disabled] {
+    cursor: not-allowed;
+    color: var(--color-ceniza);
+  }
+
+  .opcion[disabled]::before {
+    border-color: rgba(232, 226, 208, 0.15);
+  }
+
+  .opcion small {
+    font-family: var(--font-mono);
+    font-size: 9px;
+  }
+
+  .detalle__compra {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+    width: 100%;
+  }
+
+  .detalle__precio {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    font-family: var(--font-mono);
+  }
+
+  .detalle__precio span:first-child {
+    font-size: 18px;
+  }
+
+  .detalle__precio span:last-child {
+    font-size: var(--text-nano);
+    color: var(--color-ceniza);
+  }
+
+  .cantidad {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgba(232, 226, 208, 0.35);
+    transform: skewX(var(--angle-button));
+  }
+
+  .cantidad > * {
+    transform: skewX(calc(-1 * var(--angle-button)));
+  }
+
+  .cantidad__boton {
+    width: var(--touch-min);
+    height: var(--touch-min);
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    color: var(--color-hueso);
+    font-size: var(--text-lead);
+  }
+
+  .cantidad__boton[disabled] {
+    color: var(--color-ceniza);
+    cursor: not-allowed;
+  }
+
+  .cantidad b {
+    min-width: 26px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 15px;
+  }
+
+  .detalle__sumar {
+    width: 100%;
+  }
+
+  .detalle__aviso {
+    margin: 0;
+    width: 100%;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--color-ceniza);
+  }
+
+  /* Cuando el aviso deja de ser la letra chica y pasa a contestar algo que
+     hiciste, se prende. */
+  .detalle__aviso[data-tono="bien"] {
+    color: var(--color-brasa);
+  }
+
+  .detalle__aviso[data-tono="tope"] {
+    color: var(--color-hueso);
+  }
+</style>

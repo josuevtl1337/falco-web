@@ -57,18 +57,17 @@ export const clickEnElFondo = (
 
 const bloqueo = crearBloqueoDeScroll(document.documentElement);
 
-/** Conecta un botón con su diálogo modal. */
-export const conectarDialogo = (
-  dialogo: HTMLDialogElement | null,
-  disparador: HTMLElement | null,
-): void => {
-  if (!dialogo || !disparador) return;
-
-  disparador.addEventListener("click", () => {
-    if (dialogo.open) return;
-    dialogo.showModal();
-    bloqueo.tomar();
-  });
+/**
+ * Deja un diálogo listo: cierra al tocar el fondo y suelta el candado del
+ * scroll cuando se cierra, sea como sea que se haya cerrado.
+ *
+ * Se separa de `conectarDialogo` porque no todos los diálogos los abre un
+ * botón: el panel de detalle lo abre el enlace de la ficha, y aun así necesita
+ * el mismo candado. Si cada uno tocara `overflow` por su cuenta volveríamos al
+ * bug de antes: cerrar uno desbloqueaba el scroll con el otro abierto.
+ */
+export const prepararDialogo = (dialogo: HTMLDialogElement | null): void => {
+  if (!dialogo) return;
 
   // "close" cubre todas las formas de cerrar: el botón con method="dialog",
   // el Escape y el click en el fondo.
@@ -77,4 +76,22 @@ export const conectarDialogo = (
   dialogo.addEventListener("click", (evento) => {
     if (clickEnElFondo(dialogo, evento)) dialogo.close();
   });
+};
+
+/** Abre un diálogo modal tomando el candado del scroll. */
+export const abrirDialogo = (dialogo: HTMLDialogElement): void => {
+  if (dialogo.open) return;
+  dialogo.showModal();
+  bloqueo.tomar();
+};
+
+/** Conecta un botón con su diálogo modal. */
+export const conectarDialogo = (
+  dialogo: HTMLDialogElement | null,
+  disparador: HTMLElement | null,
+): void => {
+  if (!dialogo || !disparador) return;
+
+  prepararDialogo(dialogo);
+  disparador.addEventListener("click", () => abrirDialogo(dialogo));
 };

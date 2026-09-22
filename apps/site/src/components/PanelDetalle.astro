@@ -1,0 +1,136 @@
+---
+import type { Coffee, ProductWithOptions } from "@falco/db";
+import DetalleProducto from "./DetalleProducto.astro";
+
+interface Props {
+  product: ProductWithOptions;
+  coffee?: Coffee;
+  shelfLabel: string;
+}
+
+const { product, coffee, shelfLabel } = Astro.props;
+---
+
+<!--
+  El detalle de un producto es un panel sobre la tienda, no otra página: en
+  escritorio entra desde la derecha, en el celular sube desde abajo. Va en un
+  <dialog> nativo abierto con showModal(), que se encarga del fondo, del foco,
+  del Escape y de dejar inerte lo de atrás.
+
+  El marcado está en la página desde el servidor -uno por producto- y no se
+  pide al abrir: son unos pocos productos y así el panel abre en el acto, sin
+  un estado de carga y sin depender de la red.
+-->
+<dialog
+  class="panel-detalle"
+  id={`detalle-${product.slug}`}
+  data-panel-producto={product.slug}
+  aria-label={product.name}
+>
+  <div class="panel-detalle__barra">
+    <span class="panel-detalle__tirador" aria-hidden="true"></span>
+    <form method="dialog">
+      <button class="panel-detalle__x" type="submit" aria-label="Cerrar">✕</button>
+    </form>
+  </div>
+
+  <DetalleProducto
+    product={product}
+    coffee={coffee}
+    shelfLabel={shelfLabel}
+  />
+</dialog>
+
+<style>
+  .panel-detalle {
+    /* `margin: auto` es lo que centra un <dialog>: con 0 a la derecha queda
+       pegado a ese borde, que es de donde entra en escritorio. */
+    margin: 0 0 0 auto;
+    width: min(540px, 100%);
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    overflow-y: auto;
+    padding: 36px 42px;
+    border: 0;
+    border-left: 2px solid var(--color-hueso);
+    box-shadow: -10px 0 0 var(--color-tostado);
+    background: var(--color-carbon);
+    color: var(--color-hueso);
+  }
+
+  .panel-detalle::backdrop {
+    background: rgba(12, 12, 13, 0.62);
+  }
+
+  /* El `display` va en [open]: un <dialog> cerrado lo oculta el navegador con
+     `display: none`, y darle un display propio lo dejaría visible siempre. */
+  .panel-detalle[open] {
+    display: grid;
+    gap: var(--space-lg);
+    align-content: start;
+    animation: drawerIn 0.55s var(--ease-persona) both;
+  }
+
+  .panel-detalle__barra {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+  }
+
+  /* El tirador es del celular: en escritorio el panel no se arrastra. */
+  .panel-detalle__tirador {
+    display: none;
+    width: 46px;
+    height: 4px;
+    background: rgba(232, 226, 208, 0.3);
+  }
+
+  .panel-detalle__x {
+    margin-left: auto;
+    width: var(--touch-min);
+    height: var(--touch-min);
+    display: grid;
+    place-items: center;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    background: none;
+    font-size: var(--text-body);
+    color: var(--color-ceniza);
+  }
+
+  /* En pantalla angosta el panel deja de venir del costado y sube desde abajo,
+     como la hoja de la tolva en la home: a 540px de ancho un cajón lateral
+     taparía la pantalla entera igual, pero entrando de costado. */
+  @media (max-width: 900px) {
+    .panel-detalle {
+      margin: auto 0 0;
+      width: 100%;
+      height: auto;
+      max-height: 88dvh;
+      padding: var(--space-sm) 22px var(--space-xl);
+      border-left: 0;
+      border-top: 2px solid var(--color-hueso);
+      box-shadow: 0 -8px 0 var(--color-tostado);
+    }
+
+    .panel-detalle[open] {
+      animation: sheetUp 0.55s var(--ease-persona) both;
+    }
+
+    .panel-detalle__tirador {
+      display: block;
+      position: absolute;
+      left: 50%;
+      translate: -50% 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .panel-detalle[open] {
+      animation: none;
+    }
+  }
+</style>

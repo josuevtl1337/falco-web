@@ -1,9 +1,9 @@
 ---
 import { env } from "cloudflare:workers";
-import { getProductBySlug } from "@falco/db";
+import { getProductBySlug, listCoffeesByIds } from "@falco/db";
 import Base from "../../layouts/Base.astro";
 import Nav from "../../components/Nav.astro";
-import { priceParts } from "../../components/precio";
+import DetalleProducto from "../../components/DetalleProducto.astro";
 
 const { slug } = Astro.params;
 const product = slug ? await getProductBySlug(env.DB, slug) : undefined;
@@ -11,31 +11,59 @@ const product = slug ? await getProductBySlug(env.DB, slug) : undefined;
 if (!product) {
   return Astro.redirect("/404", 302);
 }
+
+const [coffee] = product.coffeeId
+  ? await listCoffeesByIds(env.DB, [product.coffeeId])
+  : [];
+
+const shelfLabel = product.shelf === "coffee" ? "Café" : "Kits y accesorios";
 ---
 
+<!--
+  La misma vista que el panel de la tienda, como página propia.
+
+  Existe para que el enlace se pueda compartir, abrir en otra pestaña y leer
+  sin JavaScript: en la tienda la ficha abre este mismo detalle encima, pero el
+  enlace de abajo siempre es real.
+-->
 <Base
   title={`${product.name} · Falco`}
   description={product.description ?? product.detail}
 >
   <Nav slot="nav" />
-  <article class="detalle pagina">
-    <h1>{product.name}</h1>
-    <p class="detalle__detalle">{product.detail}</p>
-    <p class="precio">
-      {priceParts(product).map((parte) => <span>{parte}</span>)}
-    </p>
-    {product.description && <p>{product.description}</p>}
-    {
-      product.options.length > 0 && (
-        <ul class="detalle__opciones">
-          {product.options.map((option) => (
-            <li data-disponible={option.isAvailable}>
-              {option.label}
-              {!option.isAvailable && <span> · sin stock</span>}
-            </li>
-          ))}
-        </ul>
-      )
-    }
-  </article>
+
+  <div class="pagina detalle-pagina">
+    <a class="detalle-pagina__volver" href="/#tienda">‹ Volver a la tienda</a>
+
+    <DetalleProducto
+      product={product}
+      coffee={coffee}
+      shelfLabel={shelfLabel}
+      titleTag="h1"
+    />
+  </div>
 </Base>
+
+<script>
+  import { conectarPedido } from "../../scripts/pedido";
+
+  conectarPedido();
+</script>
+
+<style>
+  .detalle-pagina {
+    display: grid;
+    gap: var(--space-lg);
+    justify-items: start;
+    max-width: 540px;
+  }
+
+  .detalle-pagina__volver {
+    font-family: var(--font-mono);
+    font-size: var(--text-nano);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-brasa);
+    text-decoration: none;
+  }
+</style>

@@ -4,6 +4,7 @@ import {
   getHopperCoffee,
   getUpcomingSpecialDays,
   getWeekHours,
+  listCoffeesByIds,
   listShelf,
 } from "@falco/db";
 import { addDays, getOpenStatus, toArgentina } from "@falco/domain";
@@ -35,6 +36,20 @@ const shelves = [
   { title: "Café", products: coffeeShelf },
   { title: "Kits y accesorios", products: kitsShelf },
 ];
+
+// El detalle de un producto de café muestra su perfil de cata, que vive en
+// `coffees`. Se piden todos de una vez, no uno por ficha.
+const coffees = new Map(
+  (
+    await listCoffeesByIds(
+      env.DB,
+      shelves
+        .flatMap((shelf) => shelf.products)
+        .map((product) => product.coffeeId)
+        .filter((id): id is number => id !== undefined),
+    )
+  ).map((item) => [item.id, item]),
+);
 
 // nowAR.date siempre es "AAAA-MM-DD": partirlo evita una segunda pasada por
 // Intl solo para el número de día y de mes.
@@ -235,7 +250,7 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
     </div>
   </div>
 
-  <Tienda shelves={shelves} />
+  <Tienda shelves={shelves} coffees={coffees} />
 
   {
     coffee && (
