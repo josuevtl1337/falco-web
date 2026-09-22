@@ -9,6 +9,20 @@ const links = [
   },
 ];
 
+// El menú del celular suma "Inicio", que en la barra no hace falta porque el
+// logo ya lleva ahí. Los números son los de la lámina: ordenan la lectura y
+// dicen cuántas opciones hay, que son cuatro y nada más.
+const menuLinks = [
+  { href: "/", label: "Inicio", index: "01" },
+  { href: "/tienda", label: "Tienda", index: "02" },
+  { href: "/donde-estamos", label: "Dónde", index: "03" },
+  {
+    href: "https://www.instagram.com/falco.cafe/",
+    label: "@falco.cafe",
+    index: "↗",
+  },
+];
+
 const path = Astro.url.pathname;
 ---
 
@@ -34,7 +48,63 @@ const path = Astro.url.pathname;
       ))
     }
   </ul>
+
+  <button class="nav__burger" type="button" data-menu-abrir aria-haspopup="dialog">
+    <span>Menú</span>
+  </button>
 </nav>
+
+<!--
+  El menú va en un <dialog> nativo y se abre con showModal(): el navegador se
+  encarga del fondo, de atrapar el foco adentro, de cerrar con Escape y de
+  dejar inerte el resto de la página. Escribir eso a mano es donde se cuelan
+  los bugs de accesibilidad, y además nos ahorra una isla que se puede no
+  hidratar.
+-->
+<dialog class="menu" id="menu-movil" aria-label="Menú">
+  <div class="menu__losa" aria-hidden="true"></div>
+  <div class="menu__puntos" aria-hidden="true"></div>
+
+  <div class="menu__barra">
+    <img
+      class="menu__logo"
+      src="/logo-falco.svg"
+      alt=""
+      width="150"
+      height="61"
+    />
+    <!-- method="dialog" cierra sin una línea de JavaScript. -->
+    <form method="dialog">
+      <button class="nav__burger" type="submit"><span>Cerrar</span></button>
+    </form>
+  </div>
+
+  <ul class="menu__lista">
+    {
+      menuLinks.map((link) => (
+        <li>
+          <a
+            href={link.href}
+            class={path === link.href ? "menu__activo" : undefined}
+            aria-current={path === link.href ? "page" : undefined}
+          >
+            <small aria-hidden="true">{link.index}</small>
+            {link.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</dialog>
+
+<script>
+  import { conectarDialogo } from "../scripts/dialogo";
+
+  conectarDialogo(
+    document.querySelector<HTMLDialogElement>("#menu-movil"),
+    document.querySelector<HTMLElement>("[data-menu-abrir]"),
+  );
+</script>
 
 <style>
   .nav {
@@ -101,6 +171,32 @@ const path = Astro.url.pathname;
     color: var(--color-hueso);
   }
 
+  /* El botón del menú: cartel inclinado con el texto derecho, igual que los
+     chips. Medido en la lámina: 46 × 46, skew de 12°, hueso sobre carbón. */
+  .nav__burger {
+    display: none;
+    /* Ancho mínimo, no fijo: "Cerrar" es más largo que "Menú" y a 46px se
+       salía de la caja. El mínimo mantiene el área táctil. */
+    min-width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    border: 0;
+    padding-inline: var(--space-sm);
+    cursor: pointer;
+    background: var(--color-hueso);
+    color: var(--color-carbon);
+    font-family: var(--font-mono);
+    font-size: var(--text-nano);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transform: skewX(-12deg);
+  }
+
+  .nav__burger span {
+    display: block;
+    transform: skewX(12deg);
+  }
+
   /* El menú comparte el margen lateral del contenido: desde 900px la home
      abre a --space-xxl (index.astro) y la barra tiene que abrir con ella,
      o el logo y las opciones quedan fuera de la columna del texto. */
@@ -110,9 +206,16 @@ const path = Astro.url.pathname;
     }
   }
 
-  /* En el celular el menú queda en una sola fila: apilado se comía un cuarto
-     de la primera pantalla, y lo primero que hay que ver es qué café hay en
-     la tolva. */
+  /* Ventana baja: la home entera tiene que entrar en una pantalla y la barra
+     también paga su parte. */
+  @media (max-height: 820px) {
+    .nav {
+      padding-block: var(--space-sm);
+    }
+  }
+
+  /* En el celular la barra es el logo y el botón: las tres opciones sueltas
+     no entraban sin encogerlas hasta volverlas ilegibles. */
   @media (max-width: 640px) {
     .nav {
       flex-wrap: nowrap;
@@ -120,13 +223,12 @@ const path = Astro.url.pathname;
       padding: var(--space-sm) var(--space-md);
     }
 
-    .nav ul {
-      flex-wrap: nowrap;
-      gap: var(--space-md);
+    .nav > ul {
+      display: none;
     }
 
-    .nav a {
-      white-space: nowrap;
+    .nav__burger {
+      display: block;
     }
 
     .nav__logo img {
@@ -134,11 +236,157 @@ const path = Astro.url.pathname;
     }
   }
 
-  /* Debajo de 420 px no entran las tres etiquetas: la de Instagram se va, y
-     el enlace sigue estando en "Dónde estamos". */
-  @media (max-width: 420px) {
-    .nav li:last-child {
-      display: none;
+  /*
+   * La pantalla del menú.
+   */
+  .menu {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    background: var(--color-carbon);
+    color: var(--color-hueso);
+  }
+
+  .menu::backdrop {
+    background: rgba(12, 12, 13, 0.62);
+  }
+
+  .menu[open] {
+    animation: rise 0.35s var(--ease-persona) both;
+  }
+
+  /* La franja tostada cruzada por detrás, y la trama de puntos encima: las dos
+     son el fondo del menú en la lámina, medidas ahí. */
+  .menu__losa {
+    position: absolute;
+    left: -30%;
+    right: -30%;
+    top: 38%;
+    height: 36%;
+    background: var(--color-tostado);
+    rotate: -18deg;
+  }
+
+  .menu__puntos {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        circle,
+        rgba(232, 226, 208, 0.12) 1.2px,
+        transparent 1.6px
+      )
+      0 0 / 8px 8px;
+  }
+
+  .menu__barra {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .menu__logo {
+    display: block;
+    width: 84px;
+    height: auto;
+  }
+
+  .menu__barra .nav__burger {
+    display: block;
+  }
+
+  .menu__lista {
+    position: relative;
+    z-index: 2;
+    list-style: none;
+    display: grid;
+    gap: var(--space-lg);
+    justify-items: start;
+    margin: var(--space-xl) 0 0;
+    padding-inline: var(--space-lg) var(--space-md);
+  }
+
+  .menu__lista a {
+    position: relative;
+    z-index: 0;
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+    padding: 4px 14px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(38px, 13vw, 54px);
+    line-height: 1;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--color-hueso);
+    rotate: -8deg;
+    animation: slideIn 0.5s var(--ease-persona) both;
+  }
+
+  .menu__lista small {
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    color: var(--color-brasa);
+  }
+
+  /* El escalonado de la lámina: cada opción entra un poco más tarde y con un
+     margen distinto, para que no lean como una lista prolija. */
+  .menu__lista li:nth-child(2) a {
+    margin-left: var(--space-lg);
+    animation-delay: 0.07s;
+  }
+
+  .menu__lista li:nth-child(3) a {
+    margin-left: var(--space-sm);
+    animation-delay: 0.14s;
+  }
+
+  .menu__lista li:nth-child(4) a {
+    margin-left: 30px;
+    font-size: clamp(22px, 8vw, 30px);
+    animation-delay: 0.21s;
+  }
+
+  /* La opción donde estás parado queda en negativo: cartel hueso con el texto
+     en carbón, que da 11,10:1.
+
+     El selector lleva el ".menu__lista" adelante por especificidad: con
+     ".menu__activo" solo, la regla de arriba (".menu__lista a", que pesa más)
+     le gana y el texto se queda en hueso... sobre un cartel hueso. Invisible.
+     Es el mismo motivo por el que ".nav a.nav__caja" está escrito así. */
+  .menu__lista a.menu__activo {
+    color: var(--color-carbon);
+  }
+
+  .menu__activo::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--color-hueso);
+    transform: skewX(-14deg);
+    box-shadow: 6px 6px 0 var(--color-sombra);
+  }
+
+  .menu__activo small {
+    color: var(--color-tostado);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .menu[open],
+    .menu__lista a {
+      animation: none;
     }
   }
 </style>

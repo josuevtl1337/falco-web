@@ -12,6 +12,7 @@ import Dialogo from "../components/Dialogo.astro";
 import { dayMoment } from "../components/fecha";
 import Nav from "../components/Nav.astro";
 import Origen from "../components/Origen.astro";
+import { placeLabel } from "../components/origen";
 import Pentagono from "../components/Pentagono.astro";
 import { OpenNow } from "../islands/OpenNow";
 
@@ -65,9 +66,15 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
   title="Falco · café de santoto"
   description="Café de especialidad en Santo Tomé. Mirá qué hay en la tolva y llevate un cuarto."
 >
-  <Nav slot="nav" />
+  <!--
+    La barra va adentro de la primera pantalla y no en el slot de arriba: la
+    home tiene que medir exactamente una pantalla, y con la barra afuera habría
+    que restarle una altura adivinada. Adentro, el flex reparte lo que hay.
+  -->
+  <div class="pantalla">
+    <Nav />
 
-  <div class="home grainy">
+    <div class="home grainy">
     <div class="glow" aria-hidden="true"></div>
     <svg
       class="marca-agua"
@@ -158,28 +165,138 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
         </section>
       )
     }
-  </div>
 
-  <div class="ticker" aria-hidden="true">
-    <div class="ticker__banda">
-      <div
-        class="ticker__cinta"
-        style={`--ticker-duracion:${tickerDuration}`}
-      >
-        <span>{tickerGroup}</span>
-        <span>{tickerGroup}</span>
+    {
+      /*
+       * La misma tolva, para el celular. El panel entero mide 699px: en una
+       * pantalla de 844 se come todo y empuja el resto fuera de vista. Acá
+       * queda la tarjeta chica (lo que hay y cómo sabe, de un vistazo) y el
+       * detalle completo se abre en una hoja que sube desde abajo.
+       *
+       * Son dos acciones en dos lugares, como marca la lámina: tocar la
+       * tarjeta abre la hoja, el botón va derecho a la tienda. No se pisan.
+       */
+      coffee && (
+        <section class="tolva-mini zona-panel" aria-label="En tolva ahora">
+          <div class="tolva-mini__cuerpo">
+            <div class="tolva-mini__info">
+              <span class="chip chip--fill chip--shadow">En tolva ahora</span>
+              <span class="tolva-mini__valor">{placeLabel(coffee)}</span>
+              <span class="tolva-mini__sub">Tostadero {coffee.roaster}</span>
+              <button
+                class="tolva-mini__abrir"
+                type="button"
+                data-hoja-abrir
+                aria-haspopup="dialog"
+              >
+                Ver cómo es ›
+              </button>
+            </div>
+
+            <div class="tolva-mini__penta">
+              <Pentagono profile={coffee.profile} labels={false} />
+            </div>
+          </div>
+
+          <a class="boton" href="/tienda">Llevate un cuarto</a>
+        </section>
+      )
+    }
+    </div>
+
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker__banda">
+        <div class="ticker__cinta" style={`--ticker-duracion:${tickerDuration}`}>
+          <span>{tickerGroup}</span>
+          <span>{tickerGroup}</span>
+        </div>
       </div>
     </div>
   </div>
+
+  {
+    coffee && (
+      <dialog class="hoja" id="hoja-tolva" aria-label="El café que hay en tolva">
+        <div class="hoja__tirador" aria-hidden="true" />
+
+        <div class="hoja__cabecera">
+          <span class="chip chip--fill chip--shadow">En tolva ahora</span>
+          {/* method="dialog" cierra sin una línea de JavaScript. */}
+          <form method="dialog">
+            <button class="hoja__x" type="submit" aria-label="Cerrar">
+              ✕
+            </button>
+          </form>
+        </div>
+
+        <div class="hoja__grid">
+          <div class="hoja__info">
+            <Origen coffee={coffee} />
+            <div class="hoja__tostadero">
+              <span class="chip chip--fill">Tostadero</span>
+              <p>{coffee.roaster}</p>
+            </div>
+          </div>
+
+          <figure class="hoja__molino" aria-hidden="true">
+            <img src="/molino-e65s.svg" alt="" width="240" height="560" />
+            <figcaption>Mahlkönig E65S</figcaption>
+          </figure>
+        </div>
+
+        <div class="hoja__sabor">
+          <span class="chip chip--fill">A qué sabe</span>
+          <Pentagono profile={coffee.profile} />
+        </div>
+
+        <a class="boton" href="/tienda">
+          Llevate un cuarto
+        </a>
+      </dialog>
+    )
+  }
+
 </Base>
 
+<script>
+  import { conectarDialogo } from "../scripts/dialogo";
+
+  conectarDialogo(
+    document.querySelector<HTMLDialogElement>("#hoja-tolva"),
+    document.querySelector<HTMLElement>("[data-hoja-abrir]"),
+  );
+</script>
+
 <style>
+  /*
+   * La home mide una pantalla y ni un píxel más: quien scrollea ya está
+   * mirando la tienda, no más home.
+   *
+   * 100dvh y no 100vh: en el celular la barra del navegador aparece y se
+   * esconde, y 100vh mide la ventana SIN ella, así que el contenido queda
+   * cortado abajo mientras la barra está a la vista. dvh mide lo que de
+   * verdad se ve en este momento.
+   */
+  .pantalla {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
   .home {
+    flex: 1;
     position: relative;
     overflow: hidden;
     display: grid;
-    gap: var(--space-xl);
-    padding: var(--space-xl) var(--space-lg);
+    align-content: center;
+    /* El aire se mide contra el alto de la ventana, en escritorio también: un
+       portátil de 900px y un monitor de 1440 no tienen el mismo margen para
+       gastar, y el contenido tiene que entrar en los dos sin scrollear. Los
+       topes son los valores de siempre, que es lo que vale en pantalla
+       grande. */
+    gap: clamp(var(--space-md), 3.5dvh, var(--space-xl));
+    padding-block: clamp(var(--space-md), 2.7dvh, var(--space-xl));
+    padding-inline: var(--space-lg);
   }
 
   /* La marca de agua del murciélago, muy tenue, arriba al centro: no compite
@@ -224,7 +341,11 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
     font-family: var(--font-display);
     /* La lámina pesa 500: con 700 el título se empasta. */
     font-weight: 500;
-    font-size: clamp(40px, 21cqw, 112px);
+    /* Dos límites, no uno: el ancho de su columna (cqw) y el alto de la
+       ventana (dvh). Con el ancho solo, una ventana ancha y baja -un portátil
+       de 1280 × 720- lo hacía enorme y empujaba la home fuera de la pantalla.
+       Gana el que quede más chico. */
+    font-size: clamp(40px, min(21cqw, 11dvh), 112px);
     line-height: 0.94;
     letter-spacing: -0.02em;
   }
@@ -258,11 +379,16 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
     font-weight: inherit;
   }
 
+  /* El panel entero es de escritorio. Abajo de 1000px la tolva es la tarjeta
+     chica más la hoja: el panel mide 699px y en una pantalla de celular se
+     come todo lo demás. */
   .tolva {
+    display: none;
     position: relative;
     overflow: hidden;
-    display: grid;
-    gap: var(--space-lg);
+    /* Igual que la home: el aire cede contra el alto de la ventana, porque el
+       panel es la columna más alta y es la que decide si todo entra. */
+    gap: clamp(var(--space-md), 2.5dvh, var(--space-lg));
     justify-items: start;
     /* El fondo del panel no es plano, medido en la lámina. */
     background: linear-gradient(168deg, rgb(49, 51, 53), rgb(35, 36, 38));
@@ -297,7 +423,7 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
 
   .tolva__info {
     display: grid;
-    gap: var(--space-lg);
+    gap: clamp(var(--space-md), 2.5dvh, var(--space-lg));
     justify-items: start;
   }
 
@@ -358,7 +484,204 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
      izquierda y el panel a la derecha, ocupando las dos filas. Apilado se
      pierde la composición y la tolva queda debajo del pliegue. Acá también
      entra el molino, que abajo de este ancho se oculta (Tarea 6). */
+  /*
+   * La tarjeta chica del celular: lo que hay en tolva y cómo sabe, de un
+   * vistazo, en el lugar de un panel de 699px.
+   */
+  .tolva-mini {
+    display: grid;
+    /* Contra el alto de la ventana, por lo mismo que el resto de la home:
+       tiene que entrar en una pantalla y los teléfonos no miden todos igual. */
+    gap: clamp(8px, 1.4dvh, 16px);
+    justify-items: start;
+    padding: clamp(10px, 1.6dvh, 16px);
+    background: linear-gradient(168deg, var(--color-piedra), rgb(35, 36, 38));
+    border: 1px solid rgba(232, 226, 208, 0.1);
+    border-top: 1px solid rgba(136, 83, 51, 0.85);
+    animation: rise 1s var(--ease-ambient) 0.55s both;
+  }
+
+  .tolva-mini__cuerpo {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 108px;
+    gap: var(--space-sm);
+    align-items: center;
+    width: 100%;
+  }
+
+  .tolva-mini__info {
+    display: grid;
+    gap: clamp(4px, 0.9dvh, 8px);
+    justify-items: start;
+  }
+
+  .tolva-mini__valor {
+    font-family: var(--font-display);
+    font-size: var(--text-lead);
+    font-weight: 500;
+    line-height: 1.15;
+  }
+
+  .tolva-mini__sub {
+    font-size: var(--text-micro);
+    color: var(--color-ceniza);
+  }
+
+  /* El botón se estira sobre toda la tarjeta con un ::after, en vez de envolver
+     el pentágono: un <button> no puede contener una <figure>, y con el ::after
+     toca toda el área pero un solo elemento recibe el foco. El botón de la
+     tienda queda fuera de .tolva-mini__cuerpo, así que no se pisan. */
+  .tolva-mini__abrir {
+    font: inherit;
+    border: 0;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: var(--text-nano);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-brasa);
+  }
+
+  .tolva-mini__abrir::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+
+  .tolva-mini__penta {
+    justify-self: end;
+    width: 108px;
+  }
+
+  /*
+   * La hoja con el detalle: sube desde abajo sobre la página. Va en un <dialog>
+   * nativo abierto con showModal(), así que el fondo, la trampa de foco, el
+   * Escape y la página inerte los pone el navegador.
+   */
+  .hoja {
+    width: 100%;
+    max-width: none;
+    /* `margin: auto` es lo que centra un <dialog>: con 0 abajo queda pegado al
+       borde inferior, que es de donde tiene que salir. */
+    margin: auto 0 0;
+    max-height: 88dvh;
+    overflow-y: auto;
+    gap: var(--space-lg);
+    padding: var(--space-sm) var(--space-lg) var(--space-xl);
+    border: 0;
+    border-top: 2px solid var(--color-hueso);
+    box-shadow: 0 -8px 0 var(--color-tostado);
+    background: var(--color-carbon);
+    color: var(--color-hueso);
+  }
+
+  .hoja::backdrop {
+    background: rgba(12, 12, 13, 0.62);
+  }
+
+  /* El `display` va en [open] y no en la regla base: un <dialog> cerrado está
+     oculto por la hoja de estilos del navegador con `display: none`, y
+     declararle un display propio lo deja visible SIEMPRE, abierto o no. */
+  .hoja[open] {
+    display: grid;
+    animation: sheetUp 0.55s var(--ease-persona) both;
+  }
+
+  .hoja__tirador {
+    justify-self: center;
+    width: 46px;
+    height: 4px;
+    background: rgba(232, 226, 208, 0.3);
+  }
+
+  .hoja__cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+  }
+
+  .hoja__x {
+    width: var(--touch-min);
+    height: var(--touch-min);
+    display: grid;
+    place-items: center;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    background: none;
+    font-size: var(--text-body);
+    color: var(--color-ceniza);
+  }
+
+  .hoja__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 104px;
+    gap: var(--space-md);
+    align-items: start;
+  }
+
+  .hoja__info,
+  .hoja__sabor,
+  .hoja__tostadero {
+    display: grid;
+    gap: var(--space-sm);
+    justify-items: start;
+    align-content: start;
+  }
+
+  .hoja__info {
+    gap: var(--space-lg);
+  }
+
+  .hoja__tostadero p {
+    margin: 0;
+    font-size: var(--text-body);
+  }
+
+  .hoja__molino {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-sm);
+    margin: 0;
+  }
+
+  .hoja__molino img {
+    width: 100%;
+    max-width: 104px;
+    height: auto;
+  }
+
+  .hoja__molino figcaption {
+    font-family: var(--font-mono);
+    font-size: var(--text-nano);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--color-ceniza);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hoja[open],
+    .tolva-mini {
+      animation: none;
+    }
+  }
+
   @media (min-width: 1000px) {
+    /* Desde acá manda el panel entero: la tarjeta chica y su hoja se van. */
+    .tolva {
+      display: grid;
+    }
+
+    .tolva-mini,
+    .hoja[open] {
+      display: none;
+    }
+
     .home {
       /* Proporción, no ancho fijo: en la lámina el panel ocupa el 42 % de la
          fila. Con un máximo en píxeles, a 1024px se comía la columna del
@@ -423,22 +746,93 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
     }
   }
 
+  /* Donde manda la tarjeta chica -todo lo que no es escritorio- la cinta no
+     entra en la primera pantalla, y la lámina tampoco la tiene ahí: lo que
+     dice (el café, el tostadero, la dirección) ya está arriba, en la tarjeta
+     y en el encabezado. */
+  @media (max-width: 999px) {
+    .ticker {
+      display: none;
+    }
+
+    .presentacion {
+      gap: clamp(8px, 1.6dvh, 24px);
+    }
+
+    .hero {
+      font-size: min(21cqw, 8dvh);
+    }
+
+    .bajada {
+      font-size: clamp(14px, 2dvh, 18px);
+    }
+  }
+
+  /*
+   * Ancho de sobra pero poco alto -un portátil de 1280 × 720-: el panel entero
+   * mide 674px y ahí no entra. Vuelve la tarjeta chica, en la misma columna
+   * del panel, y el detalle se abre en la hoja. Es el mismo recurso que en el
+   * celular, por el mismo motivo: no hay alto.
+   */
+  /* Ventana baja pero no celular: el ritmo vertical se aprieta un escalón. La
+     condición se escribe con el mínimo de 641px en vez de confiar en el orden
+     de los bloques: si no, este bloque pisaría los valores más chicos del
+     celular en un teléfono de 740px de alto y lo agrandaría. */
+  @media (min-width: 641px) and (max-height: 820px) {
+    .hero {
+      font-size: min(21cqw, 10dvh);
+    }
+
+    .bajada {
+      font-size: clamp(14px, 2.1dvh, 18px);
+    }
+  }
+
+  @media (min-width: 1000px) and (max-height: 820px) {
+    .tolva {
+      display: none;
+    }
+
+    .tolva-mini {
+      display: grid;
+    }
+
+    .hoja[open] {
+      display: grid;
+    }
+  }
+
   @media (max-width: 640px) {
     .home {
-      gap: var(--space-md);
-      padding: var(--space-lg) var(--space-md);
+      gap: clamp(4px, 1dvh, 8px);
+      /* Poco aire arriba y abajo a propósito: la home tiene que entrar en una
+         pantalla y acá cada píxel vertical se pelea. A los costados se
+         mantiene el margen del resto del sitio. */
+      padding: clamp(4px, 1dvh, 8px) var(--space-md);
     }
+
 
     .marca-agua {
       width: 260px;
     }
 
+    /*
+     * En el celular el tamaño de lo grande se mide contra el ALTO de la
+     * ventana, no contra un breakpoint de ancho: la home tiene que entrar en
+     * una pantalla y los teléfonos van de 667 a 932 píxeles de alto. Con un
+     * breakpoint fijo entra en el que probaste y se desborda en el de al lado;
+     * con dvh se acomoda sola a cualquiera.
+     */
     .presentacion {
-      gap: var(--space-sm);
+      gap: clamp(4px, 1dvh, 12px);
+    }
+
+    .hero {
+      font-size: min(21cqw, 6.8dvh);
     }
 
     .bajada {
-      font-size: var(--text-body);
+      font-size: clamp(13px, 1.9dvh, 16px);
     }
 
     .panel.tolva {

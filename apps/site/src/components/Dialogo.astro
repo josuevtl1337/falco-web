@@ -76,13 +76,17 @@
     animation: nudge 1s ease-in-out infinite;
   }
 
-  @media (max-width: 640px) {
+  /* En el celular la home entra en una sola pantalla, así que el aire y el
+     cuerpo de la cita se miden contra el alto de la ventana: en un teléfono
+     corto se achican solos en vez de empujar la tarjeta fuera de vista. */
+  @media (max-width: 640px), (max-height: 820px) {
     .dialogo__caja {
-      padding: var(--space-md) var(--space-lg) var(--space-md) var(--space-md);
+      padding: clamp(10px, 1.7dvh, 16px) var(--space-lg)
+        clamp(10px, 1.7dvh, 16px) var(--space-md);
     }
 
     .dialogo__caja :global(p) {
-      font-size: var(--text-body);
+      font-size: clamp(13px, 1.9dvh, 16px);
     }
   }
 </style>

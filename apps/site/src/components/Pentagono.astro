@@ -66,7 +66,14 @@ const description = PENTAGON_AXES.map(
 ---
 
 <figure class="pentagono">
-  <svg viewBox="-20 -14 140 128" role="img" aria-label={description}>
+  <!-- Sin etiquetas (la tarjeta chica del celular) el lienzo se cierra sobre
+       la figura: el margen de -20/-14 existe solo para que entren las palabras
+       de los cinco ejes, y sin ellas deja la figura diminuta en el medio. -->
+  <svg
+    viewBox={labels ? "-20 -14 140 128" : "15 14 70 67"}
+    role="img"
+    aria-label={description}
+  >
     <polygon
       points={guide}
       fill="none"

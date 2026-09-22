@@ -65,23 +65,40 @@ a {
  * el scoping de Astro haría que la clase no aplicara fuera del componente
  * que la define.
  */
+/*
+ * El botón es un cartel, no una caja rotada. Como en .chip, la pieza inclinada
+ * es el ::before y el elemento queda recto: con `rotate` sobre el botón entero
+ * el texto se iba con él y quedaba torcido -el mismo defecto que el dueño
+ * marcó en los carteles del HUD-. Ángulo, colores y sombra medidos en la
+ * lámina (.btn / .btn.a): -12°, hueso sobre carbón, sombra dura tostada.
+ */
 .boton {
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: var(--touch-min);
   padding: var(--space-sm) var(--space-lg);
-  background: var(--color-tostado);
-  color: var(--color-hueso);
+  background: none;
+  color: var(--color-carbon);
   border: none;
-  border-radius: var(--radius-sm);
-  rotate: var(--angle-button);
   font-family: var(--font-mono);
-  font-size: var(--text-small);
+  font-size: var(--text-nano);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.16em;
   text-decoration: none;
   cursor: pointer;
+}
+
+.boton::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-hueso);
+  box-shadow: 5px 5px 0 var(--color-tostado);
+  transform: skewX(var(--angle-button));
 }
 
 /* Cada precio entero: el texto se corta donde entra, y "$ 35.000" separado
@@ -531,6 +548,16 @@ a {
   }
   100% {
     clip-path: inset(0);
+  }
+}
+
+/* La hoja del celular entra desde abajo, empujada. */
+@keyframes sheetUp {
+  from {
+    translate: 0 100%;
+  }
+  to {
+    translate: none;
   }
 }
 
