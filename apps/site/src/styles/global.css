@@ -218,6 +218,24 @@ a {
   box-shadow: 5px 5px 0 var(--color-hueso);
 }
 
+/*
+ * Apagado: el cartel de estado cuando está cerrado.
+ *
+ * En la lámina el estado sin encender no tiene relleno — es el mismo cartel de
+ * neón, sin corriente: solo el contorno de hueso al 28% y el texto en ceniza,
+ * que sobre carbón da 5,21:1 y pasa AA. El contraste bajo acá es la
+ * información: si "cerrado" pesara lo mismo que "abierto ahora", el cartel
+ * dejaría de decir nada de un vistazo.
+ */
+.chip--off::before {
+  background: none;
+  border: 1px solid rgba(232, 226, 208, 0.28);
+}
+
+.chip--off {
+  color: var(--color-ceniza);
+}
+
 /* Encendido: solo el estado "abierto ahora". Brasa/carbón, 8,92:1. */
 .chip--lit::before {
   background: var(--color-brasa);

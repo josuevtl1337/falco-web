@@ -858,6 +858,18 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
       container-type: normal;
     }
 
+    /*
+     * El contenido arranca pegado a la barra, no centrado.
+     *
+     * Con `align-content: center` el sobrante de la pantalla se repartía mitad
+     * arriba y mitad abajo: en un 390 × 844 eran 61px de más entre la barra y
+     * la fecha, justo en lo primero que se ve. En la lámina el HUD empieza a
+     * 26px de la barra, que es exactamente el padding de la caja.
+     */
+    .home {
+      align-content: start;
+    }
+
     .zona-hud {
       order: 1;
     }

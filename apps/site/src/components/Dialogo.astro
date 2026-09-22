@@ -3,7 +3,7 @@
 ---
 
 <div class="dialogo">
-  <span class="chip chip--fill dialogo__etiqueta">Falco</span>
+  <span class="chip chip--fill chip--shadow dialogo__etiqueta">Falco</span>
   <div class="dialogo__caja">
     <slot />
     <span class="dialogo__flecha" aria-hidden="true">▼</span>
@@ -40,21 +40,35 @@
     transform: none;
   }
 
+  /*
+   * Dos capas, en este orden exacto (medido en la lámina):
+   *
+   *   1. la caja: fondo sombra con un borde de 2px de hueso;
+   *   2. un relleno tostado del mismo tamaño, corrido 9px abajo y a la
+   *      derecha, por detrás del texto.
+   *
+   * El skew de la caja crea un contexto de apilado, así que el ::before con
+   * z-index -1 se pinta ENCIMA del fondo de la caja y debajo del texto: el
+   * marrón tapa casi todo y deja asomar, arriba y a la izquierda, una franja
+   * de 9px del fondo oscuro dentro del borde de hueso.
+   *
+   * Lo teníamos invertido -el marrón como fondo y el marco corrido por
+   * detrás-, y por eso el borde asomaba abajo a la derecha.
+   */
   .dialogo__caja {
     position: relative;
     padding: var(--space-lg) var(--space-xl) var(--space-lg) var(--space-lg);
-    background: var(--color-tostado);
+    background: var(--color-sombra);
+    border: 2px solid var(--color-hueso);
     transform: skewX(-6deg);
   }
 
-  /* El "doble borde" de la lámina: un marco de línea desplazado por detrás.
-     No se contra-inclina: acompaña el mismo corte que la caja. */
   .dialogo__caja::before {
     content: "";
     position: absolute;
     inset: 0;
-    translate: var(--space-sm) var(--space-sm);
-    border: 1px solid var(--color-hueso);
+    translate: 9px 9px;
+    background: var(--color-tostado);
     z-index: -1;
   }
 

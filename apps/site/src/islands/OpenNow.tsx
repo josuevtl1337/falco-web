@@ -45,7 +45,7 @@ export function OpenNow({ week, specials, initial }: Props) {
          etiqueta entera y bien puntuada. */
       aria-label={status.label}
       data-open={open}
-      className={`chip estado ${open ? "chip--lit" : "chip--fill"}`}
+      className={`chip estado ${open ? "chip--lit" : "chip--off"}`}
     >
       <span className="punto" aria-hidden="true" />
       <span className="estado__label">{primary}</span>

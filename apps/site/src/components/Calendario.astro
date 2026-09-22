@@ -117,6 +117,15 @@ const { weekday, day, month, moment, previousDay } = Astro.props;
     .fecha__mes {
       font-size: min(26.5px, 3.1dvh);
     }
+
+    /* La columna de la fecha tiene un ancho mínimo para que el cartel del día
+       no quede pegado al "/9". En la lámina esa columna mide 118px y el
+       cartel arranca a 150px del borde; con columnas al contenido, el cartel
+       se venía 60px a la izquierda y los dos bloques se leían como uno solo. */
+    .fecha {
+      grid-template-columns: minmax(118px, auto) auto;
+      column-gap: 14px;
+    }
   }
 
   /* El chip del día va en la tipografía de títulos, no en la monoespaciada. */
