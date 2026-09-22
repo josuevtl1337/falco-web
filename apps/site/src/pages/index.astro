@@ -132,18 +132,11 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
 
     <section class="presentacion zona-texto">
       <h1 class="hero"><span>café de</span><span>santoto</span></h1>
-      <!--
-        La cola de la frase no va en el celular: la lámina usa ahí la versión
-        corta ("Cafetería de especialidad en una esquina de Santo Tomé.
-        Tostamos con Puerto Blest."). Va como un <span> dentro del mismo
-        párrafo en vez de dos párrafos alternativos: un solo texto que
-        mantener, y lo que queda se sigue leyendo como una oración entera.
-      -->
+      <!-- Solo en tablet y escritorio: en el celular no se muestra. -->
       <p class="bajada">
         Somos una cafetería de especialidad en una esquina de Santo Tomé.
-        Tostamos con <b>Puerto Blest</b><span class="bajada__cola">
-          y servimos café que se puede entender sin saber nada de café</span
-        >.
+        Tostamos con <b>Puerto Blest</b> y servimos café que se puede entender
+        sin saber nada de café.
       </p>
       <!--
         El envoltorio existe para poder ordenarlo: en el celular la cita va
@@ -881,25 +874,14 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
       order: 3;
     }
 
-    .bajada {
-      order: 4;
-      /* Lámina: 15px con interlineado 24,3px (1,62). */
-      font-size: clamp(13px, 1.8dvh, 15px);
-      line-height: 1.62;
-    }
-
-    /* La versión corta de la lámina: dos líneas en vez de cuatro. */
-    .bajada__cola {
-      display: none;
-    }
-  }
-
-  /* En un teléfono muy corto (iPhone SE: 667px de alto) no entra todo ni con
-     los tamaños de la lámina, que está dibujada para 844. Lo primero que se
-     va es la bajada, que es lo único que repite lo que ya dicen el héroe y la
-     cita. Todo lo demás conserva su tamaño: preferimos que falte una frase
-     antes que empequeñecer lo que hay que leer. */
-  @media (max-width: 640px) and (max-height: 700px) {
+    /*
+     * La bajada no va en el celular, en ningún tamaño.
+     *
+     * Decisión del dueño, dos veces: en una sola pantalla esa frase repite lo
+     * que ya dicen el héroe ("café de santoto") y la cita de abajo ("traer el
+     * mundo del café a Santo Tomé"). La lámina sí la tiene, pero acá manda lo
+     * que él pidió, no la lámina.
+     */
     .bajada {
       display: none;
     }
