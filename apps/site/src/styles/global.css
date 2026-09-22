@@ -582,6 +582,18 @@ a {
   }
 }
 
+/* El sello de "Nuevo" en la ficha: se balancea, no gira entero. Medido en la
+   lámina: de 12° a 4° y un 8% más grande en el medio del ciclo. */
+@keyframes wobble {
+  0%,
+  100% {
+    transform: rotate(12deg) scale(1);
+  }
+  50% {
+    transform: rotate(4deg) scale(1.08);
+  }
+}
+
 /* La hoja del celular entra desde abajo, empujada. */
 @keyframes sheetUp {
   from {

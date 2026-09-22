@@ -1,40 +1,207 @@
 ---
 import type { ProductWithOptions } from "@falco/db";
-import { priceParts } from "./precio";
+import { formatArs } from "@falco/domain";
 
 interface Props {
   product: ProductWithOptions;
+  /** El nombre del estante: en la lámina encabeza la ficha, en brasa. */
+  shelfLabel: string;
 }
 
-const { product } = Astro.props;
+const { product, shelfLabel } = Astro.props;
 ---
 
 <article class="ficha">
-  <a href={`/tienda/${product.slug}`}>
-    {product.isNew && <span class="chip chip--lit">Nuevo</span>}
-    <h3>{product.name}</h3>
-    <p class="ficha__detalle">{product.detail}</p>
-    <p class="precio">
-      {priceParts(product).map((parte) => <span>{parte}</span>)}
-    </p>
+  <a class="ficha__cara" href={`/tienda/${product.slug}`}>
+    {product.isNew && <span class="ficha__nuevo">Nuevo</span>}
+
+    <!-- El hueco de la foto. Todavía no hay fotos de producto: en la lámina
+         este espacio es un degradado con una luz arriba, que se lee como algo
+         puesto a propósito y no como una imagen rota. -->
+    <span class="ficha__foto" aria-hidden="true"></span>
+
+    <span class="ficha__cuerpo">
+      <span class="ficha__codigo">{shelfLabel}</span>
+      <span class="ficha__nombre">{product.name}</span>
+      <span class="ficha__detalle">{product.detail}</span>
+
+      <span class="ficha__pie">
+        <span><b>{formatArs(product.priceCashArs)}</b> efectivo</span>
+        <span class="ficha__pedir">Pedir ›</span>
+      </span>
+
+      <!-- Los dos precios van los dos en la ficha: Falco cobra distinto según
+           cómo se pague y esconder uno de los dos hasta el detalle haría que
+           el precio de la ficha fuera mentira para quien paga con tarjeta. -->
+      <span class="ficha__tarjeta">
+        {formatArs(product.priceCardArs)} tarjeta{
+          product.askStock && " · consultar stock"
+        }
+      </span>
+    </span>
   </a>
 </article>
 
 <style>
-  .ficha a {
+  .ficha {
+    position: relative;
+    /* El ancho de la lámina. Fijo a propósito: las fichas viven en un riel
+       horizontal, no en una grilla que las estire. */
+    width: 250px;
+    flex: none;
+  }
+
+  .ficha__cara {
     display: grid;
-    gap: var(--space-xs);
-    padding: var(--space-md);
-    min-height: var(--touch-min);
-    background: var(--color-piedra);
-    border-radius: var(--radius-md);
+    height: 100%;
+    align-content: start;
     text-decoration: none;
+    color: var(--color-hueso);
+    background: linear-gradient(168deg, var(--color-piedra), rgb(35, 36, 38));
+    border: 1px solid rgba(232, 226, 208, 0.12);
   }
-  .ficha .chip {
-    justify-self: start;
+
+  .ficha__foto {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    height: 150px;
+    background: linear-gradient(150deg, #3b2519, rgb(35, 36, 38));
+    border-bottom: 1px solid rgba(232, 226, 208, 0.1);
   }
+
+  /* La luz que entra desde arriba, como en el resto del sitio. */
+  .ficha__foto::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: -60px;
+    width: 220px;
+    height: 220px;
+    transform: translateX(-50%);
+    background: radial-gradient(
+      closest-side,
+      rgba(242, 196, 139, 0.26),
+      rgba(242, 196, 139, 0) 72%
+    );
+  }
+
+  .ficha__cuerpo {
+    display: grid;
+    gap: 6px;
+    padding: 16px 18px 14px;
+  }
+
+  .ficha__codigo {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-brasa);
+  }
+
+  .ficha__nombre {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-lead);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
   .ficha__detalle {
+    font-size: 13px;
     color: var(--color-ceniza);
-    margin: 0;
+  }
+
+  /* El precio entero o nada: "$ 33.000" cortado de "efectivo" en la línea de
+     abajo deja de leerse como un precio, y en una ficha de 206px se corta. Si
+     no entra con el "Pedir", es el "Pedir" el que baja de renglón. */
+  .ficha__pie {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 2px var(--space-sm);
+    margin-top: var(--space-sm);
+    padding-top: 11px;
+    border-top: 1px solid rgba(232, 226, 208, 0.09);
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+
+  .ficha__pie > :first-child {
+    white-space: nowrap;
+  }
+
+  .ficha__pie b {
+    font-weight: 400;
+  }
+
+  .ficha__pedir {
+    /* Pegado a la derecha aunque haya bajado solo a su propio renglón. */
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-ceniza);
+  }
+
+  .ficha__tarjeta {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--color-ceniza);
+  }
+
+  /* El sello de "Nuevo": un cuadrado de hueso girado que se balancea. Sale
+     de la caja por arriba y a la derecha, por eso el riel le deja aire
+     arriba. */
+  .ficha__nuevo {
+    position: absolute;
+    right: -14px;
+    top: -20px;
+    z-index: 5;
+    display: grid;
+    place-items: center;
+    width: 66px;
+    height: 66px;
+    background: var(--color-hueso);
+    color: var(--color-carbon);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+    transform: rotate(12deg);
+    animation: wobble 2.4s ease-in-out infinite;
+  }
+
+  .ficha__cara:focus-visible {
+    outline: 2px solid var(--color-brasa);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 640px) {
+    .ficha {
+      width: 206px;
+    }
+
+    .ficha__foto {
+      height: 112px;
+    }
+
+    .ficha__nombre {
+      font-size: 17px;
+    }
+
+    .ficha__detalle {
+      font-size: 11.5px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ficha__nuevo {
+      animation: none;
+    }
   }
 </style>
