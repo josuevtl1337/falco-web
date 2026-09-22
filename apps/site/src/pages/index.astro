@@ -495,10 +495,6 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
     padding-bottom: 2px;
   }
 
-  /* En escritorio la tolva va al costado, como en la lámina: el texto a la
-     izquierda y el panel a la derecha, ocupando las dos filas. Apilado se
-     pierde la composición y la tolva queda debajo del pliegue. Acá también
-     entra el molino, que abajo de este ancho se oculta (Tarea 6). */
   /*
    * La tarjeta chica del celular: lo que hay en tolva y cómo sabe, de un
    * vistazo, en el lugar de un panel de 699px.
@@ -819,16 +815,26 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
 
   @media (max-width: 640px) {
     .home {
-      gap: clamp(4px, 1dvh, 8px);
-      /* Poco aire arriba y abajo a propósito: la home tiene que entrar en una
-         pantalla y acá cada píxel vertical se pelea. A los costados se
-         mantiene el margen del resto del sitio. */
-      padding: clamp(4px, 1dvh, 8px) var(--space-md);
+      gap: clamp(8px, 1.7dvh, 16px);
+      padding: clamp(8px, 1.7dvh, 16px) var(--space-md);
     }
-
 
     .marca-agua {
       width: 260px;
+    }
+
+    /*
+     * La bajada no va en el celular.
+     *
+     * En una sola pantalla esa frase dice lo mismo que ya dicen el héroe
+     * ("café de santoto"), la cita de abajo ("traer el mundo del café a Santo
+     * Tomé") y la descripción de la página: tres veces la misma idea, en el
+     * lugar donde menos espacio hay. Sacarla no quita información, saca
+     * repetición — y los ~90px que libera se gastan abajo, en que el héroe y
+     * la fecha vuelvan a leerse grandes en vez de quedar apretados.
+     */
+    .bajada {
+      display: none;
     }
 
     /*
@@ -839,15 +845,11 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
      * con dvh se acomoda sola a cualquiera.
      */
     .presentacion {
-      gap: clamp(4px, 1dvh, 12px);
+      gap: clamp(8px, 1.7dvh, 20px);
     }
 
     .hero {
-      font-size: min(21cqw, 6.8dvh);
-    }
-
-    .bajada {
-      font-size: clamp(13px, 1.9dvh, 16px);
+      font-size: min(21cqw, 9dvh);
     }
 
     .panel.tolva {
