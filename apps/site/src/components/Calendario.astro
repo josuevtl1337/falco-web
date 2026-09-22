@@ -105,17 +105,17 @@ const { weekday, day, month, moment, previousDay } = Astro.props;
     justify-items: start;
   }
 
-  /* En el celular la home entera tiene que entrar en una pantalla, así que el
-     número del día se mide contra el ALTO de la ventana: los teléfonos van de
-     667 a 932 píxeles de alto y un tamaño fijo entra en uno y desborda el de
-     al lado. El techo es el token, que es lo que vale en escritorio. */
+  /* Medido en la lámina (marco "Celular · 390"): el día va a 50px y el mes a
+     26,5px, no a los 72/38 de escritorio. El tope es ese valor y el factor en
+     dvh lo achica solo en un teléfono más corto que 844. */
   @media (max-width: 640px) {
     .fecha__dia {
-      font-size: min(var(--text-dia), 8.8dvh);
+      font-size: min(50px, 5.9dvh);
+      text-shadow: 3px 3px 0 var(--color-tostado);
     }
 
     .fecha__mes {
-      font-size: min(var(--text-diaMes), 4.8dvh);
+      font-size: min(26.5px, 3.1dvh);
     }
   }
 

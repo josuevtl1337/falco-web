@@ -279,6 +279,19 @@ a {
   font-weight: 400;
 }
 
+/* En el celular el cartel de estado baja a los 16px de la lámina (en
+   escritorio son 20): a 20px el "ABIERTO AHORA" pesaba más que el héroe y
+   volvía densa la primera pantalla. El subtítulo ya está a 10px en las dos. */
+@media (max-width: 640px) {
+  .estado__label {
+    font-size: var(--text-body);
+  }
+
+  .hud {
+    gap: var(--space-sm);
+  }
+}
+
 /* Carbón al 85% de opacidad sobre brasa: 6,26:1, medido (ver reporte). */
 /* Dos sombras: la dura tostada que ya usan los otros carteles, y un
    resplandor de brasa desenfocado que hace que el cartel parezca encendido.

@@ -132,17 +132,32 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
 
     <section class="presentacion zona-texto">
       <h1 class="hero"><span>café de</span><span>santoto</span></h1>
+      <!--
+        La cola de la frase no va en el celular: la lámina usa ahí la versión
+        corta ("Cafetería de especialidad en una esquina de Santo Tomé.
+        Tostamos con Puerto Blest."). Va como un <span> dentro del mismo
+        párrafo en vez de dos párrafos alternativos: un solo texto que
+        mantener, y lo que queda se sigue leyendo como una oración entera.
+      -->
       <p class="bajada">
         Somos una cafetería de especialidad en una esquina de Santo Tomé.
-        Tostamos con <b>Puerto Blest</b> y servimos café que se puede entender
-        sin saber nada de café.
+        Tostamos con <b>Puerto Blest</b><span class="bajada__cola">
+          y servimos café que se puede entender sin saber nada de café</span
+        >.
       </p>
-      <Dialogo>
-        <p>
-          Nuestra misión siempre fue la misma: traer el mundo del café a
-          Santo Tomé.
-        </p>
-      </Dialogo>
+      <!--
+        El envoltorio existe para poder ordenarlo: en el celular la cita va
+        última (lámina), y los estilos con scope de esta página no alcanzan la
+        raíz de <Dialogo>, que lleva el scope de su propio componente.
+      -->
+      <div class="zona-cita">
+        <Dialogo>
+          <p>
+            Nuestra misión siempre fue la misma: traer el mundo del café a
+            Santo Tomé.
+          </p>
+        </Dialogo>
+      </div>
     </section>
 
     {
@@ -503,9 +518,9 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
     display: grid;
     /* Contra el alto de la ventana, por lo mismo que el resto de la home:
        tiene que entrar en una pantalla y los teléfonos no miden todos igual. */
-    gap: clamp(8px, 1.4dvh, 16px);
+    gap: clamp(10px, 1.9dvh, 16px);
     justify-items: start;
-    padding: clamp(10px, 1.6dvh, 16px);
+    padding: clamp(10px, 1.9dvh, 16px);
     background: linear-gradient(168deg, var(--color-piedra), rgb(35, 36, 38));
     border: 1px solid rgba(232, 226, 208, 0.1);
     border-top: 1px solid rgba(136, 83, 51, 0.85);
@@ -523,13 +538,15 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
 
   .tolva-mini__info {
     display: grid;
-    gap: clamp(4px, 0.9dvh, 8px);
+    gap: clamp(5px, 0.95dvh, 8px);
     justify-items: start;
   }
 
+  /* 19px en la lámina, no los 20 de --text-lead: el valor no puede competir
+     con el héroe, que ahora está en 56. */
   .tolva-mini__valor {
     font-family: var(--font-display);
-    font-size: var(--text-lead);
+    font-size: 19px;
     font-weight: 500;
     line-height: 1.15;
   }
@@ -550,7 +567,9 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
     background: none;
     cursor: pointer;
     font-family: var(--font-mono);
-    font-size: var(--text-nano);
+    /* 9px, medido en la lámina: es una pista de que la tarjeta se toca, no un
+       botón que compita con "Llevate un cuarto". */
+    font-size: 9px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--color-brasa);
@@ -814,9 +833,18 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
   }
 
   @media (max-width: 640px) {
+    /*
+     * Todo lo que sigue sale de medir la lámina (persona/wireframes.html,
+     * marco "Celular · 390") leyendo sus estilos calculados, no de estimar:
+     * el tope de cada clamp es el valor exacto de la lámina a 390 × 844, y el
+     * factor en dvh está elegido para dar ESE número a ese alto y achicarse
+     * solo en un teléfono más corto.
+     *
+     * La lámina: gap 22px, padding 26px 22px.
+     */
     .home {
-      gap: clamp(8px, 1.7dvh, 16px);
-      padding: clamp(8px, 1.7dvh, 16px) var(--space-md);
+      gap: clamp(12px, 2.6dvh, 22px);
+      padding: clamp(14px, 3.1dvh, 26px) 22px;
     }
 
     .marca-agua {
@@ -824,32 +852,60 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
     }
 
     /*
-     * La bajada no va en el celular.
+     * El orden de la lámina es HUD → héroe → tarjeta de la tolva → bajada →
+     * cita: la tarjeta va metida entre el héroe y la bajada. Para lograrlo,
+     * .presentacion deja de ser una caja y sus tres hijos pasan a ser celdas
+     * del mismo grid que el HUD y la tarjeta, ordenados con `order`.
      *
-     * En una sola pantalla esa frase dice lo mismo que ya dicen el héroe
-     * ("café de santoto"), la cita de abajo ("traer el mundo del café a Santo
-     * Tomé") y la descripción de la página: tres veces la misma idea, en el
-     * lugar donde menos espacio hay. Sacarla no quita información, saca
-     * repetición — y los ~90px que libera se gastan abajo, en que el héroe y
-     * la fecha vuelvan a leerse grandes en vez de quedar apretados.
+     * Al dejar de tener caja deja de ser contenedor de consultas, así que acá
+     * el héroe se mide contra la ventana (vw) y no contra su columna (cqw).
      */
+    .presentacion {
+      display: contents;
+      container-type: normal;
+    }
+
+    .zona-hud {
+      order: 1;
+    }
+
+    .hero {
+      order: 2;
+      /* Lámina: 56px, interlineado 0,92 y -2,52px de tracking (-0,045em). */
+      font-size: min(14.4vw, 6.6dvh);
+      line-height: 0.92;
+      letter-spacing: -0.045em;
+    }
+
+    .tolva-mini {
+      order: 3;
+    }
+
+    .bajada {
+      order: 4;
+      /* Lámina: 15px con interlineado 24,3px (1,62). */
+      font-size: clamp(13px, 1.8dvh, 15px);
+      line-height: 1.62;
+    }
+
+    /* La versión corta de la lámina: dos líneas en vez de cuatro. */
+    .bajada__cola {
+      display: none;
+    }
+  }
+
+  /* En un teléfono muy corto (iPhone SE: 667px de alto) no entra todo ni con
+     los tamaños de la lámina, que está dibujada para 844. Lo primero que se
+     va es la bajada, que es lo único que repite lo que ya dicen el héroe y la
+     cita. Todo lo demás conserva su tamaño: preferimos que falte una frase
+     antes que empequeñecer lo que hay que leer. */
+  @media (max-width: 640px) and (max-height: 700px) {
     .bajada {
       display: none;
     }
 
-    /*
-     * En el celular el tamaño de lo grande se mide contra el ALTO de la
-     * ventana, no contra un breakpoint de ancho: la home tiene que entrar en
-     * una pantalla y los teléfonos van de 667 a 932 píxeles de alto. Con un
-     * breakpoint fijo entra en el que probaste y se desborda en el de al lado;
-     * con dvh se acomoda sola a cualquiera.
-     */
-    .presentacion {
-      gap: clamp(8px, 1.7dvh, 20px);
-    }
-
-    .hero {
-      font-size: min(21cqw, 9dvh);
+    .zona-cita {
+      order: 5;
     }
 
     .panel.tolva {
