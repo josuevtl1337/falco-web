@@ -1,58 +1,10 @@
 ---
-import { env } from "cloudflare:workers";
-import { listShelf } from "@falco/db";
-import Base from "../../layouts/Base.astro";
-import Nav from "../../components/Nav.astro";
-import Ficha from "../../components/Ficha.astro";
-
-const [coffee, kits] = await Promise.all([
-  listShelf(env.DB, "coffee"),
-  listShelf(env.DB, "kits"),
-]);
-const shelves = [
-  { title: "Café", products: coffee },
-  { title: "Kits y accesorios", products: kits },
-];
+// Los estantes se mudaron a la home, abajo de la primera pantalla: un solo
+// lugar que lista productos, así no hay dos copias que se desincronicen ni dos
+// URLs con el mismo contenido. Esta ruta queda para los enlaces viejos y para
+// el "volver" de las fichas.
+//
+// 302 y no 301: un permanente se queda cacheado en el navegador de la gente y
+// volver atrás sería un problema.
+return Astro.redirect("/#tienda");
 ---
-
-<Base
-  title="La tienda · Falco"
-  description="Café de especialidad, kits y accesorios para llevar de Falco, en Santo Tomé."
->
-  <Nav slot="nav" />
-  <div class="pagina">
-    <h1>La tienda</h1>
-    {
-      shelves.map((shelf) => (
-      <section aria-labelledby={`estante-${shelf.title}`}>
-        <h2 id={`estante-${shelf.title}`}>{shelf.title}</h2>
-        {shelf.products.length === 0 ? (
-          <p>
-            Por ahora no hay nada en este estante. Escribinos y te contamos
-            qué tenemos.
-          </p>
-        ) : (
-          <ul class="estante">
-            {shelf.products.map((product) => (
-              <li>
-                <Ficha product={product} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    ))
-  }
-  </div>
-</Base>
-
-<style>
-  .estante {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: var(--space-md);
-  }
-</style>

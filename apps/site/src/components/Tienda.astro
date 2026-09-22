@@ -1,0 +1,92 @@
+---
+import type { ProductWithOptions } from "@falco/db";
+import Ficha from "./Ficha.astro";
+
+interface Props {
+  shelves: { title: string; products: ProductWithOptions[] }[];
+}
+
+const { shelves } = Astro.props;
+
+// El id del encabezado sale del título del estante, que puede traer espacios
+// y acentos: sin normalizar, el aria-labelledby apunta a un id que no existe
+// y la sección queda sin nombre para quien navega por secciones.
+const slug = (title: string) =>
+  `estante-${title
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")}`;
+---
+
+<!--
+  Los estantes viven acá y no en una página propia: la home termina en una
+  pantalla y lo que sigue al scrollear ES la tienda. Un solo lugar que lista
+  productos, así no hay dos copias que se desincronicen.
+-->
+<section class="tienda pagina" id="tienda" aria-labelledby="tienda-titulo">
+  <h2 id="tienda-titulo" class="tienda__titulo">La tienda</h2>
+
+  {
+    shelves.map((shelf) => (
+      <section class="tienda__estante" aria-labelledby={slug(shelf.title)}>
+        <h3 id={slug(shelf.title)} class="chip chip--fill">
+          {shelf.title}
+        </h3>
+
+        {shelf.products.length === 0 ? (
+          <p class="tienda__vacio">
+            Por ahora no hay nada en este estante. Escribinos y te contamos qué
+            tenemos.
+          </p>
+        ) : (
+          <ul class="tienda__grilla">
+            {shelf.products.map((product) => (
+              <li>
+                <Ficha product={product} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    ))
+  }
+</section>
+
+<style>
+  .tienda {
+    display: grid;
+    gap: var(--space-xl);
+    background: var(--color-carbon);
+  }
+
+  .tienda__titulo {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-title);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  .tienda__estante {
+    display: grid;
+    gap: var(--space-md);
+    justify-items: start;
+  }
+
+  .tienda__grilla {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-md);
+  }
+
+  .tienda__vacio {
+    margin: 0;
+    color: var(--color-ceniza);
+  }
+</style>

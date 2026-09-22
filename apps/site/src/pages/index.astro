@@ -4,6 +4,7 @@ import {
   getHopperCoffee,
   getUpcomingSpecialDays,
   getWeekHours,
+  listShelf,
 } from "@falco/db";
 import { addDays, getOpenStatus, toArgentina } from "@falco/domain";
 import Base from "../layouts/Base.astro";
@@ -14,6 +15,7 @@ import Nav from "../components/Nav.astro";
 import Origen from "../components/Origen.astro";
 import { placeLabel } from "../components/origen";
 import Pentagono from "../components/Pentagono.astro";
+import Tienda from "../components/Tienda.astro";
 import { OpenNow } from "../islands/OpenNow";
 
 const now = new Date();
@@ -22,6 +24,17 @@ const nowAR = toArgentina(now);
 const specials = await getUpcomingSpecialDays(env.DB, nowAR.date, 30);
 const status = getOpenStatus(now, week, specials);
 const coffee = await getHopperCoffee(env.DB);
+
+// Los estantes son lo que sigue abajo de la primera pantalla: la home termina
+// donde termina la ventana y scrollear ya es entrar en la tienda.
+const [coffeeShelf, kitsShelf] = await Promise.all([
+  listShelf(env.DB, "coffee"),
+  listShelf(env.DB, "kits"),
+]);
+const shelves = [
+  { title: "Café", products: coffeeShelf },
+  { title: "Kits y accesorios", products: kitsShelf },
+];
 
 // nowAR.date siempre es "AAAA-MM-DD": partirlo evita una segunda pasada por
 // Intl solo para el número de día y de mes.
@@ -160,7 +173,7 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
 
           <div class="tolva__pie">
             <span>Cambia cada vez que cambiamos el grano</span>
-            <a href="/tienda">Llevate un cuarto →</a>
+            <a href="#tienda">Llevate un cuarto →</a>
           </div>
         </section>
       )
@@ -198,7 +211,7 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
             </div>
           </div>
 
-          <a class="boton" href="/tienda">Llevate un cuarto</a>
+          <a class="boton" href="#tienda">Llevate un cuarto</a>
         </section>
       )
     }
@@ -213,6 +226,8 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
       </div>
     </div>
   </div>
+
+  <Tienda shelves={shelves} />
 
   {
     coffee && (
@@ -249,7 +264,7 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
           <Pentagono profile={coffee.profile} />
         </div>
 
-        <a class="boton" href="/tienda">
+        <a class="boton" href="#tienda">
           Llevate un cuarto
         </a>
       </dialog>
