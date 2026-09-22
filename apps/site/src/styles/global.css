@@ -305,7 +305,8 @@ a {
 /*
  * El ticker: franja de ancho completo con la cinta en movimiento continuo.
  * El contenido va duplicado en el marcado (index.astro) para que el bucle de
- * -50% no corte la lectura.
+ * -50% no corte la lectura: los dos grupos son idénticos, así que al final de
+ * la animación el segundo cae exactamente donde arrancó el primero.
  */
 .ticker {
   overflow: hidden;
@@ -319,14 +320,15 @@ a {
   rotate: var(--angle-ticker);
 }
 
+/* Sin `gap`: cualquier separación entre los dos grupos hace que el -50% caiga
+   a mitad de camino y el bucle salte. El separador (◆ entre cuadratines) ya
+   viene al final del texto. */
 .ticker__cinta {
   display: flex;
   flex-wrap: nowrap;
   width: max-content;
-  gap: 0 var(--space-md);
   padding-block: var(--space-sm);
-  overflow: hidden;
-  animation: slide 38s linear infinite;
+  animation: slide var(--ticker-duracion, 38s) linear infinite;
 }
 
 .ticker__cinta span {

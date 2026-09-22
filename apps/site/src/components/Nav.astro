@@ -101,6 +101,15 @@ const path = Astro.url.pathname;
     color: var(--color-hueso);
   }
 
+  /* El menú comparte el margen lateral del contenido: desde 900px la home
+     abre a --space-xxl (index.astro) y la barra tiene que abrir con ella,
+     o el logo y las opciones quedan fuera de la columna del texto. */
+  @media (min-width: 900px) {
+    .nav {
+      padding-inline: var(--space-xxl);
+    }
+  }
+
   /* En el celular el menú queda en una sola fila: apilado se comía un cuarto
      de la primera pantalla, y lo primero que hay que ver es qué café hay en
      la tolva. */

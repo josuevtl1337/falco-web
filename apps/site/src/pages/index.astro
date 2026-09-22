@@ -38,6 +38,27 @@ const tickerText =
   ]
     .filter((item): item is string => Boolean(item))
     .join("\u2003◆\u2003") + "\u2003◆\u2003";
+
+// La cinta son dos grupos idénticos y el bucle desplaza exactamente la mitad,
+// así que al terminar, el grupo 2 está donde arrancó el grupo 1 y la lectura
+// no se corta. Para que nunca aparezca la franja marrón vacía, un grupo tiene
+// que ser más ancho que la pantalla: a 12px de Martian Mono con 0,16em de
+// tracking cada carácter ocupa unos 8px, y repetimos hasta pasar los 4000px.
+// La cuenta va a la baja a propósito: quedarse corto deja hueco, pasarse no
+// se nota.
+const TICKER_CHAR_WIDTH = 8;
+const TICKER_MIN_GROUP_WIDTH = 4000;
+// Una vuelta de UNA copia del texto tarda esto: la duración total se multiplica
+// por las repeticiones para que la cinta ande siempre a la misma velocidad,
+// sin importar cuántas copias haya hecho falta apilar.
+const TICKER_SECONDS_PER_COPY = 38;
+
+const tickerCopies = Math.max(
+  1,
+  Math.ceil(TICKER_MIN_GROUP_WIDTH / (tickerText.length * TICKER_CHAR_WIDTH)),
+);
+const tickerGroup = tickerText.repeat(tickerCopies);
+const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
 ---
 
 <Base
@@ -141,9 +162,12 @@ const tickerText =
 
   <div class="ticker" aria-hidden="true">
     <div class="ticker__banda">
-      <div class="ticker__cinta">
-        <span>{tickerText}</span>
-        <span>{tickerText}</span>
+      <div
+        class="ticker__cinta"
+        style={`--ticker-duracion:${tickerDuration}`}
+      >
+        <span>{tickerGroup}</span>
+        <span>{tickerGroup}</span>
       </div>
     </div>
   </div>
