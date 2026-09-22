@@ -54,28 +54,44 @@ const shelvesWithRail = shelves.map((shelf, index) => {
   productos, así no hay dos copias que se desincronicen.
 -->
 <section class="tienda" id="tienda" aria-labelledby="tienda-titulo">
-  <header class="tienda__entrada">
-    <div class="tienda__marca">
-      <span class="chip chip--fill chip--shadow">La tienda</span>
-      <h2 id="tienda-titulo" class="tienda__titulo">
-        <span>Llevate</span><span>Falco a casa</span>
-      </h2>
-    </div>
-
-    <p class="tienda__bajada">
-      Café en grano y todo lo que necesitás para prepararlo. Armá tu pedido y
-      mandalo por WhatsApp: confirmamos stock y lo retirás en el local.
-    </p>
-  </header>
-
   {
-    shelvesWithRail.map((shelf) => (
+    shelvesWithRail.map((shelf, index) => (
       <section class="estante" aria-labelledby={shelf.id}>
-        <div class="estante__linea">
+        {/*
+          La línea del primer estante lleva además el nombre de la tienda y su
+          cartel: "Café ——— Llevate Falco a casa ——— La tienda". Así la tienda
+          se presenta sin gastar una pantalla entera en un encabezado, que era
+          lo que dejaba la segunda fila de productos cortada al aterrizar.
+
+          En el marcado el título va primero, antes del nombre del estante,
+          porque es el encabezado de la sección y el orden de lectura tiene que
+          respetarlo. Al medio lo lleva `order`, que mueve lo que se ve sin
+          tocar lo que se lee. Se puede porque en esta fila no hay nada que
+          reciba el foco.
+        */}
+        <div
+          class:list={["estante__linea", index === 0 && "estante__linea--portada"]}
+        >
+          {index === 0 && (
+            <h2 id="tienda-titulo" class="tienda__titulo">
+              Llevate Falco a casa
+            </h2>
+          )}
+
           <h3 id={shelf.id} class="estante__nombre">
             {shelf.title}
           </h3>
+
           <i aria-hidden="true" />
+
+          {index === 0 && (
+            <>
+              <i aria-hidden="true" />
+              <span class="chip chip--fill chip--shadow tienda__sello">
+                La tienda
+              </span>
+            </>
+          )}
         </div>
 
         {shelf.products.length === 0 ? (
@@ -148,50 +164,20 @@ const shelvesWithRail = shelves.map((shelf, index) => {
 <style>
   .tienda {
     display: grid;
-    gap: var(--space-xl);
-    padding-block: var(--space-xxl) var(--space-xl);
+    /* Poco aire ENTRE estantes porque cada riel ya trae el suyo (30px arriba
+       para que la estrella de "Nuevo" no se recorte, y el de abajo). Con el
+       gap grande, la segunda fila se iba 33px fuera de la pantalla. */
+    gap: var(--space-md);
+    /* Menos aire arriba que antes: sin el encabezado alto, ese espacio se lo
+       queda la segunda fila de productos, que es lo que antes quedaba cortado
+       al aterrizar en la tienda. */
+    padding-block: var(--space-xl);
     background: var(--color-carbon);
   }
 
-  .tienda__entrada,
   .estante__linea,
   .estante__vacio {
     padding-inline: var(--space-lg);
-  }
-
-  .tienda__entrada {
-    display: grid;
-    gap: var(--space-lg);
-    align-items: end;
-  }
-
-  .tienda__marca {
-    display: grid;
-    gap: var(--space-md);
-    justify-items: start;
-  }
-
-  .tienda__titulo {
-    margin: 0;
-    font-family: var(--font-display);
-    font-weight: 500;
-    /* 76px en la lámina, con el mismo doble límite que el héroe de la home:
-       el ancho de la ventana y su alto, gana el más chico. */
-    font-size: clamp(38px, min(7vw, 9dvh), 76px);
-    line-height: 0.94;
-    letter-spacing: -0.04em;
-  }
-
-  .tienda__titulo span {
-    display: block;
-  }
-
-  .tienda__bajada {
-    margin: 0;
-    max-width: 420px;
-    font-size: var(--text-lead);
-    line-height: 1.62;
-    color: var(--color-ceniza);
   }
 
   /* El nombre del estante con la línea que lo acompaña hasta el borde. */
@@ -204,6 +190,46 @@ const shelvesWithRail = shelves.map((shelf, index) => {
     display: flex;
     align-items: center;
     gap: 18px;
+  }
+
+  /*
+   * La fila de portada: nombre del estante, el título de la tienda al medio y
+   * el cartel a la derecha, todo sobre la misma línea.
+   *
+   * `order` acomoda lo que se ve; el marcado mantiene el título primero, que
+   * es el orden en el que corresponde leerlo.
+   */
+  .estante__linea--portada .estante__nombre {
+    order: 1;
+  }
+
+  .estante__linea--portada i:first-of-type {
+    order: 2;
+  }
+
+  .estante__linea--portada .tienda__titulo {
+    order: 3;
+  }
+
+  .estante__linea--portada i:last-of-type {
+    order: 4;
+  }
+
+  .estante__linea--portada .tienda__sello {
+    order: 5;
+  }
+
+  .tienda__titulo {
+    margin: 0;
+    flex-shrink: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    /* Ya no es un héroe sino una etiqueta sobre una línea: entra en la fila,
+       no la parte. */
+    font-size: clamp(18px, 2.4vw, 32px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
   }
 
   .estante__nombre {
@@ -236,7 +262,9 @@ const shelvesWithRail = shelves.map((shelf, index) => {
        lámina). El bucle se desplaza exactamente --riel-fichas pasos. */
     --riel-paso: 272px;
     overflow: hidden;
-    padding-block: 30px 22px;
+    /* Los 30px de arriba no son decorativos: la estrella de "Nuevo" sale 24px
+       por encima de la ficha y el riel recorta lo que se desborda. */
+    padding-block: 30px 12px;
     -webkit-mask-image: linear-gradient(
       90deg,
       transparent,
@@ -349,8 +377,30 @@ const shelvesWithRail = shelves.map((shelf, index) => {
     }
   }
 
+  /*
+   * En pantalla angosta los tres no entran en una línea. El título se va a su
+   * propio renglón, arriba, y abajo queda "Café ——— La tienda": la idea es la
+   * misma, repartida en dos.
+   */
+  @media (max-width: 760px) {
+    .estante__linea--portada {
+      flex-wrap: wrap;
+      gap: var(--space-sm) 18px;
+    }
+
+    .estante__linea--portada .tienda__titulo {
+      order: 0;
+      flex-basis: 100%;
+    }
+
+    /* Con el título afuera sobra una raya: la que queda se estira sola entre
+       el nombre del estante y el cartel. */
+    .estante__linea--portada i:last-of-type {
+      display: none;
+    }
+  }
+
   @media (min-width: 900px) {
-    .tienda__entrada,
     .estante__linea,
     .estante__vacio {
       padding-inline: var(--space-xxl);
@@ -358,17 +408,6 @@ const shelvesWithRail = shelves.map((shelf, index) => {
 
     .riel__pista {
       padding-inline-start: var(--space-xxl);
-    }
-
-    /* En pantalla ancha el título y la bajada comparten fila, con la bajada
-       alineada a la derecha, como en la lámina. */
-    .tienda__entrada {
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 60px;
-    }
-
-    .tienda__bajada {
-      text-align: right;
     }
   }
 
@@ -378,7 +417,6 @@ const shelvesWithRail = shelves.map((shelf, index) => {
       padding-block: var(--space-xl) var(--space-lg);
     }
 
-    .tienda__entrada,
     .estante__linea,
     .estante__vacio {
       padding-inline: 22px;
@@ -386,10 +424,6 @@ const shelvesWithRail = shelves.map((shelf, index) => {
 
     .riel__pista {
       padding-inline-start: 22px;
-    }
-
-    .tienda__bajada {
-      font-size: 15px;
     }
 
     .riel {
