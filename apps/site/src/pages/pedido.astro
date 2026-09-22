@@ -1,0 +1,199 @@
+---
+import { env } from "cloudflare:workers";
+import { getSettings, listShelf } from "@falco/db";
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.astro";
+import { CATALOG_SCRIPT_ID } from "../scripts/catalogo";
+
+const [settings, coffee, kits] = await Promise.all([
+  getSettings(env.DB),
+  listShelf(env.DB, "coffee"),
+  listShelf(env.DB, "kits"),
+]);
+
+// El pedido guarda ids y cantidades, nunca nombres ni precios: para dibujarlo
+// hay que cruzarlo contra el catálogo de verdad, que viaja acá. Van sólo los
+// campos que la pantalla usa, no la fila entera de la base.
+const catalogo = {
+  products: [...coffee, ...kits].map((product) => ({
+    id: product.id,
+    name: product.name,
+    detail: product.detail,
+    priceCashArs: product.priceCashArs,
+    priceCardArs: product.priceCardArs,
+    options: product.options.map((option) => ({
+      id: option.id,
+      label: option.label,
+      isAvailable: option.isAvailable,
+    })),
+  })),
+  whatsapp: settings.whatsapp_number,
+};
+
+const PASOS = [
+  { n: 1, titulo: "Armás el pedido" },
+  { n: 2, titulo: "Lo confirmamos por WhatsApp" },
+  { n: 3, titulo: "Retirás en el local" },
+];
+---
+
+<!--
+  La única pantalla que no vive en la home: acá se ve y se arma el pedido.
+
+  Se dibuja en el navegador porque el pedido vive en el navegador. El servidor
+  manda el catálogo y el número de WhatsApp; el resto lo arma el cliente.
+-->
+<Base
+  title="Tu pedido · Falco"
+  description="Mirá lo que sumaste y mandalo por WhatsApp. Falco te confirma el stock y lo retirás en el local."
+>
+  <Nav slot="nav" />
+
+  <script id={CATALOG_SCRIPT_ID} type="application/json" set:html={JSON.stringify(catalogo)} is:inline />
+
+  <div class="pedido pagina" data-pedido-pantalla>
+    <header class="pedido__encabezado">
+      <a class="pedido__volver" href="/#tienda">‹ Seguir mirando</a>
+      <span class="chip chip--fill chip--shadow">Tu pedido</span>
+      <p class="pedido__resumen" data-pedido-resumen></p>
+    </header>
+
+    <ol class="pasos" data-pedido-pasos hidden>
+      {
+        PASOS.map((paso) => (
+          <li class="paso" data-paso={paso.n}>
+            <b>{paso.n}</b>
+            <span>{paso.titulo}</span>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div data-pedido-cuerpo></div>
+
+    <div class="pedido__envio" data-pedido-envio hidden></div>
+  </div>
+</Base>
+
+<script>
+  import { conectarPantallaDePedido } from "../scripts/pedido-pantalla";
+
+  conectarPantallaDePedido();
+</script>
+
+<style>
+  .pedido {
+    display: grid;
+    gap: var(--space-lg);
+    align-content: start;
+    max-width: 620px;
+  }
+
+  .pedido__encabezado {
+    display: grid;
+    gap: var(--space-sm);
+    justify-items: start;
+  }
+
+  .pedido__volver,
+  .pedido__resumen {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-nano);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .pedido__volver {
+    color: var(--color-brasa);
+    text-decoration: none;
+  }
+
+  .pedido__resumen {
+    color: var(--color-ceniza);
+  }
+
+  /*
+   * Los tres pasos. El segundo es el que importa: deja claro, antes de
+   * mandar nada, que esto no reserva: lo confirma Falco por WhatsApp.
+   */
+  .pasos {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .paso {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+    padding: 10px 10px 11px 12px;
+    border: 1px solid rgba(232, 226, 208, 0.22);
+    transform: skewX(-8deg);
+  }
+
+  .paso > * {
+    transform: skewX(8deg);
+  }
+
+  .paso b {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .paso span {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.45;
+    color: var(--color-ceniza);
+  }
+
+  .paso--ahora {
+    background: var(--color-hueso);
+    border-color: var(--color-hueso);
+    color: var(--color-carbon);
+    box-shadow: 4px 4px 0 var(--color-tostado);
+  }
+
+  .paso--ahora span {
+    color: var(--color-carbon);
+  }
+
+  .paso--hecho {
+    border-color: rgba(136, 83, 51, 0.9);
+  }
+
+  .paso--hecho b::after {
+    content: " ✓";
+    color: var(--color-brasa);
+    font-size: 14px;
+  }
+
+  /*
+   * El botón de enviar queda pegado abajo mientras se scrollea la lista: con
+   * varios productos, el botón se iba fuera de la pantalla justo cuando hacía
+   * falta.
+   */
+  .pedido__envio {
+    position: sticky;
+    bottom: 0;
+    display: grid;
+    gap: 10px;
+    margin-inline: calc(var(--space-lg) * -1);
+    padding: var(--space-md) var(--space-lg)
+      calc(var(--space-md) + env(safe-area-inset-bottom, 0px));
+    background: var(--color-carbon);
+    border-top: 1px solid rgba(232, 226, 208, 0.12);
+  }
+
+  .pedido__envio[hidden] {
+    display: none;
+  }
+</style>

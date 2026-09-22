@@ -1,5 +1,6 @@
 ---
 import type { Coffee, ProductWithOptions } from "@falco/db";
+import BarraPedido from "./BarraPedido.astro";
 import Ficha from "./Ficha.astro";
 import PanelDetalle from "./PanelDetalle.astro";
 
@@ -153,12 +154,16 @@ const shelvesWithRail = shelves.map((shelf, index) => {
   )
 }
 
+<BarraPedido />
+
 <script>
+  import { conectarBarraDePedido } from "../scripts/barra-pedido";
   import { conectarDetalle } from "../scripts/detalle";
   import { conectarPedido } from "../scripts/pedido";
 
   conectarDetalle();
   conectarPedido();
+  conectarBarraDePedido();
 </script>
 
 <style>

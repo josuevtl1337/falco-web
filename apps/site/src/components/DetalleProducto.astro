@@ -27,6 +27,7 @@ const porDefecto = disponibles[0]?.id;
   class="detalle"
   data-producto={product.id}
   data-nombre={product.name}
+  data-detalle={product.detail}
   data-tope={ORDER_LIMITS.maxUnitsPerProduct}
 >
   <span class="chip chip--fill chip--shadow">{marca}</span>
@@ -230,41 +231,9 @@ const porDefecto = disponibles[0]?.id;
     color: var(--color-ceniza);
   }
 
-  .cantidad {
-    display: inline-flex;
-    align-items: center;
-    border: 1px solid rgba(232, 226, 208, 0.35);
-    transform: skewX(var(--angle-button));
-  }
-
-  .cantidad > * {
-    transform: skewX(calc(-1 * var(--angle-button)));
-  }
-
-  .cantidad__boton {
-    width: var(--touch-min);
-    height: var(--touch-min);
-    display: grid;
-    place-items: center;
-    border: 0;
-    background: none;
-    cursor: pointer;
-    color: var(--color-hueso);
-    font-size: var(--text-lead);
-  }
-
-  .cantidad__boton[disabled] {
-    color: var(--color-ceniza);
-    cursor: not-allowed;
-  }
-
-  .cantidad b {
-    min-width: 26px;
-    text-align: center;
-    font-family: var(--font-mono);
-    font-weight: 400;
-    font-size: 15px;
-  }
+  /* `.cantidad` vive en global.css: la pantalla del pedido la crea desde
+     JavaScript, y los estilos con scope de Astro no alcanzan a un elemento
+     que no salió de esta plantilla. */
 
   .detalle__sumar {
     width: 100%;

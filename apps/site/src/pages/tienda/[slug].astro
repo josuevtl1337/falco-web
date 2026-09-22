@@ -3,6 +3,7 @@ import { env } from "cloudflare:workers";
 import { getProductBySlug, listCoffeesByIds } from "@falco/db";
 import Base from "../../layouts/Base.astro";
 import Nav from "../../components/Nav.astro";
+import BarraPedido from "../../components/BarraPedido.astro";
 import DetalleProducto from "../../components/DetalleProducto.astro";
 
 const { slug } = Astro.params;
@@ -42,12 +43,16 @@ const shelfLabel = product.shelf === "coffee" ? "Café" : "Kits y accesorios";
       titleTag="h1"
     />
   </div>
+
+  <BarraPedido />
 </Base>
 
 <script>
+  import { conectarBarraDePedido } from "../../scripts/barra-pedido";
   import { conectarPedido } from "../../scripts/pedido";
 
   conectarPedido();
+  conectarBarraDePedido();
 </script>
 
 <style>

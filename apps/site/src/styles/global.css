@@ -623,6 +623,331 @@ html {
   }
 }
 
+/*
+ * El cartel de "¡Sumado!": entra desde la izquierda, inclinado, y se va solo.
+ * Va fijo arriba para que se vea aunque el panel del producto se cierre.
+ * Medido en la lámina.
+ */
+.aviso {
+  position: fixed;
+  left: 14px;
+  right: 30px;
+  top: calc(var(--alto-nav) + var(--space-sm));
+  z-index: 40;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 14px;
+  margin: 0;
+  padding: 12px 22px;
+  background: var(--color-tostado);
+  color: var(--color-hueso);
+  transform: rotate(-3deg);
+  box-shadow: 6px 6px 0 var(--color-hueso);
+  animation: avisoIn 0.5s var(--ease-persona) both;
+}
+
+.aviso b {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--text-title);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.aviso span {
+  font-family: var(--font-mono);
+  font-size: var(--text-nano);
+  letter-spacing: 0.1em;
+}
+
+.aviso--yendose {
+  animation: avisoOut 0.35s ease-in both;
+}
+
+@keyframes avisoIn {
+  from {
+    transform: translateX(-110%) rotate(-3deg);
+  }
+  to {
+    transform: rotate(-3deg);
+  }
+}
+
+@keyframes avisoOut {
+  to {
+    opacity: 0;
+    transform: translateY(-14px) rotate(-3deg);
+  }
+}
+
+@media (min-width: 900px) {
+  .aviso {
+    left: auto;
+    right: var(--space-xxl);
+    max-width: 420px;
+  }
+}
+
+/*
+ * El pedido: el selector de cantidad, los renglones, el total y los campos.
+ *
+ * Todo esto vive acá y no en el <style> de la página porque la pantalla del
+ * pedido dibuja sus renglones desde JavaScript, y el scope de Astro sólo
+ * alcanza a los elementos que salieron de una plantilla: un elemento creado
+ * con createElement no lleva el atributo del scope y se quedaría sin estilo.
+ */
+.cantidad {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(232, 226, 208, 0.35);
+  transform: skewX(var(--angle-button));
+}
+
+.cantidad > * {
+  transform: skewX(calc(-1 * var(--angle-button)));
+}
+
+.cantidad__boton {
+  width: var(--touch-min);
+  height: var(--touch-min);
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--color-hueso);
+  font-size: var(--text-lead);
+}
+
+.cantidad__boton[disabled] {
+  color: var(--color-ceniza);
+  cursor: not-allowed;
+}
+
+.cantidad b {
+  min-width: 26px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 15px;
+}
+
+.pedido__lista {
+  list-style: none;
+  display: grid;
+  gap: var(--space-md);
+  margin: 0;
+  padding: 0;
+}
+
+.renglon {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 28px;
+  gap: var(--space-md);
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(232, 226, 208, 0.1);
+}
+
+.renglon__main {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.renglon__main b {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--text-body);
+}
+
+.renglon__main small {
+  font-size: var(--text-micro);
+  color: var(--color-ceniza);
+}
+
+/* El precio del renglón usa .precio, que ya mantiene cada importe entero. */
+.renglon__main .precio {
+  font-size: 11px;
+}
+
+/* En el renglón los botones son más chicos que en el detalle: acá hay tres
+   controles por fila y el de 44px empujaba el nombre del producto. */
+.renglon__cantidad .cantidad__boton {
+  width: 36px;
+  height: 36px;
+  font-size: 17px;
+}
+
+.renglon__quitar {
+  width: 28px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  color: var(--color-ceniza);
+  font-size: 13px;
+}
+
+.pedido__total {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.pedido__total > span {
+  font-family: var(--font-mono);
+  font-size: var(--text-nano);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ceniza);
+}
+
+.pedido__numeros {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  justify-items: end;
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+.pedido__numeros b {
+  font-weight: 400;
+  font-size: var(--text-lead);
+}
+
+.pedido__numeros small {
+  font-size: var(--text-nano);
+  color: var(--color-ceniza);
+}
+
+.campo {
+  display: grid;
+  gap: 6px;
+}
+
+.campo span {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ceniza);
+}
+
+.campo input {
+  font: inherit;
+  font-size: var(--text-body);
+  color: var(--color-hueso);
+  background: var(--color-sombra);
+  border: 0;
+  border-bottom: 2px solid var(--color-hueso);
+  min-height: 46px;
+  padding: 10px 12px;
+}
+
+.pedido__armado {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.pedido__retiro {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  padding: 14px 16px;
+  background: rgb(35, 36, 38);
+  border: 1px solid rgba(232, 226, 208, 0.1);
+}
+
+.pedido__retiro p {
+  margin: 0;
+  font-size: var(--text-small);
+  color: var(--color-ceniza);
+}
+
+.pedido__vacio,
+.pedido__enviado {
+  display: grid;
+  gap: var(--space-md);
+  justify-items: start;
+}
+
+.pedido__titulo {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--text-title);
+  letter-spacing: -0.02em;
+}
+
+.pedido__parrafo,
+.pedido__vacio-texto {
+  margin: 0;
+  max-width: 46ch;
+  font-size: var(--text-body);
+  line-height: 1.5;
+  color: var(--color-ceniza);
+}
+
+.pedido__parrafo b {
+  color: var(--color-hueso);
+  font-weight: inherit;
+}
+
+.pedido__codigo {
+  font-family: var(--font-mono);
+}
+
+.pedido__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.pedido__otro {
+  border: 0;
+  padding: 0;
+  min-height: var(--touch-min);
+  cursor: pointer;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: var(--text-nano);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ceniza);
+  text-decoration: underline;
+}
+
+.pedido__enviar {
+  width: 100%;
+}
+
+.pedido__letra-chica,
+.pedido__sin-whatsapp {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--color-ceniza);
+}
+
+.pedido__sin-whatsapp {
+  text-transform: none;
+  font-size: var(--text-micro);
+  letter-spacing: normal;
+  color: var(--color-brasa);
+}
+
 /* El sello de "Nuevo" en la ficha: se balancea, no gira entero. Medido en la
    lámina: de 12° a 4° y un 8% más grande en el medio del ciclo. */
 @keyframes wobble {

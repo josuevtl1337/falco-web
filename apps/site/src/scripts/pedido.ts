@@ -8,6 +8,10 @@ import {
   type AddOutcome,
   type Order,
 } from "@falco/domain";
+import { mostrarAviso } from "./aviso";
+
+/** La letra chica que el panel muestra mientras no haya nada que contestar. */
+const AVISO_BASE = "El stock se confirma por WhatsApp antes de retirar";
 
 /**
  * Los paneles de detalle: elegir la molienda, la cantidad y sumar al pedido.
@@ -136,7 +140,22 @@ export const conectarPedido = (): void => {
       return;
     }
 
-    avisar(panel, AVISOS[resultado], TONOS[resultado]);
+    // Lo que salió bien se dice con el cartel de arriba, que se ve aunque el
+    // panel se cierre; lo que no entró se dice dentro del panel, al lado del
+    // producto del que estamos hablando.
+    const sumado = resultado === "added" || resultado === "increased";
+    if (sumado) {
+      mostrarAviso(
+        "¡Sumado!",
+        [panel.dataset.nombre, panel.dataset.detalle]
+          .filter(Boolean)
+          .join(" · "),
+      );
+      avisar(panel, AVISO_BASE, "");
+    } else {
+      avisar(panel, AVISOS[resultado], TONOS[resultado]);
+    }
+
     escribirCantidad(panel, 1);
     document.dispatchEvent(
       new CustomEvent("falco:pedido", { detail: { pedido } }),
