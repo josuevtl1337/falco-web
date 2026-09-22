@@ -1,4 +1,4 @@
-import { abrirDialogo, prepararDialogo } from "./dialogo";
+import { abrirDialogo, cerrarDialogo, prepararDialogo } from "./dialogo";
 
 /**
  * El detalle de un producto se abre como panel, sin salir de la tienda.
@@ -26,12 +26,9 @@ export const conectarDetalle = (): void => {
   ];
   if (paneles.length === 0) return;
 
-  // El fondo, el Escape y el candado del scroll son los mismos de siempre; acá
-  // no hay disparador propio porque abre el enlace de la ficha.
-  for (const panel of paneles) prepararDialogo(panel);
-
   const abrir = (panel: HTMLDialogElement) => {
-    abierto()?.close();
+    const previo = abierto();
+    if (previo) cerrarDialogo(previo);
     abrirDialogo(panel);
   };
 
@@ -60,15 +57,36 @@ export const conectarDetalle = (): void => {
     history.pushState({ producto: slug }, "", enlace.href);
   });
 
-  // Cerrar el panel deshace el paso del historial, para no dejar dos entradas
-  // por cada producto que alguien mira.
+  /*
+   * Cerrar el panel deshace el paso del historial, para no dejar dos entradas
+   * por cada producto que alguien mira.
+   *
+   * Es idempotente por construcción: después de `history.back()` el estado ya
+   * no tiene ese producto, así que una segunda llamada no hace nada. Hace
+   * falta que lo sea porque esto se dispara desde dos lados -el evento `close`
+   * y nuestro propio cierre- y no se puede dar por sentado que los dos lleguen
+   * (ni que llegue uno).
+   */
+  const volverDelPanel = (panel: HTMLDialogElement) => {
+    if (history.state?.producto === panel.dataset.panelProducto) history.back();
+  };
+
+  // Un solo lugar que sabe qué es "cerrar este panel": prepararDialogo engancha
+  // los tres caminos (el evento, el botón de cerrar y el click en el fondo) y
+  // en todos suelta el candado y deshace el paso del historial.
   for (const panel of paneles) {
-    panel.addEventListener("close", () => {
-      if (history.state?.producto === panel.dataset.panelProducto) {
-        history.back();
-      }
-    });
+    prepararDialogo(panel, () => volverDelPanel(panel));
   }
+
+  // Cerrar un panel desde el código pasa por acá, que hace las dos cosas sin
+  // esperar a que el navegador avise.
+  document.addEventListener("falco:cerrar-panel", (evento) => {
+    const slug = (evento as CustomEvent<{ slug?: string }>).detail?.slug;
+    const panel = slug ? panelDe(slug) : abierto();
+    if (!panel) return;
+    cerrarDialogo(panel);
+    volverDelPanel(panel);
+  });
 
   // "Atrás" y "adelante": el panel sigue a la URL, no al revés.
   window.addEventListener("popstate", (evento) => {

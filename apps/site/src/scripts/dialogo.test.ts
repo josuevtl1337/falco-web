@@ -1,6 +1,10 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from "vitest";
-import { clickEnElFondo, crearBloqueoDeScroll } from "./dialogo";
+import {
+  clickEnElFondo,
+  crearBloqueoDeScroll,
+  crearCandadoDeDialogos,
+} from "./dialogo";
 
 describe("crearBloqueoDeScroll", () => {
   let raiz: HTMLElement;
@@ -54,6 +58,83 @@ describe("crearBloqueoDeScroll", () => {
 
     bloqueo.tomar();
     expect(bloqueo.abiertos).toBe(1);
+    expect(raiz.style.overflow).toBe("hidden");
+  });
+});
+
+describe("crearCandadoDeDialogos", () => {
+  let raiz: HTMLElement;
+  const dialogo = () => document.createElement("dialog");
+
+  beforeEach(() => {
+    raiz = document.createElement("div");
+  });
+
+  it("bloquea al abrir el primero", () => {
+    const candado = crearCandadoDeDialogos(raiz);
+    candado.tomar(dialogo());
+    expect(raiz.style.overflow).toBe("hidden");
+  });
+
+  /*
+   * El motivo de que exista este candado y no el de antes.
+   *
+   * Cerrar un diálogo puede avisar por dos caminos -el evento `close` del
+   * navegador y nuestra propia llamada- y no hay garantía de que llegue uno,
+   * el otro, o los dos. Si llegan los dos, descontar dos veces dejaría el
+   * scroll libre con otro diálogo todavía abierto.
+   */
+  it("soltar dos veces el mismo diálogo descuenta una sola", () => {
+    const candado = crearCandadoDeDialogos(raiz);
+    const a = dialogo();
+    const b = dialogo();
+
+    candado.tomar(a);
+    candado.tomar(b);
+    expect(candado.abiertos).toBe(2);
+
+    candado.soltar(a);
+    candado.soltar(a);
+    candado.soltar(a);
+
+    expect(candado.abiertos).toBe(1);
+    expect(raiz.style.overflow).toBe("hidden");
+  });
+
+  it("tomar dos veces el mismo diálogo cuenta una sola", () => {
+    const candado = crearCandadoDeDialogos(raiz);
+    const a = dialogo();
+
+    candado.tomar(a);
+    candado.tomar(a);
+    expect(candado.abiertos).toBe(1);
+
+    candado.soltar(a);
+    expect(raiz.style.overflow).toBe("");
+  });
+
+  it("con el último cerrado, vuelve el scroll", () => {
+    const candado = crearCandadoDeDialogos(raiz);
+    const a = dialogo();
+    const b = dialogo();
+
+    candado.tomar(a);
+    candado.tomar(b);
+    candado.soltar(b);
+    candado.soltar(a);
+
+    expect(raiz.style.overflow).toBe("");
+  });
+
+  it("un diálogo que se reabre vuelve a tomar el candado", () => {
+    const candado = crearCandadoDeDialogos(raiz);
+    const a = dialogo();
+
+    candado.tomar(a);
+    candado.soltar(a);
+    candado.tomar(a);
+
+    expect(candado.abiertos).toBe(1);
     expect(raiz.style.overflow).toBe("hidden");
   });
 });

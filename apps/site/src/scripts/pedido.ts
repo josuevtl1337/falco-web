@@ -160,6 +160,18 @@ export const conectarPedido = (): void => {
     document.dispatchEvent(
       new CustomEvent("falco:pedido", { detail: { pedido } }),
     );
+
+    // Sumar cierra el panel y devuelve a la tienda, como en la lámina: el
+    // gesto terminó, y el cartel de arriba más la barra de abajo ya dicen que
+    // salió bien. Si NO entró, el panel se queda abierto: el motivo está ahí
+    // adentro y hay algo que decidir.
+    //
+    // Se avisa con un evento en vez de llamar a close() acá: cerrar un panel
+    // es además soltar el candado del scroll y deshacer el paso del historial,
+    // y eso lo sabe detalle.ts, que es quien lo abrió.
+    if (sumado) {
+      document.dispatchEvent(new CustomEvent("falco:cerrar-panel"));
+    }
   });
 
   // Al abrir un panel, la cantidad vuelve a 1 y los botones se recalculan
