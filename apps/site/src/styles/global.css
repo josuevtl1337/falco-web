@@ -95,6 +95,19 @@ a {
   }
 }
 
+/*
+ * `hidden` gana siempre.
+ *
+ * El atributo esconde con `display: none` desde la hoja del navegador, que
+ * pierde contra cualquier `display` nuestro: un `.pasos { display: grid }`
+ * deja visible algo marcado como oculto. Pasó de verdad con los tres pasos
+ * del pedido. Con esto, poner `hidden` alcanza y no hay que acordarse de
+ * escribir la excepción en cada componente.
+ */
+[hidden] {
+  display: none !important;
+}
+
 /* Ir a una sección se ve, no aparece de golpe. Con el movimiento reducido, el
    salto vuelve a ser instantáneo. */
 html {

@@ -54,7 +54,8 @@ const PASOS = [
   <div class="pedido pagina" data-pedido-pantalla>
     <header class="pedido__encabezado">
       <a class="pedido__volver" href="/#tienda">‹ Seguir mirando</a>
-      <span class="chip chip--fill chip--shadow">Tu pedido</span>
+      <!-- El cartel ES el título de la página: lleva el h1, no un span. -->
+      <h1 class="chip chip--fill chip--shadow pedido__sello">Tu pedido</h1>
       <p class="pedido__resumen" data-pedido-resumen></p>
     </header>
 
@@ -191,9 +192,5 @@ const PASOS = [
       calc(var(--space-md) + env(safe-area-inset-bottom, 0px));
     background: var(--color-carbon);
     border-top: 1px solid rgba(232, 226, 208, 0.12);
-  }
-
-  .pedido__envio[hidden] {
-    display: none;
   }
 </style>
