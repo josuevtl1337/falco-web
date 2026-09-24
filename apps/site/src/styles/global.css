@@ -155,6 +155,27 @@ html {
   transform: skewX(var(--angle-button));
 }
 
+/* Las otras dos caras del botón, de la lámina (.btn.c y .btn.b): el cartel
+   tostado con sombra oscura, y el de sólo borde para la acción secundaria. */
+.boton--tostado {
+  color: var(--color-hueso);
+}
+
+.boton--tostado::before {
+  background: var(--color-tostado);
+  box-shadow: 5px 5px 0 var(--color-sombra);
+}
+
+.boton--linea {
+  color: var(--color-hueso);
+}
+
+.boton--linea::before {
+  background: none;
+  border: 1px solid rgba(232, 226, 208, 0.4);
+  box-shadow: none;
+}
+
 /* Cada precio entero: el texto se corta donde entra, y "$ 35.000" separado
    de "tarjeta" deja de leerse como un precio. Se usa en la ficha y en el
    detalle, así que no puede vivir en el <style> de un componente. */

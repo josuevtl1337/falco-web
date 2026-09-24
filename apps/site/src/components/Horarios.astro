@@ -1,0 +1,131 @@
+---
+import type { HoursRow, SpecialRow } from "./horarios";
+
+interface Props {
+  rows: HoursRow[];
+  specials: SpecialRow[];
+  /** Sólo en escritorio: en el celular el tostadero ya se dice en otros lados. */
+  roaster?: string;
+}
+
+const { rows, specials, roaster } = Astro.props;
+---
+
+<!--
+  Los horarios agrupados como en la lámina ("Lunes a viernes", "Domingo"),
+  con la fila de hoy marcada. Es una lista de definiciones y no una tabla:
+  cada renglón es un nombre y su valor, sin columnas que comparar.
+-->
+<dl class="horarios">
+  {
+    rows.map((row) => (
+      <div class:list={["horarios__fila", { "horarios__fila--hoy": row.isToday }]}>
+        <dt>
+          {row.label}
+          {row.isToday && <span class="chip chip--fill chip--shadow horarios__hoy">Hoy</span>}
+        </dt>
+        <dd>{row.shifts.map((shift, i) => <><span>{shift}</span>{i < row.shifts.length - 1 && " y "}</>)}</dd>
+      </div>
+    ))
+  }
+  {
+    specials.map((row) => (
+      <div
+        class:list={[
+          "horarios__fila horarios__fila--especial",
+          { "horarios__fila--hoy": row.isToday },
+        ]}
+      >
+        <dt>
+          {row.label}
+          {row.note && <small>{row.note}</small>}
+          {row.isToday && <span class="chip chip--fill chip--shadow horarios__hoy">Hoy</span>}
+        </dt>
+        <dd>{row.shifts.map((shift, i) => <><span>{shift}</span>{i < row.shifts.length - 1 && " y "}</>)}</dd>
+      </div>
+    ))
+  }
+  {
+    roaster && (
+      <div class="horarios__fila horarios__fila--tostadero">
+        <dt>Tostadero</dt>
+        <dd>{roaster}</dd>
+      </div>
+    )
+  }
+</dl>
+
+<style>
+  .horarios {
+    margin: 0;
+    display: grid;
+  }
+
+  .horarios__fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+    padding-block: 15px;
+    border-bottom: 1px solid rgba(232, 226, 208, 0.09);
+  }
+
+  .horarios__fila:first-child {
+    border-top: 1px solid rgba(232, 226, 208, 0.09);
+  }
+
+  dt {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    font-family: var(--font-mono);
+    font-size: var(--text-nano);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-ceniza);
+  }
+
+  dt small {
+    flex-basis: 100%;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+  }
+
+  dd {
+    margin: 0;
+    text-align: right;
+    text-wrap: balance;
+    font-size: var(--text-body);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Cada tramo entero: se baja de renglón entre tramos, nunca en el medio. */
+  dd span {
+    white-space: nowrap;
+  }
+
+  .horarios__hoy {
+    font-size: 11px;
+  }
+
+  .horarios__fila--hoy dt,
+  .horarios__fila--hoy dd {
+    color: var(--color-hueso);
+  }
+
+  .horarios__fila--hoy dd {
+    font-weight: 600;
+  }
+
+  /* El feriado se lee como una excepción a la semana, no como un día más. */
+  .horarios__fila--especial dt {
+    color: var(--color-brasa);
+  }
+
+  @media (max-width: 899px) {
+    .horarios__fila--tostadero {
+      display: none;
+    }
+  }
+</style>

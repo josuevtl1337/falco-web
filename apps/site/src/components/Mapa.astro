@@ -1,0 +1,112 @@
+---
+interface Props {
+  /** A dónde lleva tocar el mapa: el mismo destino que "Cómo llegar". */
+  href: string;
+}
+
+const { href } = Astro.props;
+---
+
+<!--
+  El plano de la cuadra, dibujado a mano (design/persona/build_wf.py, MAP):
+  Falco a mitad de cuadra sobre Iriondo, en la vereda este, entre 9 de Julio
+  y la Av. 7 de Marzo. Norte arriba; Iriondo se inclina con skewX como en el
+  plano real.
+
+  Es un SVG propio y no un mapa embebido: no pide nada a terceros, no rastrea
+  a nadie y se ve igual sin conexión. Para navegar de verdad está "Cómo
+  llegar", y tocar el plano lleva al mismo lugar.
+-->
+<a class="mapa" href={href} target="_blank" rel="noopener" aria-label="Abrir la ubicación de Falco en Google Maps">
+  <svg class="mapa__plano" viewBox="0 0 660 500" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Mapa: Falco en Iriondo 2153, a mitad de cuadra entre 9 de Julio y la Av. 7 de Marzo">
+  <rect width="660" height="500" fill="#1E1F21"/>
+  <g transform="matrix(1 0 -0.144 1 0 0)" fill="none">
+  <rect x="40" y="0" width="90" height="70" fill="rgba(59,37,25,0.5)"/><rect x="150" y="10" width="70" height="62" fill="rgba(59,37,25,0.5)"/><rect x="240" y="0" width="110" height="72" fill="rgba(59,37,25,0.5)"/><rect x="392" y="4" width="80" height="64" fill="rgba(59,37,25,0.5)"/><rect x="486" y="0" width="100" height="70" fill="rgba(59,37,25,0.5)"/><rect x="660" y="8" width="90" height="60" fill="rgba(59,37,25,0.5)"/><rect x="180" y="132" width="80" height="60" fill="rgba(59,37,25,0.5)"/><rect x="268" y="130" width="84" height="70" fill="rgba(59,37,25,0.5)"/><rect x="180" y="206" width="80" height="70" fill="rgba(59,37,25,0.5)"/><rect x="268" y="210" width="84" height="56" fill="rgba(59,37,25,0.5)"/><rect x="268" y="276" width="84" height="92" fill="rgba(59,37,25,0.5)"/><rect x="180" y="290" width="80" height="74" fill="rgba(59,37,25,0.5)"/><rect x="0" y="140" width="96" height="90" fill="rgba(59,37,25,0.5)"/><rect x="0" y="250" width="96" height="110" fill="rgba(59,37,25,0.5)"/><rect x="396" y="130" width="58" height="94" fill="rgba(59,37,25,0.5)"/><rect x="462" y="134" width="48" height="86" fill="rgba(59,37,25,0.5)"/><rect x="396" y="274" width="70" height="88" fill="rgba(59,37,25,0.5)"/><rect x="476" y="282" width="80" height="74" fill="rgba(59,37,25,0.5)"/><rect x="576" y="236" width="60" height="110" fill="rgba(59,37,25,0.5)"/><rect x="520" y="126" width="100" height="90" fill="rgba(59,37,25,0.5)"/><rect x="660" y="120" width="90" height="110" fill="rgba(59,37,25,0.5)"/><rect x="660" y="250" width="90" height="110" fill="rgba(59,37,25,0.5)"/><rect x="0" y="440" width="96" height="70" fill="rgba(59,37,25,0.5)"/><rect x="180" y="430" width="90" height="80" fill="rgba(59,37,25,0.5)"/><rect x="280" y="436" width="72" height="70" fill="rgba(59,37,25,0.5)"/><rect x="392" y="444" width="90" height="60" fill="rgba(59,37,25,0.5)"/><rect x="500" y="440" width="110" height="70" fill="rgba(59,37,25,0.5)"/><rect x="660" y="452" width="90" height="60" fill="rgba(59,37,25,0.5)"/>
+  <rect x="392" y="232" width="84" height="32" fill="#885333"/>
+  <path d="M120,-20 L120,540" stroke="#313335" stroke-width="12"/><path d="M640,-20 L640,540" stroke="#313335" stroke-width="12"/>
+  <path d="M-120,384 L780,424" stroke="#313335" stroke-width="16"/>
+  <path d="M372,-20 L372,540" stroke="#313335" stroke-width="18"/>
+  <path d="M363,-20 L363,540 M381,-20 L381,540" stroke="#E8E2D0" stroke-opacity="0.22" stroke-width="1"/>
+  <path d="M-120,113 L780,89" stroke="#313335" stroke-width="30"/>
+  <path d="M-120,98 L780,74 M-120,128 L780,104" stroke="#F2C48B" stroke-opacity="0.75" stroke-width="1.5"/>
+  <path class="ruta" d="M386,124 L386,240" stroke="#F2C48B" stroke-width="3" stroke-dasharray="6 4" stroke-linecap="round"/>
+  </g>
+  <text x="44.4" y="112.2" transform="rotate(-1.5 44.4 108.2)" fill="#F2C48B" font-family="Martian Mono, monospace" font-size="11" letter-spacing="3">AV. 7 DE MARZO</text>
+  <text x="466" y="101" transform="rotate(-1.5 466 97)" fill="#F2C48B" font-family="Martian Mono, monospace" font-size="11" letter-spacing="3">AV. 7 DE MARZO</text>
+  <text x="339.4" y="410.5" transform="rotate(2.5 339.4 407)" fill="#9A9C9E" font-family="Martian Mono, monospace" font-size="9" letter-spacing="2">9 DE JULIO</text>
+  <text x="302.4" y="372" transform="rotate(-81.8 302.4 372)" fill="#9A9C9E" font-family="Martian Mono, monospace" font-size="9" letter-spacing="2">IRIONDO</text>
+  <g transform="translate(120 146) skewX(-12)"><rect width="226" height="26" fill="#1E1F21" stroke="#F2C48B" stroke-width="1"/></g>
+  <text x="136" y="163" textLength="194" lengthAdjust="spacingAndGlyphs" fill="#F2C48B" font-family="Martian Mono, monospace" font-size="9" letter-spacing="1">A MEDIA CUADRA DE LA 7 DE MARZO</text>
+  <path d="M342,159 L354,159" stroke="#F2C48B" stroke-width="1"/>
+  <g transform="translate(620 150)"><circle r="15" fill="#1E1F21" stroke="rgba(232,226,208,0.3)"/>
+  <path d="M0,-9 L5,4 L0,1 L-5,4 Z" fill="#E8E2D0"/><text y="-18" text-anchor="middle" fill="#9A9C9E" font-family="Martian Mono, monospace" font-size="9">N</text></g>
+  <circle class="ping" cx="350.3" cy="248" r="64" fill="none" stroke="rgba(242,196,139,0.5)" stroke-width="1.5"/>
+  <circle class="ping" cx="350.3" cy="248" r="64" fill="none" stroke="rgba(242,196,139,0.5)" stroke-width="1.5" style="animation-delay:1.2s"/>
+  <circle class="ping" cx="350.3" cy="248" r="64" fill="none" stroke="rgba(242,196,139,0.5)" stroke-width="1.5" style="animation-delay:2.4s"/>
+  <circle cx="350.3" cy="248" r="7" fill="#F2C48B" stroke="#1E1F21" stroke-width="2"/>
+  <text x="398.3" y="252" text-anchor="middle" fill="#E8E2D0" font-family="Martian Mono, monospace" font-size="11" letter-spacing="2">FALCO</text>
+  </svg>
+</a>
+
+<style>
+  .mapa {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: var(--color-sombra);
+    border: 1px solid rgba(232, 226, 208, 0.12);
+    height: 430px;
+  }
+
+  .mapa__plano {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* En el celular el plano es más bajo y recorta arriba y abajo: el
+     viewBox está armado para que la 7 de Marzo y 9 de Julio sigan dentro. */
+  @media (max-width: 899px) {
+    .mapa {
+      height: 210px;
+    }
+  }
+
+  .mapa :global(.ping) {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: sonar 3.6s ease-out infinite;
+  }
+
+  .mapa :global(.ruta) {
+    animation: andar 1.4s linear infinite;
+  }
+
+  @keyframes sonar {
+    from {
+      transform: scale(0.1);
+      opacity: 1;
+    }
+    to {
+      transform: scale(1);
+      opacity: 0;
+    }
+  }
+
+  @keyframes andar {
+    to {
+      stroke-dashoffset: -20;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mapa :global(.ping),
+    .mapa :global(.ruta) {
+      animation: none;
+    }
+
+    .mapa :global(.ping) {
+      opacity: 0.4;
+    }
+  }
+</style>

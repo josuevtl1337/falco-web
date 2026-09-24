@@ -1,9 +1,14 @@
 ---
+interface Props {
+  /** El nombre en la etiqueta: quién habla. En la home es Falco. */
+  etiqueta?: string;
+}
 
+const { etiqueta = "Falco" } = Astro.props;
 ---
 
 <div class="dialogo">
-  <span class="chip chip--fill chip--shadow dialogo__etiqueta">Falco</span>
+  <span class="chip chip--fill chip--shadow dialogo__etiqueta">{etiqueta}</span>
   <div class="dialogo__caja">
     <slot />
     <span class="dialogo__flecha" aria-hidden="true">▼</span>
