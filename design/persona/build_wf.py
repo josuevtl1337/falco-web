@@ -151,18 +151,38 @@ TICKER = (
     "<b>Mahlkönig E65S</b> ◆ Iriondo 2153 · Santo Tomé ◆</span>"
 )
 
-MAP = """<svg viewBox="0 0 660 500" preserveAspectRatio="xMidYMid slice" aria-label="Mapa de ejemplo: Falco en Iriondo 2153">
+# Falco a mitad de cuadra sobre Iriondo, en la vereda este, entre 9 de Julio y la
+# Av. 7 de Marzo (la calle que todos conocen). Norte arriba; Iriondo se inclina
+# con skewX como en el plano real. El cartel usa textLength para no depender del
+# ancho de la fuente.
+MAP = """<svg viewBox="0 0 660 500" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Mapa: Falco en Iriondo 2153, a mitad de cuadra entre 9 de Julio y la Av. 7 de Marzo">
   <rect width="660" height="500" fill="#1E1F21"/>
-  <g stroke="rgba(232,226,208,0.10)" stroke-width="1" fill="none"><path d="M0,90 L660,60 M0,190 L660,160 M0,392 L660,362 M0,470 L660,440 M120,0 L96,500 M400,0 L376,500 M540,0 L516,500"/></g>
-  <g stroke="rgba(232,226,208,0.24)" stroke-width="2" fill="none"><path d="M0,292 L660,262 M268,0 L244,500"/></g>
-  <g fill="rgba(59,37,25,0.55)"><rect x="130" y="200" width="100" height="76"/><rect x="286" y="196" width="86" height="72"/><rect x="130" y="292" width="100" height="88"/><rect x="286" y="286" width="86" height="88"/><rect x="418" y="188" width="92" height="76"/><rect x="418" y="280" width="92" height="86"/></g>
-  <circle class="ping" cx="256" cy="278" r="70" fill="none" stroke="rgba(242,196,139,0.5)" stroke-width="1.5"/>
-  <circle class="ping" cx="256" cy="278" r="70" fill="none" stroke="rgba(242,196,139,0.5)" stroke-width="1.5" style="animation-delay:1.2s"/>
-  <circle class="ping" cx="256" cy="278" r="70" fill="none" stroke="rgba(242,196,139,0.5)" stroke-width="1.5" style="animation-delay:2.4s"/>
-  <circle cx="256" cy="278" r="7" fill="#F2C48B"/>
-  <g transform="translate(282 250) skewX(-14)"><rect width="92" height="24" fill="#885333"/></g>
-  <text x="296" y="267" fill="#E8E2D0" font-family="Martian Mono, monospace" font-size="11" letter-spacing="2">FALCO</text>
-</svg>"""
+  <g transform="matrix(1 0 -0.144 1 0 0)" fill="none">
+  <rect x="40" y="0" width="90" height="70" fill="rgba(59,37,25,0.5)"/><rect x="150" y="10" width="70" height="62" fill="rgba(59,37,25,0.5)"/><rect x="240" y="0" width="110" height="72" fill="rgba(59,37,25,0.5)"/><rect x="392" y="4" width="80" height="64" fill="rgba(59,37,25,0.5)"/><rect x="486" y="0" width="100" height="70" fill="rgba(59,37,25,0.5)"/><rect x="660" y="8" width="90" height="60" fill="rgba(59,37,25,0.5)"/><rect x="180" y="132" width="80" height="60" fill="rgba(59,37,25,0.5)"/><rect x="268" y="130" width="84" height="70" fill="rgba(59,37,25,0.5)"/><rect x="180" y="206" width="80" height="70" fill="rgba(59,37,25,0.5)"/><rect x="268" y="210" width="84" height="56" fill="rgba(59,37,25,0.5)"/><rect x="268" y="276" width="84" height="92" fill="rgba(59,37,25,0.5)"/><rect x="180" y="290" width="80" height="74" fill="rgba(59,37,25,0.5)"/><rect x="0" y="140" width="96" height="90" fill="rgba(59,37,25,0.5)"/><rect x="0" y="250" width="96" height="110" fill="rgba(59,37,25,0.5)"/><rect x="396" y="130" width="58" height="94" fill="rgba(59,37,25,0.5)"/><rect x="462" y="134" width="48" height="86" fill="rgba(59,37,25,0.5)"/><rect x="396" y="274" width="70" height="88" fill="rgba(59,37,25,0.5)"/><rect x="476" y="282" width="80" height="74" fill="rgba(59,37,25,0.5)"/><rect x="576" y="236" width="60" height="110" fill="rgba(59,37,25,0.5)"/><rect x="520" y="126" width="100" height="90" fill="rgba(59,37,25,0.5)"/><rect x="660" y="120" width="90" height="110" fill="rgba(59,37,25,0.5)"/><rect x="660" y="250" width="90" height="110" fill="rgba(59,37,25,0.5)"/><rect x="0" y="440" width="96" height="70" fill="rgba(59,37,25,0.5)"/><rect x="180" y="430" width="90" height="80" fill="rgba(59,37,25,0.5)"/><rect x="280" y="436" width="72" height="70" fill="rgba(59,37,25,0.5)"/><rect x="392" y="444" width="90" height="60" fill="rgba(59,37,25,0.5)"/><rect x="500" y="440" width="110" height="70" fill="rgba(59,37,25,0.5)"/><rect x="660" y="452" width="90" height="60" fill="rgba(59,37,25,0.5)"/>
+  <rect x="392" y="232" width="84" height="32" fill="#885333"/>
+  <path d="M120,-20 L120,540" stroke="#313335" stroke-width="12"/><path d="M640,-20 L640,540" stroke="#313335" stroke-width="12"/>
+  <path d="M-120,384 L780,424" stroke="#313335" stroke-width="16"/>
+  <path d="M372,-20 L372,540" stroke="#313335" stroke-width="18"/>
+  <path d="M363,-20 L363,540 M381,-20 L381,540" stroke="#E8E2D0" stroke-opacity="0.22" stroke-width="1"/>
+  <path d="M-120,113 L780,89" stroke="#313335" stroke-width="30"/>
+  <path d="M-120,98 L780,74 M-120,128 L780,104" stroke="#F2C48B" stroke-opacity="0.75" stroke-width="1.5"/>
+  <path class="ruta" d="M386,124 L386,240" stroke="#F2C48B" stroke-width="3" stroke-dasharray="6 4" stroke-linecap="round"/>
+  </g>
+  <text x="44.4" y="112.2" transform="rotate(-1.5 44.4 108.2)" fill="#F2C48B" font-family="Martian Mono, monospace" font-size="11" letter-spacing="3">AV. 7 DE MARZO</text>
+  <text x="466" y="101" transform="rotate(-1.5 466 97)" fill="#F2C48B" font-family="Martian Mono, monospace" font-size="11" letter-spacing="3">AV. 7 DE MARZO</text>
+  <text x="339.4" y="410.5" transform="rotate(2.5 339.4 407)" fill="#9A9C9E" font-family="Martian Mono, monospace" font-size="9" letter-spacing="2">9 DE JULIO</text>
+  <text x="302.4" y="372" transform="rotate(-81.8 302.4 372)" fill="#9A9C9E" font-family="Martian Mono, monospace" font-size="9" letter-spacing="2">IRIONDO</text>
+  <g transform="translate(120 146) skewX(-12)"><rect width="226" height="26" fill="#1E1F21" stroke="#F2C48B" stroke-width="1"/></g>
+  <text x="136" y="163" textLength="194" lengthAdjust="spacingAndGlyphs" fill="#F2C48B" font-family="Martian Mono, monospace" font-size="9" letter-spacing="1">A MEDIA CUADRA DE LA 7 DE MARZO</text>
+  <path d="M342,159 L354,159" stroke="#F2C48B" stroke-width="1"/>
+  <g transform="translate(620 150)"><circle r="15" fill="#1E1F21" stroke="rgba(232,226,208,0.3)"/>
+  <path d="M0,-9 L5,4 L0,1 L-5,4 Z" fill="#E8E2D0"/><text y="-18" text-anchor="middle" fill="#9A9C9E" font-family="Martian Mono, monospace" font-size="9">N</text></g>
+  <circle class="ping" cx="350.3" cy="248" r="64" fill="none" stroke="rgba(242,196,139,0.5)" stroke-width="1.5"/>
+  <circle class="ping" cx="350.3" cy="248" r="64" fill="none" stroke="rgba(242,196,139,0.5)" stroke-width="1.5" style="animation-delay:1.2s"/>
+  <circle class="ping" cx="350.3" cy="248" r="64" fill="none" stroke="rgba(242,196,139,0.5)" stroke-width="1.5" style="animation-delay:2.4s"/>
+  <circle cx="350.3" cy="248" r="7" fill="#F2C48B" stroke="#1E1F21" stroke-width="2"/>
+  <text x="398.3" y="252" text-anchor="middle" fill="#E8E2D0" font-family="Martian Mono, monospace" font-size="11" letter-spacing="2">FALCO</text>
+  </svg>"""
 
 PLAY = '<div class="play"><svg viewBox="0 0 24 24" fill="#292A2C" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div>'
 
