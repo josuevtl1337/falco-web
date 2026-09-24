@@ -1,7 +1,7 @@
 ---
 const links = [
   { href: "/#tienda", label: "La tienda" },
-  { href: "/donde-estamos", label: "Dónde estamos" },
+  { href: "/#donde-estamos", label: "Dónde estamos" },
   {
     href: "https://www.instagram.com/falco.cafe/",
     label: "@falco.cafe",
@@ -15,7 +15,7 @@ const links = [
 const menuLinks = [
   { href: "/", label: "Inicio", index: "01" },
   { href: "/#tienda", label: "Tienda", index: "02" },
-  { href: "/donde-estamos", label: "Dónde", index: "03" },
+  { href: "/#donde-estamos", label: "Dónde", index: "03" },
   {
     href: "https://www.instagram.com/falco.cafe/",
     label: "@falco.cafe",
@@ -39,8 +39,8 @@ const path = Astro.url.pathname;
         <li>
           <a
             href={link.href}
-            class={link.boxed ? "nav__caja" : undefined}
-            aria-current={path === link.href ? "page" : undefined}
+            class={link.boxed ? "nav__caja" : "nav__seccion"}
+            data-seccion={link.boxed ? undefined : link.href}
           >
             {link.label}
           </a>
@@ -87,6 +87,7 @@ const path = Astro.url.pathname;
             href={link.href}
             class={path === link.href ? "menu__activo" : undefined}
             aria-current={path === link.href ? "page" : undefined}
+            data-seccion={link.index === "↗" ? undefined : link.href}
           >
             <small aria-hidden="true">{link.index}</small>
             {link.label}
@@ -117,6 +118,10 @@ const path = Astro.url.pathname;
     const destino = new URL(enlace.href, location.href);
     if (destino.pathname === location.pathname && destino.hash) menu.close();
   });
+
+  import { conectarSeccionActiva } from "../scripts/seccion-activa";
+
+  conectarSeccionActiva();
 </script>
 
 <style>
@@ -179,8 +184,45 @@ const path = Astro.url.pathname;
     color: var(--color-ceniza);
   }
 
-  .nav a[aria-current="page"] {
-    color: var(--color-brasa);
+  /*
+   * La opción activa, como en la lámina (.nav nav a.on): una placa tostada
+   * inclinada con sombra dura de hueso, detrás del texto, que se despliega de
+   * izquierda a derecha. La activa es la sección que estás mirando
+   * (scripts/seccion-activa.ts); al pasar el mouse se prende igual.
+   */
+  .nav__seccion {
+    position: relative;
+    z-index: 0;
+    transition: color 0.28s var(--ease-persona);
+  }
+
+  .nav__seccion::before {
+    content: "";
+    position: absolute;
+    inset: 8px -14px;
+    z-index: -1;
+    background: var(--color-tostado);
+    box-shadow: 4px 4px 0 var(--color-hueso);
+    transform: skewX(-16deg) scaleX(0);
+    transform-origin: left;
+    transition: transform 0.28s var(--ease-persona);
+  }
+
+  .nav a.nav__seccion:hover,
+  .nav a.nav__seccion[aria-current] {
+    color: var(--color-hueso);
+  }
+
+  .nav__seccion:hover::before,
+  .nav__seccion[aria-current]::before {
+    transform: skewX(-16deg) scaleX(1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav__seccion,
+    .nav__seccion::before {
+      transition: none;
+    }
   }
 
   .nav__caja {

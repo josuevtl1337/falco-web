@@ -2,6 +2,7 @@
 import { env } from "cloudflare:workers";
 import {
   getHopperCoffee,
+  getSettings,
   getUpcomingSpecialDays,
   getWeekHours,
   listCoffeesByIds,
@@ -11,11 +12,13 @@ import { addDays, getOpenStatus, toArgentina } from "@falco/domain";
 import Base from "../layouts/Base.astro";
 import Calendario from "../components/Calendario.astro";
 import Dialogo from "../components/Dialogo.astro";
+import DondeEstamos from "../components/DondeEstamos.astro";
 import { dayMoment } from "../components/fecha";
 import Nav from "../components/Nav.astro";
 import Origen from "../components/Origen.astro";
 import { placeLabel } from "../components/origen";
 import Pentagono from "../components/Pentagono.astro";
+import Pie from "../components/Pie.astro";
 import Tienda from "../components/Tienda.astro";
 import { OpenNow } from "../islands/OpenNow";
 
@@ -25,6 +28,7 @@ const nowAR = toArgentina(now);
 const specials = await getUpcomingSpecialDays(env.DB, nowAR.date, 30);
 const status = getOpenStatus(now, week, specials);
 const coffee = await getHopperCoffee(env.DB);
+const settings = await getSettings(env.DB);
 
 // Los estantes son lo que sigue abajo de la primera pantalla: la home termina
 // donde termina la ventana y scrollear ya es entrar en la tienda.
@@ -253,6 +257,22 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
 
   <Tienda shelves={shelves} coffees={coffees} db={env.DB} />
 
+  <!-- Dónde estamos y el pie ocupan juntos la última pantalla. -->
+  <div class="final">
+    <DondeEstamos
+      week={week}
+      specials={specials}
+      status={status}
+      nowAR={nowAR}
+      instagramUrl={settings.instagram_url}
+      roaster={coffee?.roaster}
+    />
+    <Pie
+      instagramUrl={settings.instagram_url}
+      whatsapp={settings.whatsapp_number}
+    />
+  </div>
+
   {
     coffee && (
       <dialog class="hoja" id="hoja-tolva" aria-label="El café que hay en tolva">
@@ -307,6 +327,12 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
 </script>
 
 <style>
+  .final {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100dvh - var(--alto-nav));
+  }
+
   /*
    * La home mide una pantalla y ni un píxel más: quien scrollea ya está
    * mirando la tienda, no más home.
