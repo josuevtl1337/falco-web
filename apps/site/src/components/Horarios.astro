@@ -66,7 +66,9 @@ const { rows, specials, roaster } = Astro.props;
     justify-content: space-between;
     align-items: center;
     gap: var(--space-md);
-    padding-block: 15px;
+    /* 15px como en la lámina; en una ventana baja se achica para que la
+       página siga entrando en una pantalla. */
+    padding-block: clamp(8px, 1.6dvh, 15px);
     border-bottom: 1px solid rgba(232, 226, 208, 0.09);
   }
 

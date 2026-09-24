@@ -9,7 +9,6 @@ import {
 import { addDays, getOpenStatus, toArgentina } from "@falco/domain";
 import Base from "../layouts/Base.astro";
 import Calendario from "../components/Calendario.astro";
-import Dialogo from "../components/Dialogo.astro";
 import { dayMoment } from "../components/fecha";
 import Horarios from "../components/Horarios.astro";
 import {
@@ -52,7 +51,7 @@ const dm = instagramDmUrl(settings.instagram_url);
   <div class="donde grainy">
     <div class="donde__izq">
       <header class="donde__encabezado">
-        <span class="chip chip--fill chip--shadow">Dónde estamos</span>
+        <span class="chip chip--fill chip--shadow donde__sello">Dónde estamos</span>
         <h1 class="donde__titulo">Iriondo 2153</h1>
         <div class="hud">
           <Calendario
@@ -87,20 +86,11 @@ const dm = instagramDmUrl(settings.instagram_url);
           )
         }
       </nav>
-      <p class="direccion donde__nota">“Ver la carta” abre la carta en Google Drive</p>
     </div>
 
     <div class="donde__der">
       <div class="donde__mapa">
         <Mapa href={MAPS} />
-      </div>
-      <div class="donde__dialogo">
-        <Dialogo etiqueta="Barista">
-          <p>
-            Si nunca probaste café de especialidad, este es un buen lugar para
-            empezar. Pedí un filtrado y preguntá lo que quieras.
-          </p>
-        </Dialogo>
       </div>
     </div>
   </div>
@@ -108,39 +98,39 @@ const dm = instagramDmUrl(settings.instagram_url);
 
 <style>
   /*
-   * Escritorio: dos columnas, como en la lámina (600px y el resto, 64 de
-   * aire). En el celular las columnas desaparecen (display: contents) y los
-   * bloques se reordenan: el mapa sube justo abajo del estado, antes de los
-   * horarios, que es lo que se busca al entrar con el teléfono en la mano.
+   * Escritorio: dos columnas, como en la lámina (600px y el mapa, 64 de
+   * aire). El mapa tiene la proporción de la lámina (620 × 430) y un ancho
+   * tope: con alto fijo y ancho libre, en una pantalla ancha el plano se
+   * recortaba arriba y abajo y quedaba con mucho zoom.
+   *
+   * Celular: la página entra en una pantalla, como la home. Las columnas
+   * desaparecen (display: contents), los bloques se reordenan -el mapa sube
+   * abajo del estado, que es lo que se busca con el teléfono en la mano- y el
+   * mapa se estira o se achica para ocupar lo que sobra.
    */
   .donde {
     display: grid;
-    grid-template-columns: minmax(0, 600px) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 600px) minmax(0, 760px);
+    justify-content: space-between;
     gap: 64px;
-    padding: 60px var(--space-xxl);
-    /* Las sombras corridas de los carteles y el grano asoman unos píxeles
-       por el borde: sin esto la página se desplazaba de costado en el
-       celular. clip, y no hidden, para no crear un contenedor de scroll. */
-    overflow-x: clip;
-  }
-
-  .donde__izq,
-  .donde__der {
-    display: grid;
-    align-content: start;
+    /* El aire vertical se mide contra el alto de la ventana, como en la
+       home: en un portátil de 720px de alto la página entra sin scrollear. */
+    padding: clamp(24px, 6.5dvh, 60px) var(--space-xxl);
+    /* El grano (.grainy::after, inset -4px) y las sombras corridas de los
+       carteles asoman por el borde: sin esto la página se desplazaba unos
+       píxeles. clip, y no hidden, para no crear un contenedor de scroll. */
+    overflow: clip;
   }
 
   .donde__izq {
-    gap: 28px;
-  }
-
-  .donde__der {
-    gap: var(--space-xl);
+    display: grid;
+    align-content: start;
+    gap: clamp(16px, 3dvh, 28px);
   }
 
   .donde__encabezado {
     display: grid;
-    gap: 28px;
+    gap: clamp(16px, 3dvh, 28px);
     justify-items: start;
   }
 
@@ -149,6 +139,10 @@ const dm = instagramDmUrl(settings.instagram_url);
     font-size: clamp(46px, 5.4vw, 72px);
     letter-spacing: -0.035em;
     line-height: 0.95;
+  }
+
+  .donde__mapa {
+    aspect-ratio: 620 / 430;
   }
 
   .donde__acciones {
@@ -161,19 +155,20 @@ const dm = instagramDmUrl(settings.instagram_url);
     min-height: 50px;
   }
 
-  .donde__nota {
-    font-size: 9px;
-  }
-
-  .donde__dialogo {
-    max-width: 560px;
-  }
-
   @media (max-width: 899px) {
     .donde {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 22px;
-      padding: 28px 22px 40px;
+      /* En tablet la columna no se estira a todo el ancho: queda como una
+         hoja centrada, y el mapa no se vuelve una tira. */
+      --ancho-hoja: 600px;
+      width: 100%;
+      max-width: var(--ancho-hoja);
+      margin-inline: auto;
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100dvh - var(--alto-nav));
+      gap: clamp(12px, 2.2dvh, 22px);
+      padding: clamp(14px, 2.6dvh, 28px) var(--space-md)
+        calc(clamp(14px, 2.6dvh, 24px) + env(safe-area-inset-bottom, 0px));
     }
 
     .donde__izq,
@@ -183,35 +178,60 @@ const dm = instagramDmUrl(settings.instagram_url);
 
     .donde__encabezado {
       order: 1;
-      gap: 22px;
+      gap: clamp(10px, 1.8dvh, 22px);
     }
+
+    .donde__titulo {
+      font-size: clamp(34px, 5.6dvh, 46px);
+    }
+
+    /* El mapa es el que cede: ocupa lo que dejan los demás, y no baja de un
+       alto en el que todavía se leen la 7 de Marzo y el cartel. */
+    /* El plano recorta arriba y abajo cuando la caja es muy apaisada: con
+       más de 2 a 1 se pierde la 7 de Marzo, así que el alto mínimo es la
+       mitad del ancho. */
     .donde__mapa {
       order: 2;
+      aspect-ratio: auto;
+      flex: 1 1 0;
+      min-height: calc((min(100vw, var(--ancho-hoja)) - 2 * var(--space-md)) / 2);
     }
+
     .donde__horarios {
       order: 3;
     }
+
     .donde__acciones {
       order: 4;
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
-    .donde__nota {
-      order: 5;
-    }
-    .donde__dialogo {
-      order: 6;
-      padding-top: var(--space-sm);
-    }
 
     .donde__acciones .boton {
+      min-height: var(--touch-min);
       padding-inline: 10px;
       font-size: 9px;
     }
 
     .donde__dm {
       grid-column: 1 / -1;
+    }
+  }
+
+  /* En un teléfono bajo la fecha se va: el cartel de abierto/cerrado ya dice
+     lo que importa, y así el mapa no queda como una tira. */
+  @media (max-width: 899px) and (max-height: 760px) {
+    .donde__encabezado :global(.fecha) {
+      display: none;
+    }
+  }
+
+  /* Y en uno muy bajo (iPhone SE) también el sello: el título ya es la
+     dirección, y "Dónde estamos" está marcado en el menú. */
+  @media (max-width: 899px) and (max-height: 700px) {
+    .donde__sello {
+      display: none;
     }
   }
 </style>
