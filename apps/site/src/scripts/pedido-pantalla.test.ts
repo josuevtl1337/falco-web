@@ -172,4 +172,20 @@ describe("la pantalla del pedido", () => {
     expect(guardado()).toBeNull();
     expect(document.querySelector(".pedido__vacio")).not.toBeNull();
   });
+
+  it("se entera de lo que se suma desde la misma página", () => {
+    // Vaciar el pedido desde el panel y después sumar desde la tienda: el
+    // panel tiene que mostrar lo nuevo, igual que la barra de abajo.
+    montar(pedido({ items: [] }));
+    expect(document.querySelector(".pedido__vacio")).not.toBeNull();
+
+    const nuevo = pedido();
+    localStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(nuevo));
+    document.dispatchEvent(
+      new CustomEvent("falco:pedido", { detail: { pedido: nuevo } }),
+    );
+
+    expect(document.querySelector(".pedido__vacio")).toBeNull();
+    expect(document.querySelectorAll(".renglon")).toHaveLength(1);
+  });
 });

@@ -394,10 +394,22 @@ export const conectarPantallaDePedido = (): void => {
     );
   }
 
+  /**
+   * Mientras la propia pantalla avisa, no se escucha a sí misma: redibujar en
+   * medio del click de "Enviar para confirmar" sacaría el enlace del DOM antes
+   * de que el navegador lo siga, y WhatsApp no se abriría.
+   */
+  let avisando = false;
+
   function avisarCambio(order: Order | null) {
-    document.dispatchEvent(
-      new CustomEvent("falco:pedido", { detail: { pedido: order } }),
-    );
+    avisando = true;
+    try {
+      document.dispatchEvent(
+        new CustomEvent("falco:pedido", { detail: { pedido: order } }),
+      );
+    } finally {
+      avisando = false;
+    }
   }
 
   function dibujar() {
@@ -443,6 +455,13 @@ export const conectarPantallaDePedido = (): void => {
   }
 
   dibujar();
+
+  // En la home la pantalla vive en un panel que se dibuja una vez al cargar:
+  // sin esto, sumar desde la tienda después de vaciar el pedido dejaba el panel
+  // diciendo "Todavía no sumaste nada" mientras la barra mostraba la unidad.
+  document.addEventListener("falco:pedido", () => {
+    if (!avisando) dibujar();
+  });
 
   // Si el pedido cambia en otra pestaña, esta se entera.
   window.addEventListener("storage", dibujar);
