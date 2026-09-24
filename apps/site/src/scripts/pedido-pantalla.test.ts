@@ -188,4 +188,21 @@ describe("la pantalla del pedido", () => {
     expect(document.querySelector(".pedido__vacio")).toBeNull();
     expect(document.querySelectorAll(".renglon")).toHaveLength(1);
   });
+
+  it("sacar con la cruz avisa el cambio, para que la barra no quede vieja", () => {
+    montar(pedido());
+    const avisos: unknown[] = [];
+    document.addEventListener("falco:pedido", (e) =>
+      avisos.push((e as CustomEvent).detail.pedido),
+    );
+    document.querySelector<HTMLButtonElement>(".renglon__quitar")!.click();
+    expect(avisos).toHaveLength(1);
+    expect((avisos[0] as Order).items).toHaveLength(0);
+  });
+
+  it("en el panel vacío, ir a la tienda cierra el panel en vez de navegar", () => {
+    montar(null);
+    const ir = document.querySelector<HTMLAnchorElement>(".pedido__vacio a")!;
+    expect(ir.hasAttribute("data-pedido-volver")).toBe(true);
+  });
 });

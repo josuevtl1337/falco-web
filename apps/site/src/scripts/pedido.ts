@@ -84,6 +84,10 @@ const panelDe = (destino: EventTarget | null): HTMLElement | null =>
   destino instanceof Element ? destino.closest(".detalle") : null;
 
 export const conectarPedido = (): void => {
+  // Si el aviso lo dispara este mismo archivo, el panel que sumó ya está al
+  // día y tiene su propio mensaje: no hay que pisarlo.
+  let avisando = false;
+
   document.addEventListener("click", (evento) => {
     const destino = evento.target;
     if (!(destino instanceof Element)) return;
@@ -157,9 +161,14 @@ export const conectarPedido = (): void => {
     }
 
     escribirCantidad(panel, 1);
-    document.dispatchEvent(
-      new CustomEvent("falco:pedido", { detail: { pedido } }),
-    );
+    avisando = true;
+    try {
+      document.dispatchEvent(
+        new CustomEvent("falco:pedido", { detail: { pedido } }),
+      );
+    } finally {
+      avisando = false;
+    }
 
     // Sumar cierra el panel y devuelve a la tienda, como en la lámina: el
     // gesto terminó, y el cartel de arriba más la barra de abajo ya dicen que
@@ -176,7 +185,20 @@ export const conectarPedido = (): void => {
 
   // Al abrir un panel, la cantidad vuelve a 1 y los botones se recalculan
   // contra lo que ya hay en el pedido.
-  for (const panel of document.querySelectorAll<HTMLElement>(".detalle")) {
+  const paneles = [...document.querySelectorAll<HTMLElement>(".detalle")];
+  for (const panel of paneles) {
     escribirCantidad(panel, 1);
   }
+
+  // El pedido cambió desde otro lado (se sacó algo, se vació, se empezó otro):
+  // los topes y los carteles de cada producto se recalculan sin recargar.
+  document.addEventListener("falco:pedido", () => {
+    if (avisando) return;
+    for (const panel of paneles) {
+      escribirCantidad(panel, 1);
+      if (panel.querySelector<HTMLElement>("[data-aviso]")?.dataset.tono) {
+        avisar(panel, AVISO_BASE, "");
+      }
+    }
+  });
 };

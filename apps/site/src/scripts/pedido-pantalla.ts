@@ -50,8 +50,13 @@ export const conectarPantallaDePedido = (): void => {
   const catalog = toCatalog(payload);
   const whatsapp = payload.whatsapp;
 
+  /**
+   * Todo cambio hecho desde la pantalla se avisa: si no, la barra de abajo y
+   * los paneles de producto se quedaban con el pedido viejo hasta recargar.
+   */
   const guardar = (order: Order) => {
     saveOrder(almacenamiento(), order);
+    avisarCambio(order);
     dibujar();
   };
 
@@ -94,6 +99,9 @@ export const conectarPantallaDePedido = (): void => {
     const ir = document.createElement("a");
     ir.className = "boton";
     ir.href = "/#tienda";
+    // Dentro del panel cierra el panel en vez de navegar (y recargar la home);
+    // en la página /pedido sigue siendo un enlace normal a la tienda.
+    ir.dataset.pedidoVolver = "";
     ir.textContent = "Ir a la tienda";
     poner(caja, ir);
     return caja;
