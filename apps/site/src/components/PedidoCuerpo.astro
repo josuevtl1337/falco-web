@@ -1,0 +1,160 @@
+---
+interface Props {
+  /** En la página propia el título es el h1; dentro del panel, un h2. */
+  titleTag?: "h1" | "h2";
+  /** Qué hace el enlace de volver: en el panel lo cierra, en la página navega. */
+  volver: { href: string; texto: string };
+}
+
+const { titleTag = "h1", volver } = Astro.props;
+const Titulo = titleTag;
+
+const PASOS = [
+  { n: 1, titulo: "Armás el pedido" },
+  { n: 2, titulo: "Lo confirmamos por WhatsApp" },
+  { n: 3, titulo: "Retirás en el local" },
+];
+---
+
+<!--
+  El armazón del pedido, compartido por la página /pedido y por el panel que se
+  abre sobre la tienda. Lo de adentro lo dibuja el navegador: el pedido vive
+  ahí, el servidor no sabe qué sumó cada uno.
+-->
+<div class="pedido" data-pedido-pantalla>
+  <header class="pedido__encabezado">
+    <a class="pedido__volver" href={volver.href} data-pedido-volver>
+      ‹ {volver.texto}
+    </a>
+    <Titulo class="chip chip--fill chip--shadow pedido__sello">Tu pedido</Titulo>
+    <p class="pedido__resumen" data-pedido-resumen></p>
+  </header>
+
+  <ol class="pasos" data-pedido-pasos hidden>
+    {
+      PASOS.map((paso) => (
+        <li class="paso" data-paso={paso.n}>
+          <b>{paso.n}</b>
+          <span>{paso.titulo}</span>
+        </li>
+      ))
+    }
+  </ol>
+
+  <div data-pedido-cuerpo></div>
+
+  <div class="pedido__envio" data-pedido-envio hidden></div>
+</div>
+
+<style>
+  .pedido {
+    display: grid;
+    gap: var(--space-lg);
+    align-content: start;
+  }
+
+  .pedido__encabezado {
+    display: grid;
+    gap: var(--space-sm);
+    justify-items: start;
+  }
+
+  .pedido__volver,
+  .pedido__resumen {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-nano);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .pedido__volver {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-min);
+    color: var(--color-brasa);
+    text-decoration: none;
+  }
+
+  .pedido__resumen {
+    color: var(--color-ceniza);
+  }
+
+  /*
+   * Los tres pasos. El segundo es el que importa: deja claro, antes de mandar
+   * nada, que esto no reserva: lo confirma Falco por WhatsApp.
+   */
+  .pasos {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .paso {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+    padding: 10px 10px 11px 12px;
+    border: 1px solid rgba(232, 226, 208, 0.22);
+    transform: skewX(-8deg);
+  }
+
+  .paso > * {
+    transform: skewX(8deg);
+  }
+
+  .paso b {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .paso span {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.45;
+    color: var(--color-ceniza);
+  }
+
+  .paso--ahora {
+    background: var(--color-hueso);
+    border-color: var(--color-hueso);
+    color: var(--color-carbon);
+    box-shadow: 4px 4px 0 var(--color-tostado);
+  }
+
+  .paso--ahora span {
+    color: var(--color-carbon);
+  }
+
+  .paso--hecho {
+    border-color: rgba(136, 83, 51, 0.9);
+  }
+
+  .paso--hecho b::after {
+    content: " ✓";
+    color: var(--color-brasa);
+    font-size: 14px;
+  }
+
+  /*
+   * El botón de enviar queda pegado abajo mientras se scrollea la lista: con
+   * varios productos se iba fuera de la pantalla justo cuando hacía falta.
+   */
+  .pedido__envio {
+    position: sticky;
+    bottom: 0;
+    display: grid;
+    gap: 10px;
+    padding: var(--space-md) 0
+      calc(var(--space-sm) + env(safe-area-inset-bottom, 0px));
+    background: var(--color-carbon);
+    border-top: 1px solid rgba(232, 226, 208, 0.12);
+  }
+</style>

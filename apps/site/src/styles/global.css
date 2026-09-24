@@ -637,6 +637,103 @@ html {
 }
 
 /*
+ * Los paneles con URL propia: el detalle de un producto y el pedido.
+ * Compartidos por dos componentes, así que no pueden vivir en el <style> de
+ * ninguno de los dos.
+ */
+.panel-detalle {
+  /* `margin: auto` es lo que centra un <dialog>: con 0 a la derecha queda
+       pegado a ese borde, que es de donde entra en escritorio. */
+  margin: 0 0 0 auto;
+  width: min(540px, 100%);
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  overflow-y: auto;
+  padding: 36px 42px;
+  border: 0;
+  border-left: 2px solid var(--color-hueso);
+  box-shadow: -10px 0 0 var(--color-tostado);
+  background: var(--color-carbon);
+  color: var(--color-hueso);
+}
+
+.panel-detalle::backdrop {
+  background: rgba(12, 12, 13, 0.62);
+}
+
+/* El `display` va en [open]: un <dialog> cerrado lo oculta el navegador con
+     `display: none`, y darle un display propio lo dejaría visible siempre. */
+.panel-detalle[open] {
+  display: grid;
+  gap: var(--space-lg);
+  align-content: start;
+  animation: drawerIn 0.55s var(--ease-persona) both;
+}
+
+.panel-detalle__barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+/* El tirador es del celular: en escritorio el panel no se arrastra. */
+.panel-detalle__tirador {
+  display: none;
+  width: 46px;
+  height: 4px;
+  background: rgba(232, 226, 208, 0.3);
+}
+
+.panel-detalle__x {
+  margin-left: auto;
+  width: var(--touch-min);
+  height: var(--touch-min);
+  display: grid;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  font-size: var(--text-body);
+  color: var(--color-ceniza);
+}
+
+/* En pantalla angosta el panel deja de venir del costado y sube desde abajo,
+     como la hoja de la tolva en la home: a 540px de ancho un cajón lateral
+     taparía la pantalla entera igual, pero entrando de costado. */
+@media (max-width: 900px) {
+  .panel-detalle {
+    margin: auto 0 0;
+    width: 100%;
+    height: auto;
+    max-height: 88dvh;
+    padding: var(--space-sm) 22px var(--space-xl);
+    border-left: 0;
+    border-top: 2px solid var(--color-hueso);
+    box-shadow: 0 -8px 0 var(--color-tostado);
+  }
+
+  .panel-detalle[open] {
+    animation: sheetUp 0.55s var(--ease-persona) both;
+  }
+
+  .panel-detalle__tirador {
+    display: block;
+    position: absolute;
+    left: 50%;
+    translate: -50% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-detalle[open] {
+    animation: none;
+  }
+}
+
+/*
  * El cartel de "¡Sumado!": entra desde la izquierda, inclinado, y se va solo.
  * Va fijo arriba para que se vea aunque el panel del producto se cierre.
  * Medido en la lámina.

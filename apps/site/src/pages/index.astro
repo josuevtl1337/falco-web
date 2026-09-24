@@ -251,7 +251,7 @@ const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
     </div>
   </div>
 
-  <Tienda shelves={shelves} coffees={coffees} />
+  <Tienda shelves={shelves} coffees={coffees} db={env.DB} />
 
   {
     coffee && (

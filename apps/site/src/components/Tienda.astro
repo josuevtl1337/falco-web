@@ -1,6 +1,8 @@
 ---
-import type { Coffee, ProductWithOptions } from "@falco/db";
+import type { Coffee, ProductWithOptions, ReadableDb } from "@falco/db";
 import BarraPedido from "./BarraPedido.astro";
+import CatalogoJson from "./CatalogoJson.astro";
+import PanelPedido from "./PanelPedido.astro";
 import Ficha from "./Ficha.astro";
 import PanelDetalle from "./PanelDetalle.astro";
 
@@ -8,9 +10,11 @@ interface Props {
   shelves: { title: string; products: ProductWithOptions[] }[];
   /** Los cafés por id: de ahí sale el perfil de cata de cada detalle. */
   coffees: Map<number, Coffee>;
+  /** Para el catálogo que la pantalla del pedido necesita en el navegador. */
+  db: ReadableDb;
 }
 
-const { shelves, coffees } = Astro.props;
+const { shelves, coffees, db } = Astro.props;
 
 // El ancho de una ficha más su separación, medido en la lámina (250 + 22).
 const CARD_STRIDE = 272;
@@ -154,14 +158,18 @@ const shelvesWithRail = shelves.map((shelf, index) => {
   )
 }
 
+<CatalogoJson db={db} />
+<PanelPedido />
 <BarraPedido />
 
 <script>
   import { conectarBarraDePedido } from "../scripts/barra-pedido";
-  import { conectarDetalle } from "../scripts/detalle";
+  import { conectarPaneles } from "../scripts/paneles";
+  import { conectarPantallaDePedido } from "../scripts/pedido-pantalla";
   import { conectarPedido } from "../scripts/pedido";
 
-  conectarDetalle();
+  conectarPaneles();
+  conectarPantallaDePedido();
   conectarPedido();
   conectarBarraDePedido();
 </script>
