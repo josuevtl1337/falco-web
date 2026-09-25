@@ -1,0 +1,46 @@
+---
+import type { Coffee, ProductWithOptions } from "@falco/db";
+import DetalleProducto from "./DetalleProducto.astro";
+
+interface Props {
+  product: ProductWithOptions;
+  coffee?: Coffee;
+  shelfLabel: string;
+}
+
+const { product, coffee, shelfLabel } = Astro.props;
+---
+
+<!--
+  El detalle de un producto es un panel sobre la tienda, no otra página: en
+  escritorio entra desde la derecha, en el celular sube desde abajo. Va en un
+  <dialog> nativo abierto con showModal(), que se encarga del fondo, del foco,
+  del Escape y de dejar inerte lo de atrás.
+
+  El marcado está en la página desde el servidor -uno por producto- y no se
+  pide al abrir: son unos pocos productos y así el panel abre en el acto, sin
+  un estado de carga y sin depender de la red.
+-->
+<dialog
+  class="panel-detalle"
+  id={`detalle-${product.slug}`}
+  data-panel-ruta={`/tienda/${product.slug}`}
+  aria-label={product.name}
+>
+  <div class="panel-detalle__barra">
+    <span class="panel-detalle__tirador" aria-hidden="true"></span>
+    <form method="dialog">
+      <button class="panel-detalle__x" type="submit" aria-label="Cerrar">✕</button>
+    </form>
+  </div>
+
+  <DetalleProducto
+    product={product}
+    coffee={coffee}
+    shelfLabel={shelfLabel}
+  />
+</dialog>
+
+<!-- Los estilos de .panel-detalle viven en global.css: los comparten el
+     panel del producto y el del pedido, y el scope de Astro no cruza de un
+     componente a otro. -->

@@ -1,0 +1,450 @@
+---
+import type { Coffee, ProductWithOptions, ReadableDb } from "@falco/db";
+import BarraPedido from "./BarraPedido.astro";
+import CatalogoJson from "./CatalogoJson.astro";
+import PanelPedido from "./PanelPedido.astro";
+import Ficha from "./Ficha.astro";
+import PanelDetalle from "./PanelDetalle.astro";
+
+interface Props {
+  shelves: { title: string; products: ProductWithOptions[] }[];
+  /** Los cafés por id: de ahí sale el perfil de cata de cada detalle. */
+  coffees: Map<number, Coffee>;
+  /** Para el catálogo que la pantalla del pedido necesita en el navegador. */
+  db: ReadableDb;
+}
+
+const { shelves, coffees, db } = Astro.props;
+
+// El ancho de una ficha más su separación, medido en la lámina (250 + 22).
+const CARD_STRIDE = 272;
+
+// Un riel que se mueve necesita que UNA tanda de fichas sea más ancha que la
+// pantalla: si no, al final del recorrido se ve la franja vacía (el mismo
+// problema que tuvo la cinta del pie). Con pocos productos la única forma de
+// llenarla sería repetir el mismo café ocho veces, que miente sobre el
+// catálogo. Así que con pocas fichas el estante se queda quieto y se arrastra
+// con el dedo; cuando haya más, el riel arranca solo.
+const MIN_MOVING_WIDTH = 1400;
+
+// El id del encabezado sale del título del estante, que trae espacios y
+// acentos: sin normalizar, el aria-labelledby apunta a un id que no existe y
+// la sección queda sin nombre.
+const slug = (title: string) =>
+  `estante-${title
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")}`;
+
+const shelvesWithRail = shelves.map((shelf, index) => {
+  const setWidth = shelf.products.length * CARD_STRIDE;
+  return {
+    ...shelf,
+    id: slug(shelf.title),
+    moves: setWidth >= MIN_MOVING_WIDTH,
+    // Los dos estantes van en sentidos opuestos, como en la lámina.
+    reversed: index % 2 === 1,
+    // 52s y 58s en la lámina para tandas de cinco fichas: lo escalamos por el
+    // largo real para que la velocidad no dependa de cuántos productos haya.
+    duration: `${Math.round((setWidth / (5 * CARD_STRIDE)) * (index % 2 === 1 ? 58 : 52))}s`,
+  };
+});
+---
+
+<!--
+  Los estantes viven acá y no en una página propia: la home termina en una
+  pantalla y lo que sigue al scrollear ES la tienda. Un solo lugar que lista
+  productos, así no hay dos copias que se desincronicen.
+-->
+<section class="tienda" id="tienda" aria-labelledby="tienda-titulo">
+  {
+    shelvesWithRail.map((shelf, index) => (
+      <section class="estante" aria-labelledby={shelf.id}>
+        {/*
+          La línea del primer estante lleva además el nombre de la tienda y su
+          cartel: "Café ——— Llevate Falco a casa ——— La tienda". Así la tienda
+          se presenta sin gastar una pantalla entera en un encabezado, que era
+          lo que dejaba la segunda fila de productos cortada al aterrizar.
+
+          En el marcado el título va primero, antes del nombre del estante,
+          porque es el encabezado de la sección y el orden de lectura tiene que
+          respetarlo. Al medio lo lleva `order`, que mueve lo que se ve sin
+          tocar lo que se lee. Se puede porque en esta fila no hay nada que
+          reciba el foco.
+        */}
+        <div
+          class:list={["estante__linea", index === 0 && "estante__linea--portada"]}
+        >
+          {index === 0 && (
+            <h2 id="tienda-titulo" class="tienda__titulo">
+              Llevate Falco a casa
+            </h2>
+          )}
+
+          <h3 id={shelf.id} class="estante__nombre">
+            {shelf.title}
+          </h3>
+
+          <i aria-hidden="true" />
+
+          {index === 0 && (
+            <>
+              <i aria-hidden="true" />
+              <span class="chip chip--fill chip--shadow tienda__sello">
+                La tienda
+              </span>
+            </>
+          )}
+        </div>
+
+        {shelf.products.length === 0 ? (
+          <p class="estante__vacio">
+            Por ahora no hay nada en este estante. Escribinos y te contamos qué
+            tenemos.
+          </p>
+        ) : (
+          <div
+            class:list={["riel", shelf.moves && "riel--anda"]}
+            style={`--riel-duracion:${shelf.duration};--riel-fichas:${shelf.products.length}`}
+          >
+            <div class:list={["riel__pista", shelf.reversed && "riel__pista--vuelta"]}>
+              <ul class="riel__tanda">
+                {shelf.products.map((product) => (
+                  <li>
+                    <Ficha product={product} shelfLabel={shelf.title} />
+                  </li>
+                ))}
+              </ul>
+
+              {/*
+                La copia sólo existe para que el bucle no corte: el desplazamiento
+                es exactamente el ancho de una tanda, así que al terminar la
+                segunda queda donde arrancó la primera. Va oculta para los
+                lectores de pantalla, que si no leerían el catálogo dos veces,
+                y fuera del tabulador. NO puede ser `inert`: la mitad de lo que
+                se ve en pantalla es esta copia, e inerte no se podía tocar.
+              */}
+              {shelf.moves && (
+                <ul class="riel__tanda riel__copia" aria-hidden="true">
+                  {shelf.products.map((product) => (
+                    <li>
+                      <Ficha product={product} shelfLabel={shelf.title} copy />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        )}
+      </section>
+    ))
+  }
+</section>
+
+{
+  /*
+    Un panel por producto, servidos desde el servidor. El detalle abre en el
+    acto, sin pedir nada, y si el script no corre las fichas siguen siendo
+    enlaces a su propia página.
+  */
+  shelvesWithRail.flatMap((shelf) =>
+    shelf.products.map((product) => (
+      <PanelDetalle
+        product={product}
+        coffee={product.coffeeId ? coffees.get(product.coffeeId) : undefined}
+        shelfLabel={shelf.title}
+      />
+    )),
+  )
+}
+
+<CatalogoJson db={db} />
+<PanelPedido />
+<BarraPedido />
+
+<script>
+  import { conectarBarraDePedido } from "../scripts/barra-pedido";
+  import { conectarPaneles } from "../scripts/paneles";
+  import { conectarPantallaDePedido } from "../scripts/pedido-pantalla";
+  import { conectarPedido } from "../scripts/pedido";
+
+  conectarPaneles();
+  conectarPantallaDePedido();
+  conectarPedido();
+  conectarBarraDePedido();
+</script>
+
+<style>
+  .tienda {
+    display: grid;
+    /* Poco aire ENTRE estantes porque cada riel ya trae el suyo (30px arriba
+       para que la estrella de "Nuevo" no se recorte, y el de abajo). Con el
+       gap grande, la segunda fila se iba 33px fuera de la pantalla. */
+    gap: var(--space-md);
+    /* Menos aire arriba que antes: sin el encabezado alto, ese espacio se lo
+       queda la segunda fila de productos, que es lo que antes quedaba cortado
+       al aterrizar en la tienda. */
+    padding-block: var(--space-xl);
+    background: var(--color-carbon);
+  }
+
+  .estante__linea,
+  .estante__vacio {
+    padding-inline: var(--space-lg);
+  }
+
+  /* El nombre del estante con la línea que lo acompaña hasta el borde. */
+  .estante {
+    display: grid;
+    gap: 0;
+  }
+
+  .estante__linea {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  /*
+   * La fila de portada: nombre del estante, el título de la tienda al medio y
+   * el cartel a la derecha, todo sobre la misma línea.
+   *
+   * `order` acomoda lo que se ve; el marcado mantiene el título primero, que
+   * es el orden en el que corresponde leerlo.
+   */
+  .estante__linea--portada .estante__nombre {
+    order: 1;
+  }
+
+  .estante__linea--portada i:first-of-type {
+    order: 2;
+  }
+
+  .estante__linea--portada .tienda__titulo {
+    order: 3;
+  }
+
+  .estante__linea--portada i:last-of-type {
+    order: 4;
+  }
+
+  .estante__linea--portada .tienda__sello {
+    order: 5;
+  }
+
+  .tienda__titulo {
+    margin: 0;
+    flex-shrink: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    /* Ya no es un héroe sino una etiqueta sobre una línea: entra en la fila,
+       no la parte. */
+    font-size: clamp(18px, 2.4vw, 32px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
+  }
+
+  .estante__nombre {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-nano);
+    font-weight: 400;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-brasa);
+  }
+
+  .estante__linea i {
+    flex: 1;
+    height: 1px;
+    background: rgba(232, 226, 208, 0.12);
+  }
+
+  .estante__vacio {
+    margin: 0;
+    color: var(--color-ceniza);
+  }
+
+  /*
+   * El riel: las fichas en fila, con los bordes desvanecidos para que entren y
+   * salgan en lugar de cortarse de golpe.
+   */
+  .riel {
+    /* El paso: lo que ocupa una ficha con su separación (250 + 22 en la
+       lámina). El bucle se desplaza exactamente --riel-fichas pasos. */
+    --riel-paso: 272px;
+    overflow: hidden;
+    /* Los 30px de arriba no son decorativos: la estrella de "Nuevo" sale 24px
+       por encima de la ficha y el riel recorta lo que se desborda. */
+    padding-block: 30px 12px;
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 6%,
+      #000 94%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 6%,
+      #000 94%,
+      transparent
+    );
+  }
+
+  .riel__pista {
+    display: flex;
+    width: max-content;
+    padding-inline-start: var(--space-lg);
+  }
+
+  .riel__tanda {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+  }
+
+  /*
+   * La separación va como margen de cada ficha y NO como `gap` de la fila.
+   *
+   * Con `gap`, el ancho total de las dos tandas es 2·tanda + gap y el -50% del
+   * bucle cae a mitad de camino, así que la vuelta salta. Con el margen, el
+   * ancho de una tanda ya incluye su separación final y el -50% aterriza justo
+   * donde arranca la copia.
+   */
+  .riel__tanda li {
+    margin-right: 22px;
+  }
+
+  /*
+   * Se desplaza el ancho EXACTO de una tanda, no un -50%.
+   *
+   * La pista lleva un sangrado a la izquierda para que la primera ficha
+   * empiece alineada con el texto, y ese sangrado vive dentro del elemento
+   * animado: con -50% el punto de corte cae a mitad del sangrado y la vuelta
+   * salta 36px. Contando fichas el bucle cierra donde tiene que cerrar, y
+   * sigue cerrando si mañana cambia el sangrado.
+   */
+  @keyframes rielar {
+    to {
+      transform: translateX(calc(-1 * var(--riel-fichas) * var(--riel-paso)));
+    }
+  }
+
+  /*
+   * El movimiento va sólo donde hay puntero fino: en una pantalla táctil la
+   * ficha se corre debajo del dedo justo cuando vas a tocarla, y no hay "pasar
+   * el mouse" para frenarla. Ahí el riel se arrastra a mano, que es lo que la
+   * gente espera de una fila de productos en el celular.
+   */
+  @media (hover: hover) and (pointer: fine) {
+    .riel--anda .riel__pista {
+      animation: rielar var(--riel-duracion) linear infinite;
+    }
+
+    .riel--anda .riel__pista--vuelta {
+      animation-direction: reverse;
+    }
+
+    /* Frena con el mouse encima y también cuando el foco entra con el teclado:
+       si no, quien navega con Tab persigue una ficha en movimiento. */
+    .riel--anda:hover .riel__pista,
+    .riel--anda:focus-within .riel__pista {
+      animation-play-state: paused;
+    }
+  }
+
+  /* Sin puntero fino (o sin riel que se mueva) la fila se arrastra con el
+     dedo, y la copia sobra: sería el catálogo repetido. */
+  @media (hover: none), (pointer: coarse) {
+    .riel__copia {
+      display: none;
+    }
+  }
+
+  /* Un estante que no se mueve se arrastra a mano, siempre. */
+  .riel:not(.riel--anda) {
+    overflow-x: auto;
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    .riel {
+      overflow-x: auto;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .riel--anda .riel__pista {
+      animation: none;
+    }
+
+    .riel {
+      overflow-x: auto;
+    }
+
+    .riel__copia {
+      display: none;
+    }
+  }
+
+  /*
+   * En pantalla angosta los tres no entran en una línea. El título se va a su
+   * propio renglón, arriba, y abajo queda "Café ——— La tienda": la idea es la
+   * misma, repartida en dos.
+   */
+  @media (max-width: 760px) {
+    .estante__linea--portada {
+      flex-wrap: wrap;
+      gap: var(--space-sm) 18px;
+    }
+
+    .estante__linea--portada .tienda__titulo {
+      order: 0;
+      flex-basis: 100%;
+    }
+
+    /* Con el título afuera sobra una raya: la que queda se estira sola entre
+       el nombre del estante y el cartel. */
+    .estante__linea--portada i:last-of-type {
+      display: none;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .estante__linea,
+    .estante__vacio {
+      padding-inline: var(--space-xxl);
+    }
+
+    .riel__pista {
+      padding-inline-start: var(--space-xxl);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .tienda {
+      gap: var(--space-lg);
+      padding-block: var(--space-xl) var(--space-lg);
+    }
+
+    .estante__linea,
+    .estante__vacio {
+      padding-inline: 22px;
+    }
+
+    .riel__pista {
+      padding-inline-start: 22px;
+    }
+
+    .riel {
+      /* La ficha baja a 206px en el celular: el paso del bucle la acompaña. */
+      --riel-paso: 228px;
+      padding-block: 30px 18px;
+    }
+  }
+</style>

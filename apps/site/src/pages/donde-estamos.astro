@@ -1,0 +1,7 @@
+---
+// "Dónde estamos" es una sección de la home, abajo de la tienda. Esta ruta
+// queda para los enlaces viejos, igual que /tienda.
+//
+// 302 y no 301: un permanente se queda cacheado en el navegador de la gente.
+return Astro.redirect("/#donde-estamos");
+---

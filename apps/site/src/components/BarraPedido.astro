@@ -1,0 +1,114 @@
+---
+// Sin props: lo que muestra sale del pedido guardado en el navegador.
+---
+
+<!--
+  La barra del pedido: aparece abajo en cuanto hay algo sumado y es el único
+  camino a /pedido desde la tienda.
+
+  Arranca oculta en el HTML porque el servidor no sabe -ni tiene por qué
+  saber- qué sumó cada uno: el pedido vive en el navegador. La muestra el
+  script, si hay algo que mostrar.
+-->
+<a class="barra-pedido" href="/pedido" data-barra-pedido hidden>
+  <span class="barra-pedido__n" data-barra-n>0</span>
+  <span class="barra-pedido__texto">
+    <b>Tu pedido</b>
+    <small data-barra-detalle></small>
+  </span>
+  <span class="barra-pedido__ir">Ver ›</span>
+</a>
+
+<style>
+  .barra-pedido {
+    position: fixed;
+    left: 14px;
+    right: 14px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    z-index: 15;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 62px;
+    padding: 10px 18px;
+    background: var(--color-hueso);
+    color: var(--color-carbon);
+    text-decoration: none;
+    transform: skewX(-6deg);
+    box-shadow: 6px 6px 0 var(--color-tostado);
+    animation: barraIn 0.4s var(--ease-persona) both;
+  }
+
+  .barra-pedido > * {
+    transform: skewX(6deg);
+  }
+
+  .barra-pedido__n {
+    width: 36px;
+    height: 36px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    background: var(--color-tostado);
+    color: var(--color-hueso);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 18px;
+  }
+
+  .barra-pedido__texto {
+    flex: 1;
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .barra-pedido__texto b {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 18px;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .barra-pedido__texto small {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+
+  .barra-pedido__ir {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* En escritorio no hace falta que cruce la pantalla entera. */
+  @media (min-width: 900px) {
+    .barra-pedido {
+      left: auto;
+      right: 32px;
+      bottom: 32px;
+      min-width: 320px;
+    }
+  }
+
+  @keyframes barraIn {
+    from {
+      opacity: 0;
+      transform: skewX(-6deg) translateY(120%);
+    }
+    to {
+      opacity: 1;
+      transform: skewX(-6deg) translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .barra-pedido {
+      animation: none;
+    }
+  }
+</style>

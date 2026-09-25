@@ -32,7 +32,8 @@ CREATE TABLE products (
   name            TEXT NOT NULL CHECK (length(trim(name)) > 0),
   detail          TEXT NOT NULL CHECK (length(trim(detail)) > 0),
   description     TEXT,
-  price_ars       INTEGER NOT NULL CHECK (price_ars >= 0),
+  price_card_ars  INTEGER NOT NULL CHECK (price_card_ars >= 0),
+  price_cash_ars  INTEGER NOT NULL CHECK (price_cash_ars >= 0),
   image_key       TEXT,
   is_new          INTEGER NOT NULL DEFAULT 0 CHECK (is_new IN (0, 1)),
   is_visible      INTEGER NOT NULL DEFAULT 1 CHECK (is_visible IN (0, 1)),
@@ -44,7 +45,7 @@ CREATE TABLE products (
   CHECK (kind = 'coffee' OR coffee_id IS NULL)
 ) STRICT;
 
--- Opciones de un producto (por ahora, talles de remera).
+-- Opciones de un producto: hoy, la molienda del café (en grano o molido).
 CREATE TABLE product_options (
   id              INTEGER PRIMARY KEY,
   product_id      INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
@@ -56,34 +57,50 @@ CREATE TABLE product_options (
   UNIQUE (product_id, label)
 ) STRICT;
 
--- Horario semanal. weekday: 0 = domingo … 6 = sábado. Horas de Argentina, "HH:MM" o "24:00".
--- Los CHECK de hora aceptan exactamente lo que parseHHMM sabe leer: "8:00" queda afuera.
+-- Horario semanal. weekday: 0 = domingo … 6 = sábado. Un día puede tener varios
+-- tramos (el local corta al mediodía); cero tramos es un día cerrado, así que
+-- esa fila no necesita ninguna hora propia.
 CREATE TABLE business_hours (
   weekday         INTEGER PRIMARY KEY CHECK (weekday BETWEEN 0 AND 6),
-  is_closed       INTEGER NOT NULL DEFAULT 0 CHECK (is_closed IN (0, 1)),
-  opens_at        TEXT CHECK (opens_at IS NULL OR (opens_at GLOB '[0-2][0-9]:[0-5][0-9]'
-                    AND (substr(opens_at, 1, 2) <= '23' OR opens_at = '24:00'))),
-  closes_at       TEXT CHECK (closes_at IS NULL OR (closes_at GLOB '[0-2][0-9]:[0-5][0-9]'
-                    AND (substr(closes_at, 1, 2) <= '23' OR closes_at = '24:00'))),
   updated_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
-  updated_by      TEXT,
-  CHECK (is_closed = 1 OR (opens_at IS NOT NULL AND closes_at IS NOT NULL))
+  updated_by      TEXT
+) STRICT;
+
+-- Un tramo por fila. Horas de Argentina, "HH:MM" o "24:00". Los CHECK de hora
+-- aceptan exactamente lo que parseHHMM sabe leer: "8:00" queda afuera.
+-- PRIMARY KEY (weekday, opens_at) también rechaza dos tramos con la misma
+-- hora de apertura el mismo día.
+CREATE TABLE business_hour_shifts (
+  weekday         INTEGER NOT NULL REFERENCES business_hours(weekday) ON DELETE CASCADE,
+  opens_at        TEXT NOT NULL CHECK (opens_at GLOB '[0-2][0-9]:[0-5][0-9]'
+                    AND (substr(opens_at, 1, 2) <= '23' OR opens_at = '24:00')),
+  closes_at       TEXT NOT NULL CHECK (closes_at GLOB '[0-2][0-9]:[0-5][0-9]'
+                    AND (substr(closes_at, 1, 2) <= '23' OR closes_at = '24:00')),
+  PRIMARY KEY (weekday, opens_at),
+  CHECK (closes_at > opens_at)
 ) STRICT;
 
 -- Feriados y días con horario distinto. Tienen prioridad sobre business_hours.
--- "date IS strftime(...)" exige una fecha real: usa IS y no =, porque strftime
--- devuelve NULL con basura y un CHECK que da NULL pasa.
+-- Un día especial sin tramos está cerrado, aunque el horario semanal diga
+-- que abre — reemplaza al viejo is_closed, que se podía contradecir con las
+-- horas cargadas. "date IS strftime(...)" exige una fecha real: usa IS y no
+-- =, porque strftime devuelve NULL con basura y un CHECK que da NULL pasa.
 CREATE TABLE special_days (
   date            TEXT PRIMARY KEY CHECK (date IS strftime('%Y-%m-%d', date)),
-  is_closed       INTEGER NOT NULL DEFAULT 0 CHECK (is_closed IN (0, 1)),
-  opens_at        TEXT CHECK (opens_at IS NULL OR (opens_at GLOB '[0-2][0-9]:[0-5][0-9]'
-                    AND (substr(opens_at, 1, 2) <= '23' OR opens_at = '24:00'))),
-  closes_at       TEXT CHECK (closes_at IS NULL OR (closes_at GLOB '[0-2][0-9]:[0-5][0-9]'
-                    AND (substr(closes_at, 1, 2) <= '23' OR closes_at = '24:00'))),
   note            TEXT,
   updated_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
-  updated_by      TEXT,
-  CHECK (is_closed = 1 OR (opens_at IS NOT NULL AND closes_at IS NOT NULL))
+  updated_by      TEXT
+) STRICT;
+
+-- Un tramo por fila, igual que business_hour_shifts.
+CREATE TABLE special_day_shifts (
+  date            TEXT NOT NULL REFERENCES special_days(date) ON DELETE CASCADE,
+  opens_at        TEXT NOT NULL CHECK (opens_at GLOB '[0-2][0-9]:[0-5][0-9]'
+                    AND (substr(opens_at, 1, 2) <= '23' OR opens_at = '24:00')),
+  closes_at       TEXT NOT NULL CHECK (closes_at GLOB '[0-2][0-9]:[0-5][0-9]'
+                    AND (substr(closes_at, 1, 2) <= '23' OR closes_at = '24:00')),
+  PRIMARY KEY (date, opens_at),
+  CHECK (closes_at > opens_at)
 ) STRICT;
 
 -- Ajustes sueltos. Claves: hopper_coffee_id, whatsapp_number, menu_url, instagram_url.

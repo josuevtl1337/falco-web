@@ -1,0 +1,44 @@
+---
+import type { Coffee } from "@falco/db";
+import { originDetail, originLabel } from "./origen";
+
+interface Props {
+  coffee: Coffee;
+}
+
+const { coffee } = Astro.props;
+
+// Primera línea: de dónde sale el café. Segunda línea, más chica: cómo es.
+// Las dos se arman en origen.ts, que es también de donde las saca la tarjeta
+// chica del celular: una sola fuente, probada aparte.
+const principal = originLabel(coffee);
+const secundaria = originDetail(coffee);
+---
+
+<div class="origen">
+  <span class="chip chip--fill">Origen</span>
+  <p class="origen__principal">{principal}</p>
+  {secundaria && <p class="origen__secundaria">{secundaria}</p>}
+</div>
+
+<style>
+  .origen {
+    display: grid;
+    gap: var(--space-xs);
+    justify-items: start;
+  }
+
+  .origen__principal {
+    margin: var(--space-xs) 0 0;
+    font-size: var(--text-body);
+  }
+
+  /* Mismo tamaño que la línea principal: el color ya la distingue como
+     secundaria, sin sumar otra combinación de tamaño a la auditoría de la
+     tarea 6. */
+  .origen__secundaria {
+    margin: 0;
+    font-size: var(--text-body);
+    color: var(--color-ceniza);
+  }
+</style>

@@ -78,6 +78,13 @@ M6. **Los productos y precios del seed son genéricos**: el dueño los carga a m
 15. **`settingsSchema` es un objeto todo-o-nada** repartido entre dos pantallas del admin. Partirlo
     por clave o validar por campo.
 
+15c. **`coffees.description` y `coffees.tasting_notes` no se muestran en ningún lado.** El dueño
+    decidió el 2026-09-21 que el pentágono con sus etiquetas alcanza: las notas de cata son jerga
+    para su público, y la descripción quedó afuera al seguir la lámina. Las columnas siguen en la
+    base con contenido cargado, pero **el admin no puede ofrecerlas como si se publicaran**: o no
+    van en el formulario, o van con un aviso de que hoy no se ven. Cargar un texto que no aparece
+    en ningún lado es la peor experiencia posible de un panel.
+
 ## Para el Plan 4 (lanzamiento)
 
 16. **No existe configuración de wrangler en ningún lado.** `wrangler d1 migrations` no tiene a qué

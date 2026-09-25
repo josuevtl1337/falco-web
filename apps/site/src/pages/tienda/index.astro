@@ -1,0 +1,10 @@
+---
+// Los estantes se mudaron a la home, abajo de la primera pantalla: un solo
+// lugar que lista productos, así no hay dos copias que se desincronicen ni dos
+// URLs con el mismo contenido. Esta ruta queda para los enlaces viejos y para
+// el "volver" de las fichas.
+//
+// 302 y no 301: un permanente se queda cacheado en el navegador de la gente y
+// volver atrás sería un problema.
+return Astro.redirect("/#tienda");
+---

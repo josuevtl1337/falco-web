@@ -1,0 +1,167 @@
+---
+import type { TastingProfile } from "@falco/db";
+import {
+  PENTAGON_AXES,
+  PENTAGON_LABELS,
+  pentagonPoints,
+  pentagonPolygon,
+} from "./pentagono";
+
+interface Props {
+  profile: TastingProfile;
+  labels?: boolean;
+}
+
+const { profile, labels = true } = Astro.props;
+
+const MAX_PROFILE: TastingProfile = {
+  acidity: 5,
+  sweetness: 5,
+  body: 5,
+  aroma: 5,
+  finish: 5,
+};
+
+const shape = pentagonPolygon(profile);
+const guide = pentagonPolygon(MAX_PROFILE);
+const half = pentagonPolygon({
+  acidity: 3,
+  sweetness: 3,
+  body: 3,
+  aroma: 3,
+  finish: 3,
+});
+
+// El pentágono se dibuja al aparecer: el perímetro del polígono de valores
+// es el dasharray, y anima el dashoffset de ese mismo largo hasta 0.
+const shapePoints = pentagonPoints(profile);
+const perimeter = shapePoints.reduce((total, point, index) => {
+  const next = shapePoints[(index + 1) % shapePoints.length]!;
+  return total + Math.hypot(next.x - point.x, next.y - point.y);
+}, 0);
+
+const CENTRE = 50;
+// Las etiquetas se apoyan en las mismas cinco posiciones que pentagonPoints
+// calcula para el pentágono completo (el "guide"), estiradas un poco hacia
+// afuera a lo largo de ese mismo rayo: no son coordenadas puestas a ojo,
+// salen de la única fuente de verdad en pentagono.ts.
+const LABEL_PAD = 9;
+
+const axisLabels = pentagonPoints(MAX_PROFILE).map((vertex, index) => {
+  const axis = PENTAGON_AXES[index]!;
+  const dx = vertex.x - CENTRE;
+  const dy = vertex.y - CENTRE;
+  const length = Math.hypot(dx, dy) || 1;
+  const x = vertex.x + (dx / length) * LABEL_PAD;
+  const y = vertex.y + (dy / length) * LABEL_PAD;
+  const anchor = Math.abs(dx) < 5 ? "middle" : dx > 0 ? "start" : "end";
+  const baseline = dy < -5 ? "auto" : dy > 5 ? "hanging" : "middle";
+  return { axis, x, y, anchor, baseline, value: profile[axis] };
+});
+
+// El SVG es una imagen: quien no lo ve necesita el mismo dato en palabras.
+const description = PENTAGON_AXES.map(
+  (axis) => `${PENTAGON_LABELS[axis]} ${profile[axis]} de 5`,
+).join(", ");
+---
+
+<figure class="pentagono">
+  <!-- Sin etiquetas (la tarjeta chica del celular) el lienzo se cierra sobre
+       la figura: el margen de -20/-14 existe solo para que entren las palabras
+       de los cinco ejes, y sin ellas deja la figura diminuta en el medio. -->
+  <svg
+    viewBox={labels ? "-20 -14 140 128" : "15 14 70 67"}
+    role="img"
+    aria-label={description}
+  >
+    <polygon
+      points={guide}
+      fill="none"
+      stroke="var(--color-sombra)"
+      stroke-width="1"></polygon>
+    <polygon
+      points={half}
+      fill="none"
+      stroke="var(--color-sombra)"
+      stroke-width="0.5"></polygon>
+    <polygon
+      points={shape}
+      class="pentagono__forma"
+      fill="var(--color-tostado)"
+      fill-opacity="0.55"
+      stroke="var(--color-brasa)"
+      stroke-width="1.5"
+      stroke-linejoin="round"
+      stroke-dasharray={perimeter.toFixed(2)}
+      stroke-dashoffset={perimeter.toFixed(2)}></polygon>
+    {
+      shapePoints.map((point) => (
+        <circle
+          cx={point.x}
+          cy={point.y}
+          r="3.5"
+          class="pentagono__punto"
+          fill="var(--color-hueso)"
+        />
+      ))
+    }
+    {
+      labels &&
+        axisLabels.map((label, index) => (
+          <text
+            x={label.x}
+            y={label.y}
+            text-anchor={label.anchor}
+            dominant-baseline={label.baseline}
+            class="pentagono__etiqueta"
+            style={`animation-delay:${(1 + index * 0.08).toFixed(2)}s`}
+          >
+            {PENTAGON_LABELS[label.axis].toUpperCase()}{" "}
+            <tspan class="pentagono__valor">{label.value}</tspan>
+          </text>
+        ))
+    }
+  </svg>
+</figure>
+
+<style>
+  .pentagono {
+    margin: 0;
+  }
+
+  .pentagono svg {
+    display: block;
+    width: 100%;
+    max-width: 360px;
+    height: auto;
+    overflow: visible;
+  }
+
+  .pentagono__etiqueta {
+    font-family: var(--font-mono);
+    font-size: var(--text-svg);
+    letter-spacing: 0.05em;
+    fill: var(--color-hueso);
+    opacity: 0;
+    animation: slideInSvg 0.45s var(--ease-persona) both;
+  }
+
+  .pentagono__valor {
+    fill: var(--color-brasa);
+    font-weight: 700;
+  }
+
+  /* Se dibuja al aparecer (stroke-dasharray/dashoffset ya vienen calculados
+     desde el frontmatter) y el relleno sube con un fade corto después. */
+  .pentagono__forma {
+    animation:
+      draw 1s var(--ease-persona) 0.2s both,
+      fillIn 0.4s linear 1.1s both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pentagono__etiqueta {
+      opacity: 1;
+    }
+  }
+</style>

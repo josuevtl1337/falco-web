@@ -1,4 +1,4 @@
-// 20 productos distintos y 2 unidades por producto, sumando todos sus talles.
+// 20 productos distintos y 2 unidades por producto, sumando todas sus moliendas.
 export const ORDER_LIMITS = { maxProducts: 20, maxUnitsPerProduct: 2 } as const;
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -52,7 +52,7 @@ export function addItem(
 ): { order: Order; outcome: AddOutcome } {
   if (order.sentAt) return { order, outcome: "already_sent" };
 
-  // El tope de unidades es del producto: los talles lo comparten.
+  // El tope de unidades es del producto: las moliendas lo comparten.
   if (unitsForProduct(order, key.productId) >= ORDER_LIMITS.maxUnitsPerProduct)
     return { order, outcome: "unit_limit" };
 
@@ -64,7 +64,7 @@ export function addItem(
     return { order: touch(order, now, { items }), outcome: "increased" };
   }
 
-  // Otro talle de un producto que ya está no es un producto nuevo.
+  // Otra molienda de un producto que ya está no es un producto nuevo.
   const isNewProduct = !order.items.some(
     (line) => line.productId === key.productId,
   );
@@ -99,7 +99,7 @@ export function setQty(
   if (!Number.isFinite(qty)) return order;
   const floored = Math.floor(qty);
   if (floored < 1) return removeItem(order, key, now);
-  // Lo que queda del producto después de los otros talles, nunca menos de 1:
+  // Lo que queda del producto después de las otras moliendas, nunca menos de 1:
   // para dejar la línea en cero está removeItem.
   const others = unitsForProduct(order, key.productId) - existing.qty;
   const room = Math.max(ORDER_LIMITS.maxUnitsPerProduct - others, 1);

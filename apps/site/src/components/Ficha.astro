@@ -1,0 +1,228 @@
+---
+import type { ProductWithOptions } from "@falco/db";
+import { formatArs } from "@falco/domain";
+import { NEW_BADGE_STAR } from "./estrella";
+
+interface Props {
+  product: ProductWithOptions;
+  /** El nombre del estante: en la lámina encabeza la ficha, en brasa. */
+  shelfLabel: string;
+  /**
+   * La ficha es de la copia del riel en movimiento: se puede tocar (la mitad
+   * de lo que se ve en pantalla es la copia), pero el tabulador la saltea.
+   */
+  copy?: boolean;
+}
+
+const { product, shelfLabel, copy = false } = Astro.props;
+---
+
+<article class="ficha">
+  <a
+    class="ficha__cara"
+    href={`/tienda/${product.slug}`}
+    tabindex={copy ? -1 : undefined}
+  >
+    {
+      product.isNew && (
+        <span
+          class="ficha__nuevo"
+          style={`clip-path: polygon(${NEW_BADGE_STAR})`}
+        >
+          Nuevo
+        </span>
+      )
+    }
+
+    <!-- El hueco de la foto. Todavía no hay fotos de producto: en la lámina
+         este espacio es un degradado con una luz arriba, que se lee como algo
+         puesto a propósito y no como una imagen rota. -->
+    <span class="ficha__foto" aria-hidden="true"></span>
+
+    <span class="ficha__cuerpo">
+      <span class="ficha__codigo">{shelfLabel}</span>
+      <span class="ficha__nombre">{product.name}</span>
+      <span class="ficha__detalle">{product.detail}</span>
+
+      <span class="ficha__pie">
+        <span><b>{formatArs(product.priceCashArs)}</b> efectivo</span>
+        <span class="ficha__pedir">Pedir ›</span>
+      </span>
+
+      <!-- Los dos precios van los dos en la ficha: Falco cobra distinto según
+           cómo se pague y esconder uno de los dos hasta el detalle haría que
+           el precio de la ficha fuera mentira para quien paga con tarjeta. -->
+      <span class="ficha__tarjeta">
+        {formatArs(product.priceCardArs)} tarjeta{
+          product.askStock && " · consultar stock"
+        }
+      </span>
+    </span>
+  </a>
+</article>
+
+<style>
+  .ficha {
+    position: relative;
+    /* El ancho de la lámina. Fijo a propósito: las fichas viven en un riel
+       horizontal, no en una grilla que las estire. */
+    width: 250px;
+    flex: none;
+  }
+
+  .ficha__cara {
+    display: grid;
+    height: 100%;
+    align-content: start;
+    text-decoration: none;
+    color: var(--color-hueso);
+    background: linear-gradient(168deg, var(--color-piedra), rgb(35, 36, 38));
+    border: 1px solid rgba(232, 226, 208, 0.12);
+  }
+
+  .ficha__foto {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    height: 150px;
+    background: linear-gradient(150deg, #3b2519, rgb(35, 36, 38));
+    border-bottom: 1px solid rgba(232, 226, 208, 0.1);
+  }
+
+  /* La luz que entra desde arriba, como en el resto del sitio. */
+  .ficha__foto::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: -60px;
+    width: 220px;
+    height: 220px;
+    transform: translateX(-50%);
+    background: radial-gradient(
+      closest-side,
+      rgba(242, 196, 139, 0.26),
+      rgba(242, 196, 139, 0) 72%
+    );
+  }
+
+  .ficha__cuerpo {
+    display: grid;
+    gap: 6px;
+    padding: 16px 18px 14px;
+  }
+
+  .ficha__codigo {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-brasa);
+  }
+
+  .ficha__nombre {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-lead);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .ficha__detalle {
+    font-size: 13px;
+    color: var(--color-ceniza);
+  }
+
+  /* El precio entero o nada: "$ 33.000" cortado de "efectivo" en la línea de
+     abajo deja de leerse como un precio, y en una ficha de 206px se corta. Si
+     no entra con el "Pedir", es el "Pedir" el que baja de renglón. */
+  .ficha__pie {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 2px var(--space-sm);
+    margin-top: var(--space-sm);
+    padding-top: 11px;
+    border-top: 1px solid rgba(232, 226, 208, 0.09);
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+
+  .ficha__pie > :first-child {
+    white-space: nowrap;
+  }
+
+  .ficha__pie b {
+    font-weight: 400;
+  }
+
+  .ficha__pedir {
+    /* Pegado a la derecha aunque haya bajado solo a su propio renglón. */
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-ceniza);
+  }
+
+  .ficha__tarjeta {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--color-ceniza);
+  }
+
+  /* El sello de "Nuevo": una estrella de hueso de doce puntas, inclinada, que
+     se balancea. La forma la recorta el clip-path que arma estrella.ts. Sale
+     de la caja por arriba y a la derecha, por eso el riel le deja aire
+     arriba. Un poco más grande que la caja de la lámina porque el recorte se
+     come las esquinas: la palabra tiene que seguir entrando. */
+  .ficha__nuevo {
+    position: absolute;
+    right: -18px;
+    top: -24px;
+    z-index: 5;
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 76px;
+    background: var(--color-hueso);
+    color: var(--color-carbon);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+    transform: rotate(12deg);
+    animation: wobble 2.4s ease-in-out infinite;
+  }
+
+  .ficha__cara:focus-visible {
+    outline: 2px solid var(--color-brasa);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 640px) {
+    .ficha {
+      width: 206px;
+    }
+
+    .ficha__foto {
+      height: 112px;
+    }
+
+    .ficha__nombre {
+      font-size: 17px;
+    }
+
+    .ficha__detalle {
+      font-size: 11.5px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ficha__nuevo {
+      animation: none;
+    }
+  }
+</style>

@@ -4,10 +4,15 @@ export type CatalogProduct = {
   id: number;
   name: string;
   detail: string;
-  priceArs: number;
+  priceCardArs: number;
+  priceCashArs: number;
   options?: readonly { id: number; label: string }[];
 };
 export type Catalog = ReadonlyMap<number, CatalogProduct>;
+
+// Falco cobra distinto según cómo se pague: el efectivo/transferencia y la
+// tarjeta nunca son el mismo número, así que no hay un "total" único.
+export type OrderTotals = { cash: number; card: number };
 
 const CLOSING_QUESTION =
   "¿Me confirman si hay stock y desde qué hora lo puedo retirar?";
@@ -18,15 +23,21 @@ export function formatArs(amount: number): string {
   return `$ ${safe.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
 }
 
-export function orderTotal(order: Order, catalog: Catalog): number {
-  return order.items.reduce(
-    (total, line) =>
-      total + (catalog.get(line.productId)?.priceArs ?? 0) * line.qty,
-    0,
+export function orderTotal(order: Order, catalog: Catalog): OrderTotals {
+  return order.items.reduce<OrderTotals>(
+    (totals, line) => {
+      const product = catalog.get(line.productId);
+      if (!product) return totals;
+      return {
+        cash: totals.cash + product.priceCashArs * line.qty,
+        card: totals.card + product.priceCardArs * line.qty,
+      };
+    },
+    { cash: 0, card: 0 },
   );
 }
 
-type UsableLine = { text: string; amount: number };
+type UsableLine = { text: string; cashAmount: number; cardAmount: number };
 
 function usableLine(line: OrderLine, catalog: Catalog): UsableLine | undefined {
   const product = catalog.get(line.productId);
@@ -36,16 +47,16 @@ function usableLine(line: OrderLine, catalog: Catalog): UsableLine | undefined {
       ? undefined
       : product.options?.find((o) => o.id === line.optionId);
   // Si la opción que eligió la persona ya no está, se va la línea entera: el
-  // mensaje nunca puede cobrar un café sin decir si va en grano o molido, ni
-  // una remera sin decir de qué talle es.
+  // mensaje nunca puede cobrar un café sin decir si va en grano o molido.
   if (line.optionId !== undefined && !option) return undefined;
   const parts = [`${line.qty} × ${product.name}`, product.detail];
-  // La etiqueta se escribe entera en el admin ("Molido", "Talle M"), así que
-  // el mensaje la imprime tal cual: cada producto nombra su opción a su manera.
+  // La etiqueta se escribe entera en el admin ("Molido"), así que el mensaje
+  // la imprime tal cual: cada producto nombra su opción a su manera.
   if (option) parts.push(option.label);
   return {
     text: `• ${parts.join(" · ")}`,
-    amount: product.priceArs * line.qty,
+    cashAmount: product.priceCashArs * line.qty,
+    cardAmount: product.priceCardArs * line.qty,
   };
 }
 
@@ -70,7 +81,8 @@ export function buildOrderMessage(
     ? `¡Buenas! Soy ${name} y quiero hacer este pedido (${order.code}):`
     : `¡Buenas! Quiero hacer este pedido (${order.code}):`;
 
-  const total = lines.reduce((sum, line) => sum + line.amount, 0);
+  const cashTotal = lines.reduce((sum, line) => sum + line.cashAmount, 0);
+  const cardTotal = lines.reduce((sum, line) => sum + line.cardAmount, 0);
   const note = order.note?.trim();
 
   return [
@@ -78,7 +90,7 @@ export function buildOrderMessage(
     "",
     ...lines.map((line) => line.text),
     "",
-    `Total estimado: ${formatArs(total)}`,
+    `Total estimado: ${formatArs(cashTotal)} en efectivo o transferencia · ${formatArs(cardTotal)} con tarjeta`,
     "Lo retiraría en el local cuando me confirmen.",
     ...(note ? [`Comentario: ${endWithPunctuation(note)}`] : []),
     "",

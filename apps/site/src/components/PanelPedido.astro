@@ -1,0 +1,35 @@
+---
+import PedidoCuerpo from "./PedidoCuerpo.astro";
+---
+
+<!--
+  El pedido, como panel sobre la tienda.
+
+  Misma idea que el detalle del producto: en escritorio sobra espacio y sacar a
+  la persona de la tienda para mostrarle tres renglones no tiene sentido. En
+  pantalla angosta sube como hoja, igual que el resto.
+
+  La barra sigue siendo un enlace de verdad a /pedido, y esa página existe: el
+  panel es la mejora, no el único camino.
+-->
+<dialog class="panel-detalle panel-pedido" id="panel-pedido" data-panel-ruta="/pedido" aria-label="Tu pedido">
+  <div class="panel-detalle__barra">
+    <span class="panel-detalle__tirador" aria-hidden="true"></span>
+    <form method="dialog">
+      <button class="panel-detalle__x" type="submit" aria-label="Cerrar">✕</button>
+    </form>
+  </div>
+
+  <PedidoCuerpo
+    titleTag="h2"
+    volver={{ href: "/#tienda", texto: "Seguir mirando" }}
+  />
+</dialog>
+
+<style>
+  /* El pedido necesita más ancho que la ficha de un producto: hay renglones
+     con nombre, cantidad y precio en la misma línea. */
+  .panel-pedido {
+    width: min(620px, 100%);
+  }
+</style>

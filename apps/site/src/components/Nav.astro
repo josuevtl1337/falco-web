@@ -1,0 +1,452 @@
+---
+const links = [
+  { href: "/#tienda", label: "La tienda" },
+  { href: "/#donde-estamos", label: "Dónde estamos" },
+  {
+    href: "https://www.instagram.com/falco.cafe/",
+    label: "@falco.cafe",
+    boxed: true,
+  },
+];
+
+// El menú del celular suma "Inicio", que en la barra no hace falta porque el
+// logo ya lleva ahí. Los números son los de la lámina: ordenan la lectura y
+// dicen cuántas opciones hay, que son cuatro y nada más.
+const menuLinks = [
+  { href: "/", label: "Inicio", index: "01" },
+  { href: "/#tienda", label: "Tienda", index: "02" },
+  { href: "/#donde-estamos", label: "Dónde", index: "03" },
+  {
+    href: "https://www.instagram.com/falco.cafe/",
+    label: "@falco.cafe",
+    index: "↗",
+  },
+];
+
+const path = Astro.url.pathname;
+---
+
+<nav class="nav" aria-label="Principal">
+  <a class="nav__logo" href="/" aria-label="Falco, ir al inicio">
+    <!-- 150 × 61 mantiene la proporción 2,48:1 del logo y evita que la página
+         salte mientras carga. -->
+    <img src="/logo-falco.svg" alt="" width="150" height="61" />
+  </a>
+
+  <ul>
+    {
+      links.map((link) => (
+        <li>
+          <a
+            href={link.href}
+            class={link.boxed ? "nav__caja" : "nav__seccion"}
+            data-seccion={link.boxed ? undefined : link.href}
+          >
+            {link.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <button class="nav__burger" type="button" data-menu-abrir aria-haspopup="dialog">
+    <span>Menú</span>
+  </button>
+</nav>
+
+<!--
+  El menú va en un <dialog> nativo y se abre con showModal(): el navegador se
+  encarga del fondo, de atrapar el foco adentro, de cerrar con Escape y de
+  dejar inerte el resto de la página. Escribir eso a mano es donde se cuelan
+  los bugs de accesibilidad, y además nos ahorra una isla que se puede no
+  hidratar.
+-->
+<dialog class="menu" id="menu-movil" aria-label="Menú">
+  <div class="menu__losa" aria-hidden="true"></div>
+  <div class="menu__puntos" aria-hidden="true"></div>
+
+  <div class="menu__barra">
+    <img
+      class="menu__logo"
+      src="/logo-falco.svg"
+      alt=""
+      width="150"
+      height="61"
+    />
+    <!-- method="dialog" cierra sin una línea de JavaScript. -->
+    <form method="dialog">
+      <button class="nav__burger" type="submit"><span>Cerrar</span></button>
+    </form>
+  </div>
+
+  <ul class="menu__lista">
+    {
+      menuLinks.map((link) => (
+        <li>
+          <a
+            href={link.href}
+            class={path === link.href ? "menu__activo" : undefined}
+            aria-current={path === link.href ? "page" : undefined}
+            data-seccion={link.index === "↗" ? undefined : link.href}
+          >
+            <small aria-hidden="true">{link.index}</small>
+            {link.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</dialog>
+
+<script>
+  import { conectarDialogo } from "../scripts/dialogo";
+
+  const menu = document.querySelector<HTMLDialogElement>("#menu-movil");
+
+  conectarDialogo(menu, document.querySelector<HTMLElement>("[data-menu-abrir]"));
+
+  // Una opción que lleva a una sección de esta misma página cierra el menú
+  // antes de ir: si no, el scroll pasa por detrás de un modal abierto y quedás
+  // mirando el menú sobre una página que ya se movió.
+  menu?.addEventListener("click", (evento) => {
+    const enlace =
+      evento.target instanceof Element
+        ? evento.target.closest<HTMLAnchorElement>("a[href*='#']")
+        : null;
+    if (!enlace) return;
+
+    const destino = new URL(enlace.href, location.href);
+    if (destino.pathname === location.pathname && destino.hash) menu.close();
+  });
+
+  import { conectarSeccionActiva } from "../scripts/seccion-activa";
+
+  conectarSeccionActiva();
+</script>
+
+<style>
+  /*
+   * La barra queda arriba mientras se scrollea: desde la tienda se tiene que
+   * poder volver al inicio sin subir a mano.
+   *
+   * Va con `sticky` y no con `fixed` porque sticky sigue ocupando su lugar en
+   * el flujo: así la home puede medir "una ventana menos la barra" sin que
+   * nada se superponga. El alto sale del token, que es quien manda.
+   */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    box-sizing: border-box;
+    height: var(--alto-nav);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding-inline: var(--space-lg);
+    background: var(--color-carbon);
+  }
+
+  .nav__logo {
+    display: inline-flex;
+    min-width: 0;
+  }
+
+  .nav__logo img {
+    display: block;
+    width: 118px;
+    height: auto;
+  }
+
+  .nav ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    /* 40px entre opciones, medido en la lámina. */
+    gap: var(--space-xl);
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-min);
+    font-family: var(--font-mono);
+    /* Medido en la lámina (persona/wireframes.html, 01 · Home): 10px,
+       1,8px de espaciado entre letras (0,18em a ese tamaño) y ceniza,
+       que sobre carbón da 5,21:1 y pasa AA. */
+    font-size: var(--text-nano);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--color-ceniza);
+  }
+
+  /*
+   * La opción activa, como en la lámina (.nav nav a.on): una placa tostada
+   * inclinada con sombra dura de hueso, detrás del texto, que se despliega de
+   * izquierda a derecha. La activa es la sección que estás mirando
+   * (scripts/seccion-activa.ts); al pasar el mouse se prende igual.
+   */
+  .nav__seccion {
+    position: relative;
+    z-index: 0;
+    transition: color 0.28s var(--ease-persona);
+  }
+
+  .nav__seccion::before {
+    content: "";
+    position: absolute;
+    inset: 8px -14px;
+    z-index: -1;
+    background: var(--color-tostado);
+    box-shadow: 4px 4px 0 var(--color-hueso);
+    transform: skewX(-16deg) scaleX(0);
+    transform-origin: left;
+    transition: transform 0.28s var(--ease-persona);
+  }
+
+  .nav a.nav__seccion:hover,
+  .nav a.nav__seccion[aria-current] {
+    color: var(--color-hueso);
+  }
+
+  .nav__seccion:hover::before,
+  .nav__seccion[aria-current]::before {
+    transform: skewX(-16deg) scaleX(1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav__seccion,
+    .nav__seccion::before {
+      transition: none;
+    }
+  }
+
+  .nav__caja {
+    border: 1px solid var(--color-tostado);
+    padding-inline: var(--space-md);
+  }
+
+  /* Selector más específico que ".nav a" a propósito: si no, la regla de
+     arriba (que baja el menú a ceniza) le gana por especificidad y la caja
+     con borde se queda sin su hueso. La caja con borde mantiene hueso: en
+     la lámina es la única opción del menú que no baja a ceniza (es un
+     enlace externo, no una sección). */
+  .nav a.nav__caja {
+    color: var(--color-hueso);
+  }
+
+  /* El botón del menú: cartel inclinado con el texto derecho, igual que los
+     chips. Medido en la lámina: 46 × 46, skew de 12°, hueso sobre carbón. */
+  .nav__burger {
+    display: none;
+    /* Ancho mínimo, no fijo: "Cerrar" es más largo que "Menú" y a 46px se
+       salía de la caja. El mínimo mantiene el área táctil. */
+    min-width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    border: 0;
+    padding-inline: var(--space-sm);
+    cursor: pointer;
+    background: var(--color-hueso);
+    color: var(--color-carbon);
+    font-family: var(--font-mono);
+    font-size: var(--text-nano);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transform: skewX(-12deg);
+  }
+
+  .nav__burger span {
+    display: block;
+    transform: skewX(12deg);
+  }
+
+  /* El menú comparte el margen lateral del contenido: desde 900px la home
+     abre a --space-xxl (index.astro) y la barra tiene que abrir con ella,
+     o el logo y las opciones quedan fuera de la columna del texto. */
+  @media (min-width: 900px) {
+    .nav {
+      padding-inline: var(--space-xxl);
+    }
+  }
+
+  /* En el celular la barra es el logo y el botón: las tres opciones sueltas
+     no entraban sin encogerlas hasta volverlas ilegibles. El alto ya lo bajó
+     el token --alto-nav. */
+  @media (max-width: 640px) {
+    .nav {
+      gap: var(--space-sm);
+      padding-inline: var(--space-md);
+    }
+
+    .nav > ul {
+      display: none;
+    }
+
+    .nav__burger {
+      display: block;
+    }
+
+    .nav__logo img {
+      width: 84px;
+    }
+  }
+
+  /*
+   * La pantalla del menú.
+   */
+  .menu {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    background: var(--color-carbon);
+    color: var(--color-hueso);
+  }
+
+  .menu::backdrop {
+    background: rgba(12, 12, 13, 0.62);
+  }
+
+  .menu[open] {
+    animation: rise 0.35s var(--ease-persona) both;
+  }
+
+  /* La franja tostada cruzada por detrás, y la trama de puntos encima: las dos
+     son el fondo del menú en la lámina, medidas ahí. */
+  .menu__losa {
+    position: absolute;
+    left: -30%;
+    right: -30%;
+    top: 38%;
+    height: 36%;
+    background: var(--color-tostado);
+    rotate: -18deg;
+  }
+
+  .menu__puntos {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        circle,
+        rgba(232, 226, 208, 0.12) 1.2px,
+        transparent 1.6px
+      )
+      0 0 / 8px 8px;
+  }
+
+  .menu__barra {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .menu__logo {
+    display: block;
+    width: 84px;
+    height: auto;
+  }
+
+  .menu__barra .nav__burger {
+    display: block;
+  }
+
+  .menu__lista {
+    position: relative;
+    z-index: 2;
+    list-style: none;
+    display: grid;
+    gap: var(--space-lg);
+    justify-items: start;
+    margin: var(--space-xl) 0 0;
+    padding-inline: var(--space-lg) var(--space-md);
+  }
+
+  .menu__lista a {
+    position: relative;
+    z-index: 0;
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+    padding: 4px 14px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(38px, 13vw, 54px);
+    line-height: 1;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--color-hueso);
+    rotate: -8deg;
+    animation: slideIn 0.5s var(--ease-persona) both;
+  }
+
+  .menu__lista small {
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    color: var(--color-brasa);
+  }
+
+  /* El escalonado de la lámina: cada opción entra un poco más tarde y con un
+     margen distinto, para que no lean como una lista prolija. */
+  .menu__lista li:nth-child(2) a {
+    margin-left: var(--space-lg);
+    animation-delay: 0.07s;
+  }
+
+  .menu__lista li:nth-child(3) a {
+    margin-left: var(--space-sm);
+    animation-delay: 0.14s;
+  }
+
+  .menu__lista li:nth-child(4) a {
+    margin-left: 30px;
+    font-size: clamp(22px, 8vw, 30px);
+    animation-delay: 0.21s;
+  }
+
+  /* La opción donde estás parado queda en negativo: cartel hueso con el texto
+     en carbón, que da 11,10:1.
+
+     El selector lleva el ".menu__lista" adelante por especificidad: con
+     ".menu__activo" solo, la regla de arriba (".menu__lista a", que pesa más)
+     le gana y el texto se queda en hueso... sobre un cartel hueso. Invisible.
+     Es el mismo motivo por el que ".nav a.nav__caja" está escrito así. */
+  .menu__lista a.menu__activo {
+    color: var(--color-carbon);
+  }
+
+  .menu__activo::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--color-hueso);
+    transform: skewX(-14deg);
+    box-shadow: 6px 6px 0 var(--color-sombra);
+  }
+
+  .menu__activo small {
+    color: var(--color-tostado);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .menu[open],
+    .menu__lista a {
+      animation: none;
+    }
+  }
+</style>

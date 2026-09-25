@@ -1,0 +1,161 @@
+---
+import { WEEKDAY_LABELS, type DayMoment } from "./fecha";
+
+interface Props {
+  /** 0 = domingo … 6 = sábado, igual que toArgentina().weekday. */
+  weekday: number;
+  day: number;
+  month: number;
+  moment: DayMoment;
+  /** El día de ayer: un detalle de la lámina (el número anterior sale
+   * volando cuando entra el de hoy), no un dato que venga de la base. */
+  previousDay: number;
+}
+
+const { weekday, day, month, moment, previousDay } = Astro.props;
+---
+
+<div class="fecha">
+  <p class="fecha__numero">
+    <span class="fecha__dd">
+      <strong class="fecha__dia fecha__dia--old" aria-hidden="true"
+        >{previousDay}</strong
+      >
+      <strong class="fecha__dia fecha__dia--new">{day}</strong>
+    </span>
+    <span class="fecha__mes">/{month}</span>
+  </p>
+  <div class="fecha__semana">
+    <span class="chip chip--fill chip--shadow fecha__chip">{WEEKDAY_LABELS[weekday]}</span>
+    <span class="fecha__momento">{moment}</span>
+  </div>
+</div>
+
+<style>
+  .fecha {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 2px var(--space-md);
+    align-items: end;
+  }
+
+  .fecha__numero {
+    grid-row: 1 / span 2;
+    position: relative;
+    isolation: isolate;
+    margin: 0;
+    display: flex;
+    align-items: flex-end;
+    font-family: var(--font-display);
+    line-height: 1;
+  }
+
+  /* La franja que barre detrás del número al entrar: medida en la lámina. */
+  .fecha__numero::before {
+    content: "";
+    position: absolute;
+    left: -12%;
+    right: -18%;
+    top: 16%;
+    height: 64%;
+    z-index: -1;
+    background: var(--color-tostado);
+    transform: skewX(-18deg) scaleX(0);
+    transform-origin: left center;
+    animation: sweep 0.62s cubic-bezier(0.7, 0, 0.3, 1) 0.1s both;
+  }
+
+  .fecha__dd {
+    position: relative;
+    display: inline-grid;
+  }
+
+  .fecha__dia {
+    grid-area: 1 / 1;
+    font-size: var(--text-dia);
+    font-weight: 800;
+    line-height: 1;
+    /* La sombra dura, sin desenfoque, es lo que le da volumen al número:
+       medida en la lámina como tostado a 4px. */
+    text-shadow: 4px 4px 0 var(--color-tostado);
+  }
+
+  .fecha__dia--old {
+    animation: dateOut 0.38s cubic-bezier(0.6, 0, 0.8, 0.4) 0.18s both;
+  }
+
+  .fecha__dia--new {
+    animation: dateIn 0.6s var(--ease-persona) 0.46s both;
+  }
+
+  .fecha__mes {
+    margin-left: 2px;
+    /* En la lámina el mes es la misma familia del número, no monoespaciada. */
+    font-family: var(--font-display);
+    font-size: var(--text-diaMes);
+    font-weight: 800;
+    line-height: 1;
+    color: var(--color-ceniza);
+    animation: slideIn 0.45s var(--ease-persona) 0.7s both;
+  }
+
+  .fecha__semana {
+    display: grid;
+    gap: var(--space-xs);
+    justify-items: start;
+  }
+
+  /* Medido en la lámina (marco "Celular · 390"): el día va a 50px y el mes a
+     26,5px, no a los 72/38 de escritorio. El tope es ese valor y el factor en
+     dvh lo achica solo en un teléfono más corto que 844. */
+  @media (max-width: 640px) {
+    .fecha__dia {
+      font-size: min(50px, 5.9dvh);
+      text-shadow: 3px 3px 0 var(--color-tostado);
+    }
+
+    .fecha__mes {
+      font-size: min(26.5px, 3.1dvh);
+    }
+
+    /* La columna de la fecha tiene un ancho mínimo para que el cartel del día
+       no quede pegado al "/9". En la lámina esa columna mide 118px y el
+       cartel arranca a 150px del borde; con columnas al contenido, el cartel
+       se venía 60px a la izquierda y los dos bloques se leían como uno solo. */
+    .fecha {
+      grid-template-columns: minmax(118px, auto) auto;
+      column-gap: 14px;
+    }
+  }
+
+  /* El chip del día va en la tipografía de títulos, no en la monoespaciada. */
+  .fecha__chip {
+    font-family: var(--font-display);
+    font-size: var(--text-small);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    animation: chipIn 0.45s var(--ease-persona) 0.82s both;
+  }
+
+  .fecha__chip::before {
+    animation: plateIn 0.45s var(--ease-persona) 0.82s both;
+  }
+
+  @keyframes chipIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .fecha__momento {
+    font-family: var(--font-mono);
+    font-size: var(--text-nano);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ceniza);
+    animation: slideIn 0.45s var(--ease-persona) 0.94s both;
+  }
+</style>

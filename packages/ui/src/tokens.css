@@ -16,9 +16,37 @@
   --ease-persona: cubic-bezier(0.2, 1.2, 0.4, 1);
   --ease-ambient: cubic-bezier(0.16, 1, 0.3, 1);
 
-  --font-display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
   --font-body: "Instrument Sans", system-ui, sans-serif;
   --font-mono: "Martian Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-xxl: 72px;
+  --text-nano: 10px;
+  --text-micro: 12px;
+  --text-small: 14px;
+  --text-body: 16px;
+  --text-lead: 20px;
+  --text-title: 28px;
+  --text-display: 44px;
+  --text-dia: 72px;
+  --text-diaMes: 38px;
+  --text-hero: clamp(56px, 9vw, 112px);
+  /* Unidades del lienzo del pentágono (viewBox chico), no píxeles de
+     página: no es comparable al resto de la escala, pero tiene que vivir
+     acá igual para que ningún tamaño quede suelto (tarea 6). */
+  --text-svg: 5px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --duration-quick: 120ms;
+  --duration-base: 240ms;
+  --duration-slow: 520ms;
+  --touch-min: 44px;
 
   color-scheme: dark;
 }

@@ -17,7 +17,8 @@ const CATALOG: Catalog = new Map([
       id: 1,
       name: "Huila · Colombia",
       detail: "250 g",
-      priceArs: 12000,
+      priceCardArs: 13000,
+      priceCashArs: 12000,
       options: [
         { id: 11, label: "En grano" },
         { id: 12, label: "Molido" },
@@ -26,16 +27,12 @@ const CATALOG: Catalog = new Map([
   ],
   [
     2,
-    { id: 2, name: "Filtros V60 · 02", detail: "Caja de 100", priceArs: 6500 },
-  ],
-  [
-    3,
     {
-      id: 3,
-      name: "Remera Falco",
-      detail: "Algodón",
-      priceArs: 16000,
-      options: [{ id: 31, label: "Talle M" }],
+      id: 2,
+      name: "Filtros V60 · 2",
+      detail: "Caja de 100",
+      priceCardArs: 28000,
+      priceCashArs: 26000,
     },
   ],
 ]);
@@ -45,7 +42,6 @@ function sampleOrder(): Order {
   order = addItem(order, { productId: 1, optionId: 12 }, T0).order;
   order = addItem(order, { productId: 2 }, T0).order;
   order = addItem(order, { productId: 2 }, T0).order;
-  order = addItem(order, { productId: 3, optionId: 31 }, T0).order;
   return order;
 }
 
@@ -65,8 +61,11 @@ describe("formatArs", () => {
 });
 
 describe("orderTotal", () => {
-  it("suma precio por cantidad", () => {
-    expect(orderTotal(sampleOrder(), CATALOG)).toBe(41000);
+  it("suma el efectivo y la tarjeta por separado, con cantidades mayores a 1", () => {
+    expect(orderTotal(sampleOrder(), CATALOG)).toEqual({
+      cash: 64000,
+      card: 69000,
+    });
   });
 });
 
@@ -82,10 +81,9 @@ describe("buildOrderMessage", () => {
         "¡Buenas! Soy Sofía y quiero hacer este pedido (F-7K2Q):",
         "",
         "• 1 × Huila · Colombia · 250 g · Molido",
-        "• 2 × Filtros V60 · 02 · Caja de 100",
-        "• 1 × Remera Falco · Algodón · Talle M",
+        "• 2 × Filtros V60 · 2 · Caja de 100",
         "",
-        "Total estimado: $ 41.000",
+        "Total estimado: $ 64.000 en efectivo o transferencia · $ 69.000 con tarjeta",
         "Lo retiraría en el local cuando me confirmen.",
         "Comentario: Paso a la tarde.",
         "",
@@ -116,13 +114,17 @@ describe("buildOrderMessage", () => {
   });
 
   it("si la opción elegida ya no está, saca la línea entera", () => {
+    // Dos líneas del mismo café: una con una molienda válida, otra con una
+    // molienda que ya no existe en el catálogo. Solo la primera se cobra.
     let order = createOrder("F-7K2Q", T0);
     order = addItem(order, { productId: 1, optionId: 11 }, T0).order;
-    order = addItem(order, { productId: 3, optionId: 99 }, T0).order;
+    order = addItem(order, { productId: 1, optionId: 99 }, T0).order;
     const message = buildOrderMessage(order, CATALOG);
-    expect(message).not.toContain("Remera");
+    expect(message?.match(/^•/gm)).toHaveLength(1);
     expect(message).toContain("• 1 × Huila · Colombia · 250 g · En grano");
-    expect(message).toContain("Total estimado: $ 12.000");
+    expect(message).toContain(
+      "Total estimado: $ 12.000 en efectivo o transferencia · $ 13.000 con tarjeta",
+    );
   });
 
   it("un pedido sin líneas no arma mensaje", () => {

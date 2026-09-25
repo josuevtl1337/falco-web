@@ -1,0 +1,117 @@
+---
+interface Props {
+  instagramUrl: string | undefined;
+  whatsapp: string | undefined;
+}
+
+const { instagramUrl, whatsapp } = Astro.props;
+
+const year = new Date().getFullYear();
+const links = [
+  { href: "/#tienda", label: "La tienda" },
+  { href: "/carta", label: "La carta", external: true },
+  instagramUrl && { href: instagramUrl, label: "Instagram", external: true },
+  whatsapp && {
+    href: `https://wa.me/${whatsapp}`,
+    label: "WhatsApp",
+    external: true,
+  },
+].filter((link): link is { href: string; label: string; external?: boolean } =>
+  Boolean(link),
+);
+---
+
+<!--
+  El pie de la lámina: el logo a la izquierda, los enlaces a la derecha y una
+  línea abajo. Sólo en escritorio: en el celular la última sección ocupa la
+  pantalla entera y un pie abajo obligaría a scrollear para nada.
+-->
+<footer class="pie">
+  <a class="pie__logo" href="/" aria-label="Falco, ir al inicio">
+    <img src="/logo-falco.svg" alt="" width="150" height="61" />
+  </a>
+  <nav aria-label="Pie">
+    <ul>
+      {
+        links.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              target={link.external ? "_blank" : undefined}
+              rel={link.external ? "noopener" : undefined}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+      <li><small>© {year}</small></li>
+    </ul>
+  </nav>
+</footer>
+
+<style>
+  .pie {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: var(--space-lg);
+    margin: 0 var(--space-xxl) 26px;
+    padding-bottom: 26px;
+    border-bottom: 1px solid rgba(232, 226, 208, 0.09);
+  }
+
+  .pie__logo {
+    display: inline-flex;
+  }
+
+  .pie__logo img {
+    display: block;
+    width: 104px;
+    height: auto;
+  }
+
+  ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 34px;
+    margin: 0;
+    padding: 0;
+  }
+
+  a,
+  small {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: var(--text-nano);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--color-ceniza);
+  }
+
+  a:hover {
+    color: var(--color-hueso);
+  }
+
+  /* En un portátil bajo el pie se achica para entrar con la sección. */
+  @media (max-height: 760px) {
+    .pie {
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+    }
+
+    .pie__logo img {
+      width: 84px;
+    }
+  }
+
+  @media (max-width: 899px) {
+    .pie {
+      display: none;
+    }
+  }
+</style>

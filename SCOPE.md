@@ -9,7 +9,7 @@ Detalle técnico completo: docs/superpowers/specs/2026-09-18-falco-web-design.md
 
 ## 1. Qué entra (fase 1)
 
-Sitio público (falco.cafe)
+Sitio público (falcocafe.com.ar)
 
 - Home: calendario del día + "Abierto ahora", título, misión, café en tolva
   (origen, tostadero, pentágono de cata, foto del E65S).
@@ -22,7 +22,7 @@ Sitio público (falco.cafe)
 - /carta: redirección 302 al PDF de Google Drive (link editable desde el admin).
 - 404.
 
-Admin (admin.falco.cafe)
+Admin (admin.falcocafe.com.ar)
 
 - Login con Cloudflare Access (código por mail, lista de mails permitidos).
 - Tolva: elegir qué café está en tolva.
@@ -149,11 +149,11 @@ Nunca se envía el nombre ni el comentario del pedido.
 - [ ] Horarios reales y feriados
 - [ ] Link del PDF de la carta en Drive
 - [ ] Confirmar: el café se vende solo en grano
-- [ ] Confirmar que falco.cafe está disponible (si no, elegir otro dominio)
+- [ ] Confirmar que falcocafe.com.ar está comprado (si no, elegir otro dominio)
 
 ## 9. Terminado cuando
 
-- [ ] falco.cafe muestra todas las secciones con datos reales de la base.
+- [ ] falcocafe.com.ar muestra todas las secciones con datos reales de la base.
 - [ ] Un cambio en el admin (tolva, producto, horario) se ve en el sitio en menos de 1 minuto.
 - [ ] Se puede armar un pedido y llega a WhatsApp con el mensaje exacto.
 - [ ] "Abierto ahora" es correcto con la hora de Argentina, incluidos feriados.

@@ -1,0 +1,42 @@
+---
+import { getSettings, listShelf, type ReadableDb } from "@falco/db";
+import { CATALOG_SCRIPT_ID } from "../scripts/catalogo";
+
+interface Props {
+  db: ReadableDb;
+}
+
+const { db } = Astro.props;
+
+const [settings, coffee, kits] = await Promise.all([
+  getSettings(db),
+  listShelf(db, "coffee"),
+  listShelf(db, "kits"),
+]);
+
+// El pedido guarda ids y cantidades, nunca nombres ni precios: para dibujarlo
+// hay que cruzarlo contra el catálogo de verdad, que viaja acá. Van sólo los
+// campos que la pantalla usa, no la fila entera de la base.
+const catalogo = {
+  products: [...coffee, ...kits].map((product) => ({
+    id: product.id,
+    name: product.name,
+    detail: product.detail,
+    priceCashArs: product.priceCashArs,
+    priceCardArs: product.priceCardArs,
+    options: product.options.map((option) => ({
+      id: option.id,
+      label: option.label,
+      isAvailable: option.isAvailable,
+    })),
+  })),
+  whatsapp: settings.whatsapp_number,
+};
+---
+
+<script
+  id={CATALOG_SCRIPT_ID}
+  type="application/json"
+  set:html={JSON.stringify(catalogo)}
+  is:inline
+/>

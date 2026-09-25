@@ -1,0 +1,106 @@
+---
+
+---
+
+<div class="dialogo">
+  <span class="chip chip--fill chip--shadow dialogo__etiqueta">Falco</span>
+  <div class="dialogo__caja">
+    <slot />
+    <span class="dialogo__flecha" aria-hidden="true">▼</span>
+  </div>
+</div>
+
+<style>
+  /*
+   * La caja se inclina con skewX (medido en la lámina: -6°) y el texto de
+   * adentro se contra-inclina para quedar derecho — el mismo idioma que el
+   * chip, no un `rotate` sobre todo el bloque, que arrastraría el párrafo.
+   * La etiqueta "Falco" es la excepción: en la lámina gira entera (-5°,
+   * matrix(0.996195, -0.0871557, …)), sin skew, porque el texto es corto y
+   * girarlo entero no lo vuelve ilegible.
+   */
+  .dialogo {
+    position: relative;
+    padding-top: var(--space-md);
+    max-width: 46ch;
+    animation: rise 1s var(--ease-ambient) 0.85s both;
+  }
+
+  .dialogo__etiqueta {
+    position: absolute;
+    left: var(--space-md);
+    top: 0;
+    z-index: 1;
+    transform: rotate(-5deg);
+  }
+
+  /* Cancela el skew que .chip::before le da al resto de los chips: acá la
+     etiqueta entera rota, no se corta en diagonal. */
+  .dialogo__etiqueta::before {
+    transform: none;
+  }
+
+  /*
+   * Dos capas, en este orden exacto (medido en la lámina):
+   *
+   *   1. la caja: fondo sombra con un borde de 2px de hueso;
+   *   2. un relleno tostado del mismo tamaño, corrido 9px abajo y a la
+   *      derecha, por detrás del texto.
+   *
+   * El skew de la caja crea un contexto de apilado, así que el ::before con
+   * z-index -1 se pinta ENCIMA del fondo de la caja y debajo del texto: el
+   * marrón tapa casi todo y deja asomar, arriba y a la izquierda, una franja
+   * de 9px del fondo oscuro dentro del borde de hueso.
+   *
+   * Lo teníamos invertido -el marrón como fondo y el marco corrido por
+   * detrás-, y por eso el borde asomaba abajo a la derecha.
+   */
+  .dialogo__caja {
+    position: relative;
+    padding: var(--space-lg) var(--space-xl) var(--space-lg) var(--space-lg);
+    background: var(--color-sombra);
+    border: 2px solid var(--color-hueso);
+    transform: skewX(-6deg);
+  }
+
+  .dialogo__caja::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    translate: 9px 9px;
+    background: var(--color-tostado);
+    z-index: -1;
+  }
+
+  .dialogo__caja :global(p) {
+    margin: 0;
+    color: var(--color-hueso);
+    font-size: var(--text-lead);
+    transform: skewX(6deg);
+  }
+
+  /* Sin tamaño propio (hereda var(--text-body) del documento): un tamaño
+     menos en la auditoría tipográfica de la tarea 6, y la flecha es chica
+     de por sí. */
+  .dialogo__flecha {
+    position: absolute;
+    right: var(--space-md);
+    bottom: var(--space-sm);
+    color: var(--color-hueso);
+    animation: nudge 1s ease-in-out infinite;
+  }
+
+  /* En el celular la home entra en una sola pantalla, así que el aire y el
+     cuerpo de la cita se miden contra el alto de la ventana: en un teléfono
+     corto se achican solos en vez de empujar la tarjeta fuera de vista. */
+  @media (max-width: 640px), (max-height: 820px) {
+    .dialogo__caja {
+      padding: clamp(10px, 1.7dvh, 16px) var(--space-lg)
+        clamp(10px, 1.7dvh, 16px) var(--space-md);
+    }
+
+    .dialogo__caja :global(p) {
+      font-size: clamp(13px, 1.9dvh, 16px);
+    }
+  }
+</style>

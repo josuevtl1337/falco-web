@@ -1,0 +1,39 @@
+---
+import { env } from "cloudflare:workers";
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.astro";
+import CatalogoJson from "../components/CatalogoJson.astro";
+import PedidoCuerpo from "../components/PedidoCuerpo.astro";
+---
+
+<!--
+  El pedido como página propia.
+
+  Desde la tienda se abre como panel encima (PanelPedido). Esta página existe
+  para que el enlace se pueda compartir, abrir en otra pestaña y leer sin
+  JavaScript: la barra de abajo siempre apunta a una URL de verdad.
+-->
+<Base
+  title="Tu pedido · Falco"
+  description="Mirá lo que sumaste y mandalo por WhatsApp. Falco te confirma el stock y lo retirás en el local."
+>
+  <Nav slot="nav" />
+
+  <CatalogoJson db={env.DB} />
+
+  <div class="pagina pedido-pagina">
+    <PedidoCuerpo volver={{ href: "/#tienda", texto: "Seguir mirando" }} />
+  </div>
+</Base>
+
+<script>
+  import { conectarPantallaDePedido } from "../scripts/pedido-pantalla";
+
+  conectarPantallaDePedido();
+</script>
+
+<style>
+  .pedido-pagina {
+    max-width: 620px;
+  }
+</style>
