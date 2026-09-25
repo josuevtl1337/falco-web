@@ -1,0 +1,42 @@
+---
+import { env } from "cloudflare:workers";
+import { getUpcomingSpecialDays } from "@falco/db";
+import { toArgentina } from "@falco/domain";
+import Admin from "../../../layouts/Admin.astro";
+import SeccionHorarios from "../../../components/SeccionHorarios.astro";
+import { nombreDeFecha } from "../../../horarios";
+
+const hoy = toArgentina(new Date()).date;
+// Los que vienen, sin tope práctico: el LIMIT cuenta tramos, no días.
+const dias = await getUpcomingSpecialDays(env.DB, hoy, 500);
+const horario = (tramos: readonly { opensAt: string; closesAt: string }[]) =>
+  tramos.length === 0 ? "Cerrado" : tramos.map((t) => `${t.opensAt} – ${t.closesAt}`).join(" y ");
+---
+
+<Admin titulo="Horarios" pestana="horarios">
+  <SeccionHorarios actual="feriados" />
+
+  <a class="btn btn--sec btn--ancho" href="/horarios/feriados/nuevo">+ Agregar un día especial</a>
+
+  {
+    dias.length === 0 ? (
+      <p class="nota">No hay feriados ni días especiales cargados de acá en adelante.</p>
+    ) : (
+      <ul class="lista">
+        {dias.map((dia) => (
+          <li class="item">
+            <a class="item__txt" href={`/horarios/feriados/${dia.date}`}>
+              <b>{[nombreDeFecha(dia.date), dia.note].filter(Boolean).join(" · ")}</b>
+              <small>{horario(dia.shifts)}</small>
+            </a>
+            <span class="nota" aria-hidden="true">›</span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  <p class="nota">
+    Sólo los que vienen. Un día especial manda sobre la semana: si dice cerrado, el sitio dice cerrado.
+  </p>
+</Admin>

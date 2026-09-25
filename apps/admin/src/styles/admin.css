@@ -110,6 +110,15 @@ a {
   text-decoration: none;
 }
 
+/* Un botón con cara de enlace: sin el fondo gris que le pone el navegador. */
+button.enlace {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
 .cuerpo {
   width: 100%;
   max-width: 720px;

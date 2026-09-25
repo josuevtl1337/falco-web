@@ -1,0 +1,109 @@
+---
+import { env } from "cloudflare:workers";
+import { getWeekHours, saveWeekHours } from "@falco/db";
+import Admin from "../../layouts/Admin.astro";
+import Tramos from "../../components/Tramos.astro";
+import SeccionHorarios from "../../components/SeccionHorarios.astro";
+import { conAviso } from "../../avisos";
+import { DIAS, erroresDe, leerTramos, ORDEN_SEMANA, type TramoForm } from "../../horarios";
+
+const semana = await getWeekHours(env.DB);
+let dias: { weekday: number; abierto: boolean; tramos: TramoForm[] }[] = ORDEN_SEMANA.map((weekday) => {
+  const tramos = [...(semana[weekday]?.shifts ?? [])];
+  return { weekday, abierto: tramos.length > 0, tramos };
+});
+let errores: Record<string, string> = {};
+
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  dias = ORDEN_SEMANA.map((weekday) => ({
+    weekday,
+    abierto: form.has(`d${weekday}-abierto`),
+    tramos: leerTramos(form, `d${weekday}`),
+  }));
+
+  // Abierto sin ningún horario no se puede guardar: no sería ni una cosa ni la otra.
+  for (const dia of dias) {
+    if (dia.abierto && dia.tramos.length === 0)
+      errores[String(dia.weekday)] = "Cargá al menos un horario, o marcá el día como cerrado.";
+  }
+
+  if (Object.keys(errores).length === 0) {
+    const resultado = await saveWeekHours(
+      env.DB,
+      dias.map((d) => ({ weekday: d.weekday, shifts: d.abierto ? d.tramos : [] })),
+      Astro.locals.email,
+    );
+    if (resultado.ok) return Astro.redirect(conAviso("/horarios", "horarios"), 303);
+    errores = resultado.errors;
+  }
+}
+
+const hayErrores = Object.keys(errores).length > 0;
+---
+
+<Admin titulo="Horarios" pestana="horarios">
+  <SeccionHorarios actual="semana" />
+
+  {
+    hayErrores && (
+      <div class="aviso aviso--error" role="alert">
+        <div>
+          <b>No se guardó nada.</b>
+          <small>Revisá los días marcados: hasta que estén bien, el sitio sigue con el horario de antes.</small>
+        </div>
+      </div>
+    )
+  }
+
+  <form class="form" method="post">
+    <ul class="lista semana">
+      {
+        dias.map((dia) => (
+          <li class="item semana__dia">
+            <fieldset class="semana__campos">
+              <legend class="semana__nombre">{DIAS[dia.weekday]}</legend>
+              <Tramos
+                prefijo={`d${dia.weekday}`}
+                nombre={DIAS[dia.weekday]}
+                tramos={dia.tramos}
+                abierto={dia.abierto}
+                errores={erroresDe(errores, String(dia.weekday))}
+              />
+            </fieldset>
+          </li>
+        ))
+      }
+    </ul>
+
+    <button class="enlace" type="button" data-copiar-lunes>Copiar el lunes de martes a viernes</button>
+    <p class="nota">Para cerrar a la medianoche, elegí 00:00 como hora de cierre.</p>
+
+    <div class="guardar">
+      <button class="btn btn--pri btn--ancho" type="submit">Guardar horarios</button>
+    </div>
+  </form>
+</Admin>
+
+<script>
+  import { conectarTramos } from "../../scripts/tramos";
+  conectarTramos();
+</script>
+
+<style>
+  .semana__dia {
+    display: block;
+    padding-block: 12px;
+  }
+
+  .semana__nombre {
+    padding: 0;
+    margin-bottom: 4px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--color-hueso);
+  }
+</style>
