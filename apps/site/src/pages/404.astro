@@ -1,0 +1,63 @@
+---
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.astro";
+
+// Un producto dado de baja (tienda/[slug].astro) y cualquier dirección
+// inventada terminan acá.
+Astro.response.status = 404;
+---
+
+<Base
+  title="No encontramos esa página · Falco"
+  description="La página que buscabas no existe o la cambiamos de lugar."
+>
+  <Nav slot="nav" />
+
+  <div class="perdido grainy">
+    <span class="chip chip--fill chip--shadow">Error 404</span>
+    <h1 class="perdido__titulo">Acá no hay nada</h1>
+    <p class="perdido__texto">
+      La página que buscabas no existe o la cambiamos de lugar. Si venías por
+      un producto, puede que ya no esté a la venta.
+    </p>
+    <div class="perdido__acciones">
+      <a class="boton" href="/#tienda">Ir a la tienda</a>
+      <a class="boton boton--linea" href="/">Volver al inicio</a>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .perdido {
+    min-height: calc(100dvh - var(--alto-nav));
+    display: grid;
+    align-content: center;
+    justify-items: start;
+    gap: var(--space-lg);
+    padding: var(--space-xl) var(--space-lg);
+    max-width: 720px;
+    margin-inline: auto;
+    overflow: clip;
+  }
+
+
+  .perdido__titulo {
+    font-weight: 500;
+    font-size: clamp(44px, 8vw, 80px);
+    letter-spacing: -0.035em;
+    line-height: 0.95;
+  }
+
+  .perdido__texto {
+    margin: 0;
+    max-width: 46ch;
+    color: var(--color-ceniza);
+    font-size: var(--text-lead);
+  }
+
+  .perdido__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+</style>
