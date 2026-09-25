@@ -40,7 +40,7 @@ const PESTANAS: { id: Pestana; href: string; nombre: string; icono: string }[] =
       <main class="cuerpo">
         {
           aviso && (
-            <div class="aviso" role="status">
+            <div class:list={["aviso", { "aviso--error": aviso.error }]} role={aviso.error ? "alert" : "status"}>
               <div>
                 <b>{aviso.titulo}</b>
                 <small>{aviso.detalle}</small>

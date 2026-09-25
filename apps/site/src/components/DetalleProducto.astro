@@ -33,6 +33,18 @@ const sinStock = product.options.length > 0 && disponibles.length === 0;
   data-detalle={product.detail}
   data-tope={ORDER_LIMITS.maxUnitsPerProduct}
 >
+  {
+    product.imageKey && (
+      <img
+        class="detalle__foto"
+        src={`/fotos/${product.imageKey}`}
+        alt={`${product.name}, ${product.detail}`}
+        loading="lazy"
+        decoding="async"
+      />
+    )
+  }
+
   <span class="chip chip--fill chip--shadow">{marca}</span>
 
   <div class="detalle__titulo">
@@ -103,6 +115,15 @@ const sinStock = product.options.length > 0 && disponibles.length === 0;
 </div>
 
 <style>
+  .detalle__foto {
+    display: block;
+    width: 100%;
+    max-height: 280px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border: 1px solid rgba(232, 226, 208, 0.12);
+  }
+
   .detalle {
     display: grid;
     gap: var(--space-lg);

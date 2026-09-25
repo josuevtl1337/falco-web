@@ -5,6 +5,7 @@ import {
   deleteProduct,
   reorderShelf,
   saveProduct,
+  setProductImage,
   deleteHopperCoffee,
   deleteSpecialDay,
   saveSettings,
@@ -370,5 +371,16 @@ describe("la ficha de un producto", () => {
     expect(await deleteProduct(db, huila!.id)).toEqual({ ok: true });
     expect(valor<{ n: number }>("SELECT count(*) AS n FROM coffees WHERE id = ?", huila!.coffeeId).n).toBe(0);
     expect(valor<{ n: number }>("SELECT count(*) AS n FROM product_options WHERE product_id = ?", huila!.id).n).toBe(0);
+  });
+});
+
+describe("la foto de un producto", () => {
+  it("guarda la clave nueva y devuelve la anterior para borrarla", async () => {
+    const primera = await setProductImage(db, 2, "productos/2-aaa.webp", QUIEN);
+    expect(primera).toEqual({ ok: true, previousKey: null });
+    const segunda = await setProductImage(db, 2, "productos/2-bbb.webp", QUIEN);
+    expect(segunda).toEqual({ ok: true, previousKey: "productos/2-aaa.webp" });
+    const quitar = await setProductImage(db, 2, null, QUIEN);
+    expect(quitar).toEqual({ ok: true, previousKey: "productos/2-bbb.webp" });
   });
 });

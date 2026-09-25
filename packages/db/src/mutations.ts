@@ -615,3 +615,25 @@ export async function deleteProduct(db: WritableDb, id: number): Promise<Mutatio
   await db.batch(statements);
   return { ok: true };
 }
+
+/**
+ * La foto de un producto: guarda la clave nueva y devuelve la anterior, para
+ * que quien la subió la borre del bucket. La base no toca R2.
+ */
+export async function setProductImage(
+  db: WritableDb,
+  id: number,
+  key: string | null,
+  by: string,
+): Promise<MutationResult<{ previousKey: string | null }>> {
+  const current = await db
+    .prepare("SELECT image_key FROM products WHERE id = ?")
+    .bind(id)
+    .first<{ image_key: string | null }>();
+  if (!current) return fail(GONE_PRODUCT);
+  await db
+    .prepare(`UPDATE products SET image_key = ?, updated_at = ${NOW}, updated_by = ? WHERE id = ?`)
+    .bind(key, by, id)
+    .run();
+  return { ok: true, previousKey: current.image_key };
+}

@@ -22,7 +22,11 @@ if (Astro.request.method === "POST") {
   const form = await Astro.request.formData();
   if (form.get("accion") === "borrar" && producto) {
     const r = await deleteProduct(env.DB, producto.id);
-    if (r.ok) return Astro.redirect(conAviso("/productos", "producto-borrado", producto.name), 303);
+    if (r.ok) {
+      // Su foto ya no la usa nadie.
+      if (producto.imageKey) await env.PHOTOS.delete(producto.imageKey);
+      return Astro.redirect(conAviso("/productos", "producto-borrado", producto.name), 303);
+    }
     problema = r.reason ?? "No se pudo borrar.";
   } else {
     const leido = leerProducto(form);
@@ -142,12 +146,40 @@ const opciones = [...valores.opciones, { id: undefined, label: "", disponible: t
       {erroresOpciones.length > 0 && <span class="error">{erroresOpciones[0]}</span>}
     </fieldset>
 
-    <p class="nota">La foto se va a subir desde acá en la próxima versión del admin.</p>
-
     <div class="guardar">
       <button class="btn btn--pri btn--ancho" type="submit">{nuevo ? "Crear el producto" : "Guardar"}</button>
     </div>
   </form>
+
+  <section class="campo bloque foto" aria-labelledby="foto-titulo">
+    <h2 class="k" id="foto-titulo">Foto</h2>
+    {
+      producto ? (
+        <>
+          {producto.imageKey ? (
+            <img class="foto__actual" src={`${sitio}/fotos/${producto.imageKey}`} alt={`La foto de ${producto.name}`} />
+          ) : (
+            <p class="nota">Todavía no tiene foto: en la tienda se ve el fondo de siempre.</p>
+          )}
+          <form method="post" action={`/productos/${producto.id}/foto`} enctype="multipart/form-data" data-foto>
+            <label class="btn btn--sec btn--ancho foto__elegir">
+              {producto.imageKey ? "Cambiar la foto" : "Subir una foto"}
+              <input type="file" name="foto" accept="image/*" data-foto-archivo />
+            </label>
+            <noscript><button class="btn btn--sec btn--ancho" type="submit">Subir</button></noscript>
+            <p class="nota" data-foto-estado>Se achica sola antes de subir: una foto del celular llega liviana.</p>
+          </form>
+          {producto.imageKey && (
+            <form method="post" action={`/productos/${producto.id}/foto`}>
+              <button class="enlace" type="submit" name="accion" value="quitar">Quitar la foto</button>
+            </form>
+          )}
+        </>
+      ) : (
+        <p class="nota">Primero creá el producto; después le subís la foto desde acá.</p>
+      )
+    }
+  </section>
 
   {
     producto && (
@@ -170,6 +202,8 @@ const opciones = [...valores.opciones, { id: undefined, label: "", disponible: t
   import { conectarPerfil } from "../../scripts/perfil";
   import { conectarConfirmar } from "../../scripts/confirmar";
   import { conectarFichaProducto } from "../../scripts/producto";
+  import { conectarFoto } from "../../scripts/achicar-foto";
+  conectarFoto();
   conectarPerfil();
   conectarConfirmar();
   conectarFichaProducto();
@@ -237,6 +271,29 @@ const opciones = [...valores.opciones, { id: undefined, label: "", disponible: t
     border: 0;
     background: none;
     color: var(--color-ceniza);
+    cursor: pointer;
+  }
+
+  .foto__actual {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--linea);
+  }
+
+  .foto__elegir {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* El input de archivo real, invisible encima del botón: tocar el botón lo abre. */
+  .foto__elegir input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
     cursor: pointer;
   }
 

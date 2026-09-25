@@ -13,4 +13,9 @@
       "migrations_dir": "../../packages/db/migrations",
     },
   ],
+  // Las fotos de los productos. El admin las sube; el sitio las sirve en
+  // /fotos/<clave>. En desarrollo comparten el estado local (persistState).
+  // PHOTOS y no IMAGES: el adaptador de Astro reserva IMAGES para el
+  // servicio Cloudflare Images y pisa cualquier binding con ese nombre.
+  "r2_buckets": [{ "binding": "PHOTOS", "bucket_name": "falco-photos" }],
 }

@@ -3,7 +3,9 @@
  * `?guardado=<clave>` (y `&que=<nombre>` si hace falta), y el layout lo
  * muestra: así recargar no vuelve a mandar el formulario.
  */
-const AVISOS: Record<string, { titulo: string; detalle: string }> = {
+type Aviso = { titulo: string; detalle: string; error?: boolean };
+
+const AVISOS: Record<string, Aviso> = {
   ajustes: {
     titulo: "Guardado. Ya se ve en el sitio.",
     detalle: "WhatsApp, carta e Instagram actualizados.",
@@ -22,15 +24,18 @@ const AVISOS: Record<string, { titulo: string; detalle: string }> = {
   orden: { titulo: "Guardado. Ya se ve en el sitio.", detalle: "El estante ya sale en el orden nuevo." },
   producto: { titulo: "Guardado. Ya se ve en el sitio.", detalle: "{que} quedó actualizado en la tienda." },
   "producto-borrado": { titulo: "Borrado.", detalle: "{que} ya no está en la tienda." },
+  foto: { titulo: "Guardado. Ya se ve en el sitio.", detalle: "La foto nueva ya está en la tienda." },
+  "foto-quitada": { titulo: "Listo.", detalle: "El producto vuelve a mostrarse sin foto." },
+  "foto-error": { titulo: "No se subió la foto.", detalle: "{que}", error: true },
   "cafe-borrado": { titulo: "Borrado.", detalle: "{que} ya no está en la lista de tolva." },
 };
 
-export function avisoDe(url: URL): { titulo: string; detalle: string } | null {
+export function avisoDe(url: URL): Aviso | null {
   const clave = url.searchParams.get("guardado");
   const aviso = clave ? AVISOS[clave] : undefined;
   if (!aviso) return null;
   const que = url.searchParams.get("que") ?? "";
-  return { titulo: aviso.titulo, detalle: aviso.detalle.replace("{que}", que) };
+  return { ...aviso, detalle: aviso.detalle.replace("{que}", que) };
 }
 
 /** La dirección a la que redirigir después de guardar. */
