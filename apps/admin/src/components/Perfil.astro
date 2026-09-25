@@ -1,0 +1,115 @@
+---
+import { PENTAGON_AXES, PENTAGON_LABELS, type TastingProfile } from "@falco/ui/pentagono";
+import Pentagono from "./Pentagono.astro";
+
+interface Props {
+  perfil: TastingProfile;
+  errores?: Record<string, string>;
+}
+
+const { perfil, errores = {} } = Astro.props;
+---
+
+<!--
+  Cinco controles del 1 al 5, uno por eje, y el pentágono al lado que se
+  redibuja al tocarlos (scripts/perfil.ts). Son radios de verdad: sin
+  JavaScript se cargan igual, sólo que el dibujo no cambia hasta guardar.
+-->
+<fieldset class="perfil" data-perfil-form>
+  <legend>A qué sabe · perfil</legend>
+  <div class="perfil__grilla">
+    <Pentagono perfil={perfil} />
+    <div class="perfil__ejes">
+      {
+        PENTAGON_AXES.map((eje) => (
+          <div class="perfil__eje" role="radiogroup" aria-label={PENTAGON_LABELS[eje]}>
+            <span class="perfil__nombre">{PENTAGON_LABELS[eje]}</span>
+            <div class="perfil__pasos">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <label class="perfil__paso">
+                  <input type="radio" name={eje} value={n} checked={perfil[eje] === n} required />
+                  <span>{n}</span>
+                </label>
+              ))}
+            </div>
+            {errores[eje] && <span class="error">{errores[eje]}</span>}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</fieldset>
+
+<style>
+  .perfil__grilla {
+    display: grid;
+    grid-template-columns: minmax(0, 150px) minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+    margin-top: 6px;
+  }
+
+  @media (max-width: 380px) {
+    .perfil__grilla {
+      grid-template-columns: 1fr;
+      justify-items: center;
+    }
+  }
+
+  .perfil__ejes {
+    display: grid;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .perfil__eje {
+    display: grid;
+    gap: 3px;
+  }
+
+  .perfil__nombre {
+    font-size: 13px;
+  }
+
+  .perfil__pasos {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+  }
+
+  /* El radio real queda invisible pero enfocable: la caja es el <span>. */
+  .perfil__paso {
+    position: relative;
+  }
+
+  .perfil__paso input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .perfil__paso span {
+    display: grid;
+    place-items: center;
+    min-height: 34px;
+    border: 1px solid rgba(232, 226, 208, 0.2);
+    border-radius: 6px;
+    background: var(--color-sombra);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-ceniza);
+  }
+
+  .perfil__paso input:checked + span {
+    background: var(--color-tostado);
+    border-color: var(--color-tostado);
+    color: var(--color-hueso);
+  }
+
+  .perfil__paso input:focus-visible + span {
+    outline: 2px solid var(--color-brasa);
+    outline-offset: 2px;
+  }
+</style>
