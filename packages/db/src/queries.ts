@@ -20,6 +20,23 @@ export type PreparedLike = {
 
 export type ReadableDb = { prepare(sql: string): PreparedLike };
 
+/**
+ * Lo que necesita el admin para escribir: sentencias que además se ejecutan
+ * (`run`) y un `batch` que corre varias como una sola transacción. D1 no
+ * tiene BEGIN/COMMIT sueltos; `batch` es su forma de hacer "todo o nada".
+ */
+export type WritableStatement = {
+  bind(...values: unknown[]): WritableStatement;
+  first<T>(): Promise<T | null> | T | undefined;
+  all<T>(): Promise<{ results: T[] }> | T[];
+  run(): Promise<unknown> | unknown;
+};
+
+export type WritableDb = {
+  prepare(sql: string): WritableStatement;
+  batch(statements: WritableStatement[]): Promise<unknown> | unknown;
+};
+
 async function firstRow<T>(statement: PreparedLike): Promise<T | undefined> {
   const value = await statement.first<T>();
   return value ?? undefined;
@@ -52,6 +69,24 @@ export async function getHopperCoffee(
   if (!Number.isInteger(id)) return undefined;
   // La tolva tiene su propio catálogo, con las mismas columnas que coffees:
   // por eso se lee con el mismo tipo y la home no distingue.
+  const row = await firstRow<CoffeeRow>(
+    db.prepare("SELECT * FROM hopper_coffees WHERE id = ?").bind(id),
+  );
+  return row ? toCoffee(row) : undefined;
+}
+
+/** Los cafés de tolva, para elegir cuál poner. */
+export async function listHopperCoffees(db: ReadableDb): Promise<Coffee[]> {
+  const rows = await allRows<CoffeeRow>(
+    db.prepare("SELECT * FROM hopper_coffees ORDER BY name, id"),
+  );
+  return rows.map(toCoffee);
+}
+
+export async function getHopperCoffeeById(
+  db: ReadableDb,
+  id: number,
+): Promise<Coffee | undefined> {
   const row = await firstRow<CoffeeRow>(
     db.prepare("SELECT * FROM hopper_coffees WHERE id = ?").bind(id),
   );
