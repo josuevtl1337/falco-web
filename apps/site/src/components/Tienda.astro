@@ -123,13 +123,14 @@ const shelvesWithRail = shelves.map((shelf, index) => {
                 es exactamente el ancho de una tanda, así que al terminar la
                 segunda queda donde arrancó la primera. Va oculta para los
                 lectores de pantalla, que si no leerían el catálogo dos veces,
-                e inerte, para que el tabulador no recorra cada ficha dos veces.
+                y fuera del tabulador. NO puede ser `inert`: la mitad de lo que
+                se ve en pantalla es esta copia, e inerte no se podía tocar.
               */}
               {shelf.moves && (
-                <ul class="riel__tanda riel__copia" aria-hidden="true" inert>
+                <ul class="riel__tanda riel__copia" aria-hidden="true">
                   {shelf.products.map((product) => (
                     <li>
-                      <Ficha product={product} shelfLabel={shelf.title} />
+                      <Ficha product={product} shelfLabel={shelf.title} copy />
                     </li>
                   ))}
                 </ul>
