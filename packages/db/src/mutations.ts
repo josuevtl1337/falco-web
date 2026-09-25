@@ -322,3 +322,42 @@ export async function setHopperCoffee(
   await upsertSetting(db, "hopper_coffee_id", String(id), by).run();
   return { ok: true };
 }
+
+/* -------------------------------------------------------------- Productos */
+
+/**
+ * El orden de un estante, tal como quedó en la pantalla. Tiene que traer
+ * exactamente los productos de ese estante: si alguien sumó o borró uno
+ * mientras tanto, no se adivina dónde va, se pide recargar.
+ */
+export async function reorderShelf(
+  db: WritableDb,
+  shelf: "coffee" | "kits",
+  ids: number[],
+  by: string,
+): Promise<MutationResult> {
+  const rows = await db
+    .prepare("SELECT id FROM products WHERE shelf = ?")
+    .bind(shelf)
+    .all<{ id: number }>();
+  const actuales = (Array.isArray(rows) ? rows : rows.results).map((r) => r.id);
+  const mismos =
+    ids.length === actuales.length &&
+    new Set(ids).size === ids.length &&
+    ids.every((id) => actuales.includes(id));
+  if (!mismos)
+    return fail(
+      "La lista cambió mientras la ordenabas. Recargá la página y probá de nuevo.",
+    );
+
+  await db.batch(
+    ids.map((id, index) =>
+      db
+        .prepare(
+          `UPDATE products SET sort_order = ?, updated_at = ${NOW}, updated_by = ? WHERE id = ?`,
+        )
+        .bind(index + 1, by, id),
+    ),
+  );
+  return { ok: true };
+}

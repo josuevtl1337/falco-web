@@ -19,6 +19,7 @@ const AVISOS: Record<string, { titulo: string; detalle: string }> = {
   "feriado-borrado": { titulo: "Borrado.", detalle: "Ese día vuelve a tener el horario de siempre." },
   tolva: { titulo: "Guardado. Ya se ve en el sitio.", detalle: "La home ya muestra {que} en tolva." },
   cafe: { titulo: "Guardado.", detalle: "{que} quedó guardado en la lista de tolva." },
+  orden: { titulo: "Guardado. Ya se ve en el sitio.", detalle: "El estante ya sale en el orden nuevo." },
   "cafe-borrado": { titulo: "Borrado.", detalle: "{que} ya no está en la lista de tolva." },
 };
 

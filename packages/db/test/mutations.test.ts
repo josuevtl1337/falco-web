@@ -2,6 +2,7 @@ import type Database from "better-sqlite3";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   createHopperCoffee,
+  reorderShelf,
   deleteHopperCoffee,
   deleteSpecialDay,
   saveSettings,
@@ -15,6 +16,7 @@ import {
   getSettings,
   getWeekHours,
   listHopperCoffees,
+  listShelfForAdmin,
 } from "../src/queries";
 import type { WritableDb } from "../src/queries";
 import { seededDatabase, toWritableDb } from "./sqlite-db";
@@ -245,5 +247,22 @@ describe("la tolva", () => {
     const r = await updateHopperCoffee(db, 999, cafe, QUIEN);
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.reason).toMatch(/ya no existe/);
+  });
+});
+
+describe("el orden de un estante", () => {
+  it("queda en el orden que se pidió, con los ocultos incluidos", async () => {
+    const antes = (await listShelfForAdmin(db, "kits")).map((p) => p.id);
+    const nuevo = [...antes].reverse();
+    expect(await reorderShelf(db, "kits", nuevo, QUIEN)).toEqual({ ok: true });
+    expect((await listShelfForAdmin(db, "kits")).map((p) => p.id)).toEqual(nuevo);
+  });
+
+  it("si falta un producto o sobra uno de otro estante, no toca nada", async () => {
+    const antes = (await listShelfForAdmin(db, "kits")).map((p) => p.id);
+    const r = await reorderShelf(db, "kits", [...antes.slice(1), 1], QUIEN);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toMatch(/Recargá/);
+    expect((await listShelfForAdmin(db, "kits")).map((p) => p.id)).toEqual(antes);
   });
 });

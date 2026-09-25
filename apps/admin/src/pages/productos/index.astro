@@ -1,14 +1,182 @@
 ---
+import { env } from "cloudflare:workers";
+import { listShelfForAdmin, reorderShelf } from "@falco/db";
+import { formatArs } from "@falco/domain";
 import Admin from "../../layouts/Admin.astro";
+import { conAviso } from "../../avisos";
+
+type Estante = "coffee" | "kits";
+const ESTANTES: { id: Estante; titulo: string }[] = [
+  { id: "coffee", titulo: "Café" },
+  { id: "kits", titulo: "Kits y accesorios" },
+];
+
+let problema = "";
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  const estante = form.get("shelf") === "coffee" ? "coffee" : "kits";
+  const accion = form.get("accion");
+  let ids = (await listShelfForAdmin(env.DB, estante)).map((p) => p.id);
+
+  if (accion === "ordenar") {
+    // El orden que quedó después de arrastrar.
+    ids = String(form.get("ids") ?? "").split(",").filter(Boolean).map(Number);
+  } else {
+    // Subir o bajar uno: se intercambia con el de al lado.
+    const id = Number(form.get("id"));
+    const i = ids.indexOf(id);
+    const j = accion === "subir" ? i - 1 : i + 1;
+    if (i >= 0 && j >= 0 && j < ids.length) [ids[i], ids[j]] = [ids[j]!, ids[i]!];
+  }
+
+  const r = await reorderShelf(env.DB, estante, ids, Astro.locals.email);
+  if (r.ok) return Astro.redirect(conAviso("/productos", "orden"), 303);
+  problema = r.reason ?? "No se pudo guardar el orden.";
+}
+
+const estantes = await Promise.all(
+  ESTANTES.map(async (e) => ({ ...e, productos: await listShelfForAdmin(env.DB, e.id) })),
+);
 ---
 
-<!-- Provisoria: la lista, el orden, la ficha y las fotos son las Tasks 8 a 10 del Plan 3. -->
 <Admin titulo="Productos" pestana="productos">
-  <div class="caja">
-    <span class="v">Todavía no</span>
-    <p class="sub">
-      Los productos se van a poder editar desde acá muy pronto: precios, visibles u ocultos, el orden de
-      los estantes y las fotos. Mientras tanto se cambian en la base.
-    </p>
-  </div>
+  <Fragment slot="barra">
+    <h1>Productos</h1>
+    <a class="btn btn--pri" href="/productos/nuevo">+ Nuevo</a>
+  </Fragment>
+
+  {problema && <div class="aviso aviso--error" role="alert"><div><b>No se guardó el orden.</b><small>{problema}</small></div></div>}
+
+  {
+    estantes.map((estante) => (
+      <section class="estante" aria-labelledby={`estante-${estante.id}`}>
+        <h2 class="k estante__titulo" id={`estante-${estante.id}`}>
+          <span>Estante · {estante.titulo}</span>
+          <span>{estante.productos.length}</span>
+        </h2>
+        {estante.productos.length === 0 ? (
+          <p class="nota">Este estante está vacío.</p>
+        ) : (
+          <ul class="lista" data-ordenable={estante.id}>
+            {estante.productos.map((p, i) => (
+              <li class="item producto" data-id={p.id}>
+                <button class="asa" type="button" data-asa aria-label={`Arrastrar ${p.name} para ordenarlo`}>
+                  <i /><i /><i />
+                </button>
+                <a class="item__txt" href={`/productos/${p.id}`}>
+                  <b>{p.name}</b>
+                  <small>{p.detail} · {formatArs(p.priceCashArs)}</small>
+                  {(p.isNew || !p.isVisible || p.askStock) && (
+                    <span class="chips">
+                      {p.isNew && <span class="chip chip--tostado">Nuevo</span>}
+                      {!p.isVisible && <span class="chip">Oculto</span>}
+                      {p.askStock && <span class="chip">Consultar stock</span>}
+                    </span>
+                  )}
+                </a>
+                <form method="post" class="mover">
+                  <input type="hidden" name="shelf" value={estante.id} />
+                  <input type="hidden" name="id" value={p.id} />
+                  <button class="mover__btn" type="submit" name="accion" value="subir" disabled={i === 0} aria-label={`Subir ${p.name}`}>↑</button>
+                  <button class="mover__btn" type="submit" name="accion" value="bajar" disabled={i === estante.productos.length - 1} aria-label={`Bajar ${p.name}`}>↓</button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        )}
+        <form method="post" hidden data-orden-form={estante.id}>
+          <input type="hidden" name="shelf" value={estante.id} />
+          <input type="hidden" name="accion" value="ordenar" />
+          <input type="hidden" name="ids" />
+        </form>
+      </section>
+    ))
+  }
+
+  <p class="nota">Ordenados como salen en los estantes del sitio. Arrastrá desde las rayitas, o usá las flechas.</p>
 </Admin>
+
+<script>
+  import { conectarOrden } from "../../scripts/ordenar";
+  conectarOrden();
+</script>
+
+<style>
+  .estante {
+    display: grid;
+    gap: 8px;
+  }
+
+  .estante__titulo {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 400;
+    letter-spacing: 0.16em;
+  }
+
+  .producto {
+    gap: 8px;
+    padding-left: 4px;
+  }
+
+  .producto.arrastrando {
+    opacity: 0.85;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    position: relative;
+    z-index: 2;
+  }
+
+  .asa {
+    flex: none;
+    display: grid;
+    align-content: center;
+    gap: 3px;
+    width: 36px;
+    height: 44px;
+    padding: 0 10px;
+    border: 0;
+    background: none;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .asa i {
+    display: block;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--color-ceniza);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 2px;
+  }
+
+  .chip--tostado {
+    background: var(--color-tostado);
+    border-color: var(--color-tostado);
+    color: var(--color-hueso);
+  }
+
+  .mover {
+    display: flex;
+    flex: none;
+  }
+
+  .mover__btn {
+    width: 36px;
+    height: 44px;
+    border: 0;
+    background: none;
+    color: var(--color-ceniza);
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .mover__btn:disabled {
+    opacity: 0.25;
+    cursor: default;
+  }
+</style>

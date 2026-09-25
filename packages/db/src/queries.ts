@@ -168,6 +168,22 @@ export async function listShelf(
   return withOptions(db, rows);
 }
 
+/**
+ * Todos los productos de un estante, también los ocultos: es lo que ve el
+ * admin, en el orden en que salen en el sitio.
+ */
+export async function listShelfForAdmin(
+  db: ReadableDb,
+  shelf: "coffee" | "kits",
+): Promise<ProductWithOptions[]> {
+  const rows = await allRows<ProductRow>(
+    db
+      .prepare("SELECT * FROM products WHERE shelf = ? ORDER BY sort_order, id")
+      .bind(shelf),
+  );
+  return withOptions(db, rows);
+}
+
 export async function getProductBySlug(
   db: ReadableDb,
   slug: string,
