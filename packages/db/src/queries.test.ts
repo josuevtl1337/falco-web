@@ -47,11 +47,15 @@ function toReadableDb(real: Database.Database): ReadableDb {
 
 let db: ReadableDb;
 
-beforeAll(() => {
+function freshDb(): Database.Database {
   const real = new Database(":memory:");
   real.exec(sql("../migrations/0001_init.sql"));
   real.exec(sql("../seed/seed.sql"));
-  db = toReadableDb(real);
+  return real;
+}
+
+beforeAll(() => {
+  db = toReadableDb(freshDb());
 });
 
 describe("getSettings", () => {
@@ -67,6 +71,25 @@ describe("getHopperCoffee", () => {
     const coffee = await getHopperCoffee(db);
     expect(coffee?.name).toBe("Huila");
     expect(coffee?.profile.acidity).toBeGreaterThanOrEqual(1);
+  });
+
+  // La tolva tiene su propio catálogo: sus cafés rotan y no tienen nada que
+  // ver con los que se venden. Sidama sólo existe en hopper_coffees.
+  it("lee de su propio catálogo, no de los cafés que se venden", async () => {
+    const real = freshDb();
+    real.exec("UPDATE settings SET value = '2' WHERE key = 'hopper_coffee_id'");
+    const coffee = await getHopperCoffee(toReadableDb(real));
+    expect(coffee?.name).toBe("Sidama");
+    const enVenta = real
+      .prepare("SELECT count(*) AS n FROM coffees WHERE name = 'Sidama'")
+      .get() as { n: number };
+    expect(enVenta.n).toBe(0);
+  });
+
+  it("si el café en tolva ya no existe, no hay tolva (y nada se rompe)", async () => {
+    const real = freshDb();
+    real.exec("UPDATE settings SET value = '999' WHERE key = 'hopper_coffee_id'");
+    expect(await getHopperCoffee(toReadableDb(real))).toBeUndefined();
   });
 });
 

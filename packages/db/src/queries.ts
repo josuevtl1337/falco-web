@@ -50,8 +50,10 @@ export async function getHopperCoffee(
   if (!setting) return undefined;
   const id = Number(setting.value);
   if (!Number.isInteger(id)) return undefined;
+  // La tolva tiene su propio catálogo, con las mismas columnas que coffees:
+  // por eso se lee con el mismo tipo y la home no distingue.
   const row = await firstRow<CoffeeRow>(
-    db.prepare("SELECT * FROM coffees WHERE id = ?").bind(id),
+    db.prepare("SELECT * FROM hopper_coffees WHERE id = ?").bind(id),
   );
   return row ? toCoffee(row) : undefined;
 }
