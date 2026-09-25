@@ -1,0 +1,3 @@
+# Copiá este archivo como .dev.vars para usar el admin en tu computadora.
+# Sólo vale en localhost: en Cloudflare, el mail sale del login de Access.
+ADMIN_DEV_EMAIL=vos@falco.cafe

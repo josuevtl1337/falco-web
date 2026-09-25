@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // El admin es otro Worker, con otro dominio: el sitio sigue siendo de solo
+  // lectura y nunca comparte código de escritura con este.
+  "name": "falco-admin",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-09-20",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "dist", "binding": "ASSETS" },
+  // La misma base que el sitio.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "falco",
+      "database_id": "local",
+      "migrations_dir": "../../packages/db/migrations",
+    },
+  ],
+  // Los datos de la aplicación de Cloudflare Access. Se completan en el Plan 4,
+  // al crearla; vacíos, ningún pedido pasa (salvo ADMIN_DEV_EMAIL en local).
+  "vars": {
+    "ACCESS_TEAM": "",
+    "ACCESS_AUD": "",
+  },
+}
