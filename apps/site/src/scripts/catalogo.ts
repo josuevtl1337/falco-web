@@ -68,7 +68,8 @@ export const lineIsAvailable =
   (line: { productId: number; optionId?: number }): boolean => {
     const product = payload.products.find((p) => p.id === line.productId);
     if (!product) return false;
-    if (line.optionId === undefined) return true;
+    // Sin molienda elegida sólo vale si el producto no tiene moliendas.
+    if (line.optionId === undefined) return !product.options?.length;
     const option = product.options?.find((o) => o.id === line.optionId);
     return Boolean(option?.isAvailable);
   };

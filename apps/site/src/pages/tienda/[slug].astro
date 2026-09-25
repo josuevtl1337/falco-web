@@ -10,7 +10,9 @@ const { slug } = Astro.params;
 const product = slug ? await getProductBySlug(env.DB, slug) : undefined;
 
 if (!product) {
-  return Astro.redirect("/404", 302);
+  // Se reescribe y no se redirige: la dirección queda como está y responde
+  // 404, que es lo que un buscador tiene que ver de un producto dado de baja.
+  return Astro.rewrite("/404");
 }
 
 const [coffee] = product.coffeeId

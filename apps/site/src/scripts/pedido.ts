@@ -127,11 +127,13 @@ export const conectarPedido = (): void => {
 
     let pedido = pedidoActual(ahora);
     let resultado: AddOutcome = "added";
+    let sumadas = 0;
     for (let i = 0; i < cantidad; i++) {
       const paso = addItem(pedido, { productId, optionId }, ahora);
       pedido = paso.order;
       resultado = paso.outcome;
       if (resultado !== "added" && resultado !== "increased") break;
+      sumadas++;
     }
 
     const guardado = saveOrder(almacenamiento(), pedido);
@@ -147,13 +149,19 @@ export const conectarPedido = (): void => {
     // Lo que salió bien se dice con el cartel de arriba, que se ve aunque el
     // panel se cierre; lo que no entró se dice dentro del panel, al lado del
     // producto del que estamos hablando.
-    const sumado = resultado === "added" || resultado === "increased";
+    //
+    // Si entró una parte (pidió 2 y el tope dejaba 1), lo que entró se dice
+    // igual: decir sólo "ya tenés el máximo" hacía creer que no se sumó nada.
+    const sumado = sumadas > 0;
     if (sumado) {
+      const producto = [panel.dataset.nombre, panel.dataset.detalle]
+        .filter(Boolean)
+        .join(" · ");
       mostrarAviso(
         "¡Sumado!",
-        [panel.dataset.nombre, panel.dataset.detalle]
-          .filter(Boolean)
-          .join(" · "),
+        sumadas < cantidad
+          ? `${producto} · entraron ${sumadas} de ${cantidad}: ${AVISOS[resultado].toLowerCase()}`
+          : producto,
       );
       avisar(panel, AVISO_BASE, "");
     } else {
@@ -190,11 +198,25 @@ export const conectarPedido = (): void => {
     escribirCantidad(panel, 1);
   }
 
+  // Cada vez que se abre un panel arranca de cero: cantidad 1, botones
+  // recalculados contra el pedido y sin el cartel de la vez anterior.
+  document.addEventListener("falco:panel-abierto", (evento) => {
+    const panel =
+      evento.target instanceof Element
+        ? evento.target.querySelector<HTMLElement>(".detalle")
+        : null;
+    if (!panel || panel.querySelector("[data-sumar]:disabled")) return;
+    escribirCantidad(panel, 1);
+    avisar(panel, AVISO_BASE, "");
+  });
+
   // El pedido cambió desde otro lado (se sacó algo, se vació, se empezó otro):
   // los topes y los carteles de cada producto se recalculan sin recargar.
   document.addEventListener("falco:pedido", () => {
     if (avisando) return;
     for (const panel of paneles) {
+      // Uno sin stock tiene su propio cartel, que no depende del pedido.
+      if (panel.querySelector("[data-sumar]:disabled")) continue;
       escribirCantidad(panel, 1);
       if (panel.querySelector<HTMLElement>("[data-aviso]")?.dataset.tono) {
         avisar(panel, AVISO_BASE, "");

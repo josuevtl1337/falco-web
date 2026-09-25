@@ -98,4 +98,10 @@ describe("lineIsAvailable", () => {
   it("un producto sin opciones se queda tal cual", () => {
     expect(disponible({ productId: 2 })).toBe(true);
   });
+
+  // Pasó con un café sin stock en ninguna molienda: el botón seguía andando
+  // y sumaba la línea sin molienda, que no se podía pedir.
+  it("una línea sin molienda de un producto que tiene moliendas, se va", () => {
+    expect(disponible({ productId: 1 })).toBe(false);
+  });
 });

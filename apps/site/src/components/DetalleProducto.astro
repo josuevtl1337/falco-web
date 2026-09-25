@@ -21,6 +21,9 @@ const marca = [shelfLabel, coffee?.country].filter(Boolean).join(" · ");
 // haría que el producto pareciera no tener esa molienda nunca.
 const disponibles = product.options.filter((option) => option.isAvailable);
 const porDefecto = disponibles[0]?.id;
+// Tiene moliendas y ninguna tiene stock: no hay nada que sumar. Sin esto el
+// botón seguía andando y sumaba el producto sin molienda.
+const sinStock = product.options.length > 0 && disponibles.length === 0;
 ---
 
 <div
@@ -86,12 +89,16 @@ const porDefecto = disponibles[0]?.id;
     </div>
   </div>
 
-  <button class="boton detalle__sumar" type="button" data-sumar>
-    Sumar al pedido
+  <button class="boton detalle__sumar" type="button" data-sumar disabled={sinStock}>
+    {sinStock ? "Sin stock por ahora" : "Sumar al pedido"}
   </button>
 
-  <p class="detalle__aviso" data-aviso role="status">
-    El stock se confirma por WhatsApp antes de retirar
+  <p class="detalle__aviso" data-aviso role="status" data-tono={sinStock ? "tope" : undefined}>
+    {
+      sinStock
+        ? "No nos queda en ninguna molienda. Escribinos y te avisamos cuando vuelva."
+        : "El stock se confirma por WhatsApp antes de retirar"
+    }
   </p>
 </div>
 

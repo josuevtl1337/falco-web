@@ -57,6 +57,8 @@ export const conectarPaneles = (): void => {
     // lo reemplaza igual.
     if (previo && previo !== panel) cerrarDialogo(previo);
     abrirDialogo(panel);
+    // Quien arma el contenido del panel (pedido.ts) lo deja como nuevo.
+    panel.dispatchEvent(new CustomEvent("falco:panel-abierto", { bubbles: true }));
   };
 
   /**

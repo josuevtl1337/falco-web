@@ -122,10 +122,11 @@ const shelvesWithRail = shelves.map((shelf, index) => {
                 La copia sólo existe para que el bucle no corte: el desplazamiento
                 es exactamente el ancho de una tanda, así que al terminar la
                 segunda queda donde arrancó la primera. Va oculta para los
-                lectores de pantalla, que si no leerían el catálogo dos veces.
+                lectores de pantalla, que si no leerían el catálogo dos veces,
+                e inerte, para que el tabulador no recorra cada ficha dos veces.
               */}
               {shelf.moves && (
-                <ul class="riel__tanda riel__copia" aria-hidden="true">
+                <ul class="riel__tanda riel__copia" aria-hidden="true" inert>
                   {shelf.products.map((product) => (
                     <li>
                       <Ficha product={product} shelfLabel={shelf.title} />

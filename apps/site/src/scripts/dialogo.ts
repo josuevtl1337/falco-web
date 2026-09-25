@@ -139,8 +139,15 @@ export const prepararDialogo = (
     form.addEventListener("submit", cerrado);
   }
 
+  // El click tiene que empezar Y terminar en el fondo: seleccionar texto del
+  // panel y soltar el mouse afuera también llega como un click en el fondo.
+  let empezoEnElFondo = false;
+  dialogo.addEventListener("pointerdown", (evento) => {
+    empezoEnElFondo = clickEnElFondo(dialogo, evento);
+  });
+
   dialogo.addEventListener("click", (evento) => {
-    if (!clickEnElFondo(dialogo, evento)) return;
+    if (!empezoEnElFondo || !clickEnElFondo(dialogo, evento)) return;
     dialogo.close();
     cerrado();
   });
