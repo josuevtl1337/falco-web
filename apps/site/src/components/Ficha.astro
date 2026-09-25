@@ -7,13 +7,22 @@ interface Props {
   product: ProductWithOptions;
   /** El nombre del estante: en la lámina encabeza la ficha, en brasa. */
   shelfLabel: string;
+  /**
+   * La ficha es de la copia del riel en movimiento: se puede tocar (la mitad
+   * de lo que se ve en pantalla es la copia), pero el tabulador la saltea.
+   */
+  copy?: boolean;
 }
 
-const { product, shelfLabel } = Astro.props;
+const { product, shelfLabel, copy = false } = Astro.props;
 ---
 
 <article class="ficha">
-  <a class="ficha__cara" href={`/tienda/${product.slug}`}>
+  <a
+    class="ficha__cara"
+    href={`/tienda/${product.slug}`}
+    tabindex={copy ? -1 : undefined}
+  >
     {
       product.isNew && (
         <span
