@@ -184,6 +184,19 @@ export async function listShelfForAdmin(
   return withOptions(db, rows);
 }
 
+/** Un producto por id, también si está oculto: la ficha del admin. */
+export async function getProductForAdmin(
+  db: ReadableDb,
+  id: number,
+): Promise<ProductWithOptions | undefined> {
+  const row = await firstRow<ProductRow>(
+    db.prepare("SELECT * FROM products WHERE id = ?").bind(id),
+  );
+  if (!row) return undefined;
+  const [product] = await withOptions(db, [row]);
+  return product;
+}
+
 export async function getProductBySlug(
   db: ReadableDb,
   slug: string,

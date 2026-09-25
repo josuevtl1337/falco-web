@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { beforeAll, describe, expect, it } from "vitest";
 import {
   countProducts,
+  getProductForAdmin,
   getHopperCoffee,
   getProductBySlug,
   getSettings,
@@ -209,5 +210,13 @@ describe("countProducts", () => {
     expect(visible).toBeGreaterThan(0);
     // El seed tiene un único borrador oculto.
     expect(hidden).toBe(1);
+  });
+});
+
+describe("getProductForAdmin", () => {
+  it("trae también un producto oculto, con sus moliendas", async () => {
+    const oculto = await getProductForAdmin(db, 8);
+    expect(oculto?.isVisible).toBe(false);
+    expect(await getProductForAdmin(db, 999)).toBeUndefined();
   });
 });

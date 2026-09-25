@@ -414,6 +414,8 @@ button.enlace {
 .campo {
   display: grid;
   gap: 5px;
+  /* Arriba: si el campo de al lado tiene ayuda debajo, éste no se estira. */
+  align-content: start;
   min-width: 0;
 }
 

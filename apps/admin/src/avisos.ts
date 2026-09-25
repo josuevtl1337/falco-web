@@ -20,6 +20,8 @@ const AVISOS: Record<string, { titulo: string; detalle: string }> = {
   tolva: { titulo: "Guardado. Ya se ve en el sitio.", detalle: "La home ya muestra {que} en tolva." },
   cafe: { titulo: "Guardado.", detalle: "{que} quedó guardado en la lista de tolva." },
   orden: { titulo: "Guardado. Ya se ve en el sitio.", detalle: "El estante ya sale en el orden nuevo." },
+  producto: { titulo: "Guardado. Ya se ve en el sitio.", detalle: "{que} quedó actualizado en la tienda." },
+  "producto-borrado": { titulo: "Borrado.", detalle: "{que} ya no está en la tienda." },
   "cafe-borrado": { titulo: "Borrado.", detalle: "{que} ya no está en la lista de tolva." },
 };
 

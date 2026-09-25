@@ -5,8 +5,12 @@ import type { Coffee, CoffeeDraft } from "@falco/db";
  * vacíos quedan sin valor (y el esquema dice qué falta); los textos se
  * mandan tal cual y el esquema los recorta.
  */
-export function leerCafe(form: FormData): CoffeeDraft {
-  const texto = (campo: string) => String(form.get(campo) ?? "");
+export function leerCafe(form: FormData, prefijo = ""): CoffeeDraft {
+  // El perfil (acidity, sweetness…) va sin prefijo: los radios del
+  // componente Perfil se llaman así en las dos fichas.
+  const PERFIL = ["acidity", "sweetness", "body", "aroma", "finish"];
+  const texto = (campo: string) =>
+    String(form.get(PERFIL.includes(campo) ? campo : `${prefijo}${campo}`) ?? "");
   const numero = (campo: string) => {
     const valor = texto(campo).trim();
     return valor === "" ? undefined : Number(valor);
