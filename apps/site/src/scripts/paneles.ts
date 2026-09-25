@@ -51,6 +51,26 @@ export const conectarPaneles = (): void => {
    */
   let volviendo = false;
 
+  /*
+   * Al cerrarse un diálogo, el navegador le devuelve el foco a lo que lo
+   * abrió: la ficha, que vive adentro del riel. Y el riel se pausa con el
+   * foco adentro (:focus-within, para quien recorre con el teclado), así que
+   * quedaba frenado aunque el mouse estuviera en otro lado.
+   *
+   * Si el panel se abrió con el mouse o el dedo, al cerrarlo se suelta ese
+   * foco. Si se abrió con el teclado, se deja: ahí la pausa es lo correcto.
+   */
+  let abiertoConPuntero = false;
+
+  const soltarFocoDelRiel = () => {
+    if (!abiertoConPuntero) return;
+    // Después de que el navegador devolvió el foco, no antes.
+    requestAnimationFrame(() => {
+      const activo = document.activeElement;
+      if (activo instanceof HTMLElement && activo.closest(".riel")) activo.blur();
+    });
+  };
+
   const abrir = (panel: HTMLDialogElement) => {
     const previo = abierto();
     // Cambiar de un panel a otro no toca el historial: el pushState que viene
@@ -71,6 +91,7 @@ export const conectarPaneles = (): void => {
     const esNuestroPaso = history.state?.panel === panel.dataset.panelRuta;
 
     if (panel.open) cerrarDialogo(panel);
+    soltarFocoDelRiel();
     if (!esNuestroPaso) return;
 
     volviendo = true;
@@ -113,6 +134,7 @@ export const conectarPaneles = (): void => {
     if (!panel) return;
 
     evento.preventDefault();
+    abiertoConPuntero = evento.detail > 0;
     abrir(panel);
     history.pushState(
       { panel: panel.dataset.panelRuta },
@@ -152,6 +174,9 @@ export const conectarPaneles = (): void => {
     }
 
     const visible = abierto();
-    if (visible) cerrarDialogo(visible);
+    if (visible) {
+      cerrarDialogo(visible);
+      soltarFocoDelRiel();
+    }
   });
 };
