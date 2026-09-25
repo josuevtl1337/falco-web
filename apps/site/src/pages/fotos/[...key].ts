@@ -17,6 +17,8 @@ export const GET: APIRoute = async ({ params }) => {
     headers: {
       "content-type": foto.httpMetadata?.contentType ?? "image/webp",
       "cache-control": "public, max-age=31536000, immutable",
+      // Que el navegador no adivine otro tipo: se sirve como imagen y punto.
+      "x-content-type-options": "nosniff",
       etag: foto.httpEtag,
     },
   });

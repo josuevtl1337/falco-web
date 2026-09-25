@@ -344,6 +344,56 @@ describe("la ficha de un producto", () => {
     expect(despues!.options[0]!.isAvailable).toBe(false);
   });
 
+  // Pasó en la revisión: intercambiar los nombres violaba UNIQUE(product_id,
+  // label) a mitad de camino, daba un 500 y dejaba el producto a medias.
+  it("intercambiar los nombres de dos moliendas se guarda entero", async () => {
+    const [huila] = await listShelfForAdmin(db, "coffee");
+    const [grano, molido] = huila!.options;
+    const r = await saveProduct(
+      db,
+      huila!.id,
+      {
+        product: { ...kit, kind: "coffee", name: "Huila editado", detail: huila!.detail },
+        coffee: origen,
+        options: [
+          { id: grano!.id, label: "Molido", isAvailable: true },
+          { id: molido!.id, label: "En grano", isAvailable: true },
+        ],
+      },
+      QUIEN,
+    );
+    expect(r.ok).toBe(true);
+    const [despues] = await listShelfForAdmin(db, "coffee");
+    expect(despues!.name).toBe("Huila editado");
+    expect(despues!.options.map((o) => [o.id, o.label])).toEqual([
+      [grano!.id, "Molido"],
+      [molido!.id, "En grano"],
+    ]);
+  });
+
+  it("si algo falla a mitad de camino, no queda nada guardado a medias", async () => {
+    const [huila] = await listShelfForAdmin(db, "coffee");
+    const antes = valor<{ n: number }>("SELECT count(*) AS n FROM coffees").n;
+    // Se fuerza una falla en la última escritura (las moliendas) con un
+    // trigger: el café y el producto, escritos antes, tienen que deshacerse.
+    real.exec("CREATE TRIGGER romper BEFORE INSERT ON product_options BEGIN SELECT RAISE(ABORT, 'roto'); END;");
+    const r = await saveProduct(
+      db,
+      undefined,
+      {
+        product: { ...kit, kind: "coffee", name: "Nuevo café", detail: "250 g" },
+        coffee: origen,
+        options: [{ label: "En grano", isAvailable: true }],
+      },
+      QUIEN,
+    );
+    real.exec("DROP TRIGGER romper;");
+    expect(r.ok).toBe(false);
+    expect(valor<{ n: number }>("SELECT count(*) AS n FROM coffees").n).toBe(antes);
+    expect(valor<{ n: number }>("SELECT count(*) AS n FROM products WHERE name = 'Nuevo café'").n).toBe(0);
+    expect(huila).toBeDefined();
+  });
+
   it("editar no cambia la dirección del producto, aunque cambie el nombre", async () => {
     const [prensa] = (await listShelfForAdmin(db, "kits")).filter((p) => p.slug === "prensa");
     await saveProduct(db, prensa!.id, { product: { ...kit, name: "Prensa francesa" }, options: [] }, QUIEN);
@@ -375,6 +425,37 @@ describe("la ficha de un producto", () => {
 });
 
 describe("la foto de un producto", () => {
+  it("si la foto cambió mientras tanto (otra pestaña), no pisa ni devuelve una clave equivocada", async () => {
+    await setProductImage(db, 2, "productos/2-aaa.webp", QUIEN);
+    // Otra pestaña cambia la foto justo después de que ésta leyó la actual.
+    const conOtraPestana: WritableDb = {
+      ...db,
+      prepare(sql: string) {
+        const statement = db.prepare(sql);
+        if (!sql.startsWith("SELECT image_key")) return statement;
+        return {
+          ...statement,
+          bind: (...values: unknown[]) => {
+            const bound = statement.bind(...values);
+            return {
+              ...bound,
+              first: <T,>() => {
+                const leido = bound.first<T>();
+                real.prepare("UPDATE products SET image_key = 'productos/2-otra.webp' WHERE id = 2").run();
+                return leido;
+              },
+            };
+          },
+        };
+      },
+    };
+    const r = await setProductImage(conOtraPestana, 2, "productos/2-mia.webp", QUIEN);
+    expect(r.ok).toBe(false);
+    expect(valor<{ image_key: string }>("SELECT image_key FROM products WHERE id = 2").image_key).toBe(
+      "productos/2-otra.webp",
+    );
+  });
+
   it("guarda la clave nueva y devuelve la anterior para borrarla", async () => {
     const primera = await setProductImage(db, 2, "productos/2-aaa.webp", QUIEN);
     expect(primera).toEqual({ ok: true, previousKey: null });

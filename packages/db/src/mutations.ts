@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { WritableDb, WritableStatement } from "./queries";
+import { allRows, type WritableDb, type WritableStatement } from "./queries";
 import { slugify } from "./slug";
 import {
   coffeeInputSchema,
@@ -253,6 +253,37 @@ function coffeeValues(data: z.output<typeof coffeeInputSchema>): unknown[] {
   ];
 }
 
+/** Los cafés de tolva y los de la tienda tienen las mismas columnas. */
+type CoffeeTable = "coffees" | "hopper_coffees";
+
+const insertCoffee = (
+  db: WritableDb,
+  table: CoffeeTable,
+  data: z.output<typeof coffeeInputSchema>,
+  by: string,
+  returning = false,
+): WritableStatement =>
+  db
+    .prepare(
+      `INSERT INTO ${table} (${COFFEE_COLUMNS.join(", ")}, updated_by)
+       VALUES (${COFFEE_COLUMNS.map(() => "?").join(", ")}, ?)${returning ? " RETURNING id" : ""}`,
+    )
+    .bind(...coffeeValues(data), by);
+
+const updateCoffee = (
+  db: WritableDb,
+  table: CoffeeTable,
+  id: number,
+  data: z.output<typeof coffeeInputSchema>,
+  by: string,
+): WritableStatement =>
+  db
+    .prepare(
+      `UPDATE ${table} SET ${COFFEE_COLUMNS.map((c) => `${c} = ?`).join(", ")},
+         updated_at = ${NOW}, updated_by = ? WHERE id = ?`,
+    )
+    .bind(...coffeeValues(data), by, id);
+
 const GONE = "Ese café ya no existe. Puede que alguien lo haya borrado.";
 
 export async function createHopperCoffee(
@@ -263,13 +294,9 @@ export async function createHopperCoffee(
   const parsed = coffeeInputSchema.safeParse(input);
   if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error) };
 
-  const row = await db
-    .prepare(
-      `INSERT INTO hopper_coffees (${COFFEE_COLUMNS.join(", ")}, updated_by)
-       VALUES (${COFFEE_COLUMNS.map(() => "?").join(", ")}, ?) RETURNING id`,
-    )
-    .bind(...coffeeValues(parsed.data), by)
-    .first<{ id: number }>();
+  const row = await insertCoffee(db, "hopper_coffees", parsed.data, by, true).first<{
+    id: number;
+  }>();
   if (!row) return fail("No se pudo guardar el café. Probá de nuevo.");
   return { ok: true, id: row.id };
 }
@@ -285,13 +312,7 @@ export async function updateHopperCoffee(
   if (!(await exists(db, "SELECT 1 FROM hopper_coffees WHERE id = ?", id)))
     return fail(GONE);
 
-  await db
-    .prepare(
-      `UPDATE hopper_coffees SET ${COFFEE_COLUMNS.map((c) => `${c} = ?`).join(", ")},
-         updated_at = ${NOW}, updated_by = ? WHERE id = ?`,
-    )
-    .bind(...coffeeValues(parsed.data), by, id)
-    .run();
+  await updateCoffee(db, "hopper_coffees", id, parsed.data, by).run();
   return { ok: true };
 }
 
@@ -339,11 +360,9 @@ export async function reorderShelf(
   ids: number[],
   by: string,
 ): Promise<MutationResult> {
-  const rows = await db
-    .prepare("SELECT id FROM products WHERE shelf = ?")
-    .bind(shelf)
-    .all<{ id: number }>();
-  const actuales = (Array.isArray(rows) ? rows : rows.results).map((r) => r.id);
+  const actuales = (
+    await allRows<{ id: number }>(db.prepare("SELECT id FROM products WHERE shelf = ?").bind(shelf))
+  ).map((r) => r.id);
   const mismos =
     ids.length === actuales.length &&
     new Set(ids).size === ids.length &&
@@ -460,9 +479,10 @@ function validateProduct(draft: ProductDraft):
 
 /**
  * Crea (`id` undefined) o edita un producto, con su origen si es café y sus
- * moliendas. Al editar, la dirección (`slug`) no cambia aunque cambie el
- * nombre: es el link que alguien pudo haber compartido. Y las moliendas
- * conservan su id: el pedido guardado de un cliente apunta a ese id.
+ * moliendas. Todo va en un solo batch: o se guarda entero o no se guarda
+ * nada. Al editar, la dirección (`slug`) no cambia aunque cambie el nombre:
+ * es el link que alguien pudo haber compartido. Y las moliendas conservan su
+ * id: el pedido guardado de un cliente apunta a ese id.
  */
 export async function saveProduct(
   db: WritableDb,
@@ -482,35 +502,24 @@ export async function saveProduct(
     : undefined;
   if (id && !current) return fail(GONE_PRODUCT);
 
-  // El origen primero: el producto necesita su id. Si es un café que ya tenía
-  // origen, se actualiza el mismo.
-  let coffeeId: number | null = null;
-  if (coffee) {
-    if (current?.coffee_id) {
-      await db
-        .prepare(
-          `UPDATE coffees SET ${COFFEE_COLUMNS.map((c) => `${c} = ?`).join(", ")},
-             updated_at = ${NOW}, updated_by = ? WHERE id = ?`,
-        )
-        .bind(...coffeeValues(coffee), by, current.coffee_id)
-        .run();
-      coffeeId = current.coffee_id;
-    } else {
-      const row = await db
-        .prepare(
-          `INSERT INTO coffees (${COFFEE_COLUMNS.join(", ")}, updated_by)
-           VALUES (${COFFEE_COLUMNS.map(() => "?").join(", ")}, ?) RETURNING id`,
-        )
-        .bind(...coffeeValues(coffee), by)
-        .first<{ id: number }>();
-      coffeeId = row?.id ?? null;
-    }
+  const statements: WritableStatement[] = [];
+
+  // 1. El origen. Si hay que crearlo, el producto lo toma con
+  //    last_insert_rowid(), que en el batch es la sentencia de antes.
+  let coffeeRef = "NULL";
+  const coffeeValuesRef: unknown[] = [];
+  if (coffee && current?.coffee_id) {
+    statements.push(updateCoffee(db, "coffees", current.coffee_id, coffee, by));
+    coffeeRef = "?";
+    coffeeValuesRef.push(current.coffee_id);
+  } else if (coffee) {
+    statements.push(insertCoffee(db, "coffees", coffee, by));
+    coffeeRef = "last_insert_rowid()";
   }
 
   const values = [
     product.kind,
     product.shelf,
-    coffeeId,
     product.name,
     product.detail,
     product.description ?? null,
@@ -521,64 +530,78 @@ export async function saveProduct(
     product.askStock ? 1 : 0,
   ];
 
-  let productId: number;
+  // 2. El producto. Las moliendas nuevas lo encuentran por su dirección.
+  const slug = current?.slug ?? (await freeSlug(db, product.name));
+  const productRef = "(SELECT id FROM products WHERE slug = ?)";
   if (!current) {
-    const row = await db
-      .prepare(
-        `INSERT INTO products (slug, kind, shelf, coffee_id, name, detail, description,
-           price_card_ars, price_cash_ars, is_new, is_visible, ask_stock, sort_order, updated_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
-      )
-      .bind(await freeSlug(db, product.name), ...values, await nextSortOrder(db, product.shelf), by)
-      .first<{ id: number }>();
-    if (!row) return fail("No se pudo guardar el producto. Probá de nuevo.");
-    productId = row.id;
+    statements.push(
+      db
+        .prepare(
+          `INSERT INTO products (slug, kind, shelf, name, detail, description, price_card_ars,
+             price_cash_ars, is_new, is_visible, ask_stock, coffee_id, sort_order, updated_by)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ${coffeeRef}, ?, ?)`,
+        )
+        .bind(slug, ...values, ...coffeeValuesRef, await nextSortOrder(db, product.shelf), by),
+    );
   } else {
-    productId = current.id;
     // Si cambió de estante, va al final del nuevo.
     const sortOrder =
       current.shelf === product.shelf ? current.sort_order : await nextSortOrder(db, product.shelf);
-    await db
-      .prepare(
-        `UPDATE products SET kind = ?, shelf = ?, coffee_id = ?, name = ?, detail = ?,
-           description = ?, price_card_ars = ?, price_cash_ars = ?, is_new = ?, is_visible = ?,
-           ask_stock = ?, sort_order = ?, updated_at = ${NOW}, updated_by = ? WHERE id = ?`,
-      )
-      .bind(...values, sortOrder, by, productId)
-      .run();
+    statements.push(
+      db
+        .prepare(
+          `UPDATE products SET kind = ?, shelf = ?, name = ?, detail = ?, description = ?,
+             price_card_ars = ?, price_cash_ars = ?, is_new = ?, is_visible = ?, ask_stock = ?,
+             coffee_id = ${coffeeRef}, sort_order = ?, updated_at = ${NOW}, updated_by = ?
+           WHERE id = ?`,
+        )
+        .bind(...values, ...coffeeValuesRef, sortOrder, by, current.id),
+    );
   }
 
-  // Las moliendas: se actualizan las que tienen id, se crean las nuevas y se
-  // borran las que ya no están.
-  const existing = await db
-    .prepare("SELECT id FROM product_options WHERE product_id = ?")
-    .bind(productId)
-    .all<{ id: number }>();
-  const existingIds = (Array.isArray(existing) ? existing : existing.results).map((r) => r.id);
-  const keptIds = draft.options.map((o) => o.id).filter((x): x is number => x !== undefined);
+  // 3. Las moliendas: se borran las que ya no están, se actualizan las que
+  //    tienen id y se crean las nuevas. Antes de poner los nombres finales,
+  //    las que se quedan pasan por un nombre provisorio único: si no,
+  //    intercambiar "En grano" y "Molido" chocaba con UNIQUE(product_id, label).
+  const existingIds = current
+    ? (
+        await allRows<{ id: number }>(
+          db.prepare("SELECT id FROM product_options WHERE product_id = ?").bind(current.id),
+        )
+      ).map((r) => r.id)
+    : [];
+  const keptIds = draft.options
+    .map((o) => o.id)
+    .filter((x): x is number => x !== undefined && existingIds.includes(x));
 
-  const statements: WritableStatement[] = existingIds
-    .filter((optionId) => !keptIds.includes(optionId))
-    .map((optionId) => db.prepare("DELETE FROM product_options WHERE id = ?").bind(optionId));
+  for (const optionId of existingIds.filter((x) => !keptIds.includes(x))) {
+    statements.push(db.prepare("DELETE FROM product_options WHERE id = ?").bind(optionId));
+  }
+  for (const optionId of keptIds) {
+    statements.push(
+      db.prepare("UPDATE product_options SET label = '~' || id WHERE id = ?").bind(optionId),
+    );
+  }
   options.forEach((option, index) => {
     const optionId = draft.options[index]?.id;
     statements.push(
-      optionId && existingIds.includes(optionId)
+      optionId !== undefined && keptIds.includes(optionId)
         ? db
             .prepare(
               `UPDATE product_options SET label = ?, is_available = ?, sort_order = ?,
-                 updated_at = ${NOW}, updated_by = ? WHERE id = ? AND product_id = ?`,
+                 updated_at = ${NOW}, updated_by = ? WHERE id = ?`,
             )
-            .bind(option.label, option.isAvailable ? 1 : 0, index + 1, by, optionId, productId)
+            .bind(option.label, option.isAvailable ? 1 : 0, index + 1, by, optionId)
         : db
             .prepare(
-              "INSERT INTO product_options (product_id, label, is_available, sort_order, updated_by) VALUES (?, ?, ?, ?, ?)",
+              `INSERT INTO product_options (product_id, label, is_available, sort_order, updated_by)
+               VALUES (${productRef}, ?, ?, ?, ?)`,
             )
-            .bind(productId, option.label, option.isAvailable ? 1 : 0, index + 1, by),
+            .bind(slug, option.label, option.isAvailable ? 1 : 0, index + 1, by),
     );
   });
 
-  // Dejó de ser café: su origen ya no sirve.
+  // 4. Dejó de ser café: su origen ya no sirve.
   if (current?.coffee_id && !coffee) {
     statements.push(
       db
@@ -588,8 +611,23 @@ export async function saveProduct(
         .bind(current.coffee_id, current.coffee_id),
     );
   }
-  if (statements.length > 0) await db.batch(statements);
-  return { ok: true, id: productId };
+
+  try {
+    await db.batch(statements);
+  } catch (error) {
+    // Dos productos nuevos con el mismo nombre al mismo tiempo: el segundo
+    // choca con la dirección. Nada quedó guardado; se puede volver a probar.
+    if (String(error).includes("UNIQUE") && !current)
+      return fail("Justo se creó otro producto con ese nombre. Probá de nuevo.");
+    return fail("No se pudo guardar el producto. No se cambió nada; probá de nuevo.");
+  }
+
+  const saved = await db
+    .prepare("SELECT id FROM products WHERE slug = ?")
+    .bind(slug)
+    .first<{ id: number }>();
+  if (!saved) return fail("No se pudo guardar el producto. Probá de nuevo.");
+  return { ok: true, id: saved.id };
 }
 
 /** Borra un producto con sus moliendas y, si es un café, su origen. */
@@ -619,6 +657,9 @@ export async function deleteProduct(db: WritableDb, id: number): Promise<Mutatio
 /**
  * La foto de un producto: guarda la clave nueva y devuelve la anterior, para
  * que quien la subió la borre del bucket. La base no toca R2.
+ *
+ * Sólo escribe si la foto sigue siendo la que leyó: si otra pestaña la
+ * cambió en el medio, devolver esa "anterior" haría borrar una foto en uso.
  */
 export async function setProductImage(
   db: WritableDb,
@@ -631,9 +672,17 @@ export async function setProductImage(
     .bind(id)
     .first<{ image_key: string | null }>();
   if (!current) return fail(GONE_PRODUCT);
-  await db
-    .prepare(`UPDATE products SET image_key = ?, updated_at = ${NOW}, updated_by = ? WHERE id = ?`)
-    .bind(key, by, id)
-    .run();
+
+  const result = (await db
+    .prepare(
+      `UPDATE products SET image_key = ?, updated_at = ${NOW}, updated_by = ?
+       WHERE id = ? AND image_key IS ?`,
+    )
+    .bind(key, by, id, current.image_key)
+    .run()) as { changes?: number; meta?: { changes?: number } } | undefined;
+  // D1 cuenta las filas en meta.changes; better-sqlite3, en changes.
+  const changes = result?.meta?.changes ?? result?.changes;
+  if (changes === 0)
+    return fail("La foto cambió mientras tanto. Recargá la página y probá de nuevo.");
   return { ok: true, previousKey: current.image_key };
 }

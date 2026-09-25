@@ -42,7 +42,8 @@ async function firstRow<T>(statement: PreparedLike): Promise<T | undefined> {
   return value ?? undefined;
 }
 
-async function allRows<T>(statement: PreparedLike): Promise<T[]> {
+/** D1 devuelve { results }; better-sqlite3, el arreglo suelto. */
+export async function allRows<T>(statement: PreparedLike): Promise<T[]> {
   const value = await statement.all<T>();
   return Array.isArray(value) ? value : value.results;
 }
