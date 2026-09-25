@@ -49,7 +49,10 @@ const nuevaFila = (caja: HTMLElement): HTMLElement | null => {
   if (!modelo) return null;
   const fila = modelo.cloneNode(true) as HTMLElement;
   for (const input of fila.querySelectorAll("input")) input.value = "";
-  caja.querySelector("[data-sumar]")?.before(fila);
+  // insertBefore y no before(): los tipos de Cloudflare pisan los del DOM
+  // (ver docs/superpowers/notes/2026-09-24-estado.md).
+  const sumar = caja.querySelector("[data-sumar]");
+  sumar?.parentNode?.insertBefore(fila, sumar);
   return fila;
 };
 

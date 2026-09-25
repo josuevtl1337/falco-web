@@ -65,7 +65,7 @@ const hayErrores = Object.keys(errores).length > 0;
               <legend class="semana__nombre">{DIAS[dia.weekday]}</legend>
               <Tramos
                 prefijo={`d${dia.weekday}`}
-                nombre={DIAS[dia.weekday]}
+                nombre={DIAS[dia.weekday] ?? ""}
                 tramos={dia.tramos}
                 abierto={dia.abierto}
                 errores={erroresDe(errores, String(dia.weekday))}
