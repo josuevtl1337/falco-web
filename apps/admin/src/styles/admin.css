@@ -225,6 +225,11 @@ button.enlace {
     grid-column: 2;
   }
 
+  /* La barra lateral ya dice "Falco · admin". */
+  .barra .marca {
+    visibility: hidden;
+  }
+
   .barra {
     padding-inline: 32px;
   }

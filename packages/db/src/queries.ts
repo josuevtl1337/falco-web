@@ -75,6 +75,18 @@ export async function getHopperCoffee(
   return row ? toCoffee(row) : undefined;
 }
 
+/** Cuántos productos se ven en la tienda y cuántos están ocultos. */
+export async function countProducts(
+  db: ReadableDb,
+): Promise<{ visible: number; hidden: number }> {
+  const row = await firstRow<{ visible: number | null; hidden: number | null }>(
+    db.prepare(
+      "SELECT sum(is_visible = 1) AS visible, sum(is_visible = 0) AS hidden FROM products",
+    ),
+  );
+  return { visible: row?.visible ?? 0, hidden: row?.hidden ?? 0 };
+}
+
 /** Los cafés de tolva, para elegir cuál poner. */
 export async function listHopperCoffees(db: ReadableDb): Promise<Coffee[]> {
   const rows = await allRows<CoffeeRow>(

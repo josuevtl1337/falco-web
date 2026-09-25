@@ -2,6 +2,7 @@ import Database from "better-sqlite3";
 import { readFileSync } from "node:fs";
 import { beforeAll, describe, expect, it } from "vitest";
 import {
+  countProducts,
   getHopperCoffee,
   getProductBySlug,
   getSettings,
@@ -199,5 +200,14 @@ describe("getUpcomingSpecialDays", () => {
     expect(christmas?.shifts).toEqual([
       { opensAt: "16:00", closesAt: "20:00" },
     ]);
+  });
+});
+
+describe("countProducts", () => {
+  it("cuenta los visibles y los ocultos por separado", async () => {
+    const { visible, hidden } = await countProducts(db);
+    expect(visible).toBeGreaterThan(0);
+    // El seed tiene un único borrador oculto.
+    expect(hidden).toBe(1);
   });
 });

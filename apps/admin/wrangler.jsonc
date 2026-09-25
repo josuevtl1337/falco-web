@@ -21,5 +21,7 @@
   "vars": {
     "ACCESS_TEAM": "",
     "ACCESS_AUD": "",
+    // A dónde lleva "Ver el sitio". En desarrollo, .dev.vars lo cambia.
+    "SITE_URL": "https://falcocafe.com.ar",
   },
 }
