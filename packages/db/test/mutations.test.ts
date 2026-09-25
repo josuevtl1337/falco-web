@@ -2,7 +2,9 @@ import type Database from "better-sqlite3";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   createHopperCoffee,
+  deleteProduct,
   reorderShelf,
+  saveProduct,
   deleteHopperCoffee,
   deleteSpecialDay,
   saveSettings,
@@ -264,5 +266,109 @@ describe("el orden de un estante", () => {
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.reason).toMatch(/Recargá/);
     expect((await listShelfForAdmin(db, "kits")).map((p) => p.id)).toEqual(antes);
+  });
+});
+
+describe("la ficha de un producto", () => {
+  const kit = {
+    kind: "gear" as const,
+    name: "Molinillo manual",
+    detail: "Para moler en casa",
+    priceCashArs: 90000,
+    priceCardArs: 95000,
+    isNew: true,
+    isVisible: true,
+    askStock: false,
+  };
+  const origen = { ...cafe, name: "Tarrazú", country: "Costa Rica" };
+
+  it("un accesorio nuevo va al estante de kits, al final, con su dirección armada", async () => {
+    const r = await saveProduct(db, undefined, { product: kit, options: [] }, QUIEN);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const kits = await listShelfForAdmin(db, "kits");
+    expect(kits.at(-1)?.id).toBe(r.id);
+    expect(kits.at(-1)?.slug).toBe("molinillo-manual");
+    expect(kits.at(-1)?.shelf).toBe("kits");
+  });
+
+  it("dos productos con el mismo nombre no chocan: la dirección suma un número", async () => {
+    await saveProduct(db, undefined, { product: kit, options: [] }, QUIEN);
+    const r = await saveProduct(db, undefined, { product: kit, options: [] }, QUIEN);
+    expect(r.ok).toBe(true);
+    const slugs = (await listShelfForAdmin(db, "kits")).map((p) => p.slug);
+    expect(slugs).toContain("molinillo-manual-2");
+  });
+
+  it("un café nuevo crea su origen y sus moliendas", async () => {
+    const r = await saveProduct(
+      db,
+      undefined,
+      {
+        product: { ...kit, kind: "coffee", name: "Tarrazú · Costa Rica", detail: "250 g" },
+        coffee: origen,
+        options: [{ label: "En grano", isAvailable: true }, { label: "Molido", isAvailable: false }],
+      },
+      QUIEN,
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const [nuevo] = (await listShelfForAdmin(db, "coffee")).filter((p) => p.id === r.id);
+    expect(nuevo?.coffeeId).toBeDefined();
+    expect(nuevo?.options.map((o) => [o.label, o.isAvailable])).toEqual([
+      ["En grano", true],
+      ["Molido", false],
+    ]);
+  });
+
+  it("editar una molienda conserva su id: los pedidos guardados la siguen encontrando", async () => {
+    const [huila] = await listShelfForAdmin(db, "coffee");
+    const [grano, molido] = huila!.options;
+    const r = await saveProduct(
+      db,
+      huila!.id,
+      {
+        product: { ...kit, kind: "coffee", name: huila!.name, detail: huila!.detail },
+        coffee: origen,
+        options: [
+          { id: grano!.id, label: "En grano", isAvailable: false },
+          { id: molido!.id, label: "Molido", isAvailable: true },
+        ],
+      },
+      QUIEN,
+    );
+    expect(r.ok).toBe(true);
+    const [despues] = await listShelfForAdmin(db, "coffee");
+    expect(despues!.options.map((o) => o.id)).toEqual([grano!.id, molido!.id]);
+    expect(despues!.options[0]!.isAvailable).toBe(false);
+  });
+
+  it("editar no cambia la dirección del producto, aunque cambie el nombre", async () => {
+    const [prensa] = (await listShelfForAdmin(db, "kits")).filter((p) => p.slug === "prensa");
+    await saveProduct(db, prensa!.id, { product: { ...kit, name: "Prensa francesa" }, options: [] }, QUIEN);
+    const [despues] = (await listShelfForAdmin(db, "kits")).filter((p) => p.id === prensa!.id);
+    expect(despues!.name).toBe("Prensa francesa");
+    expect(despues!.slug).toBe("prensa");
+  });
+
+  it("un precio con centavos o un café sin origen dicen qué falta", async () => {
+    const r = await saveProduct(
+      db,
+      undefined,
+      { product: { ...kit, kind: "coffee", priceCashArs: 12.5 }, options: [] },
+      QUIEN,
+    );
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.errors.priceCashArs).toMatch(/sin centavos/);
+      expect(r.errors["coffee.name"]).toBeDefined();
+    }
+  });
+
+  it("borrar un café se lleva su origen y sus moliendas", async () => {
+    const [huila] = await listShelfForAdmin(db, "coffee");
+    expect(await deleteProduct(db, huila!.id)).toEqual({ ok: true });
+    expect(valor<{ n: number }>("SELECT count(*) AS n FROM coffees WHERE id = ?", huila!.coffeeId).n).toBe(0);
+    expect(valor<{ n: number }>("SELECT count(*) AS n FROM product_options WHERE product_id = ?", huila!.id).n).toBe(0);
   });
 });

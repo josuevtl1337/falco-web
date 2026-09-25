@@ -1,7 +1,10 @@
 import type { z } from "zod";
 import type { WritableDb, WritableStatement } from "./queries";
+import { slugify } from "./slug";
 import {
   coffeeInputSchema,
+  productInputSchema,
+  productOptionInputSchema,
   settingsSchema,
   specialDaySchema,
   weekHoursSchema,
@@ -359,5 +362,256 @@ export async function reorderShelf(
         .bind(index + 1, by, id),
     ),
   );
+  return { ok: true };
+}
+
+export type ProductOptionDraft = {
+  /** El id de una molienda que ya existe; sin id, es nueva. */
+  id?: number;
+  label: string;
+  isAvailable: boolean;
+};
+
+export type ProductDraft = {
+  product: {
+    kind: "coffee" | "gear" | "kit" | "apparel";
+    name: string;
+    detail: string;
+    description?: string | null;
+    priceCashArs: number;
+    priceCardArs: number;
+    isNew: boolean;
+    isVisible: boolean;
+    askStock: boolean;
+  };
+  /** El origen y el perfil: obligatorio si el producto es un café. */
+  coffee?: CoffeeDraft;
+  options: ProductOptionDraft[];
+};
+
+/** El estante sale del tipo: un café nunca puede terminar entre los kits. */
+const shelfFor = (kind: ProductDraft["product"]["kind"]) =>
+  kind === "coffee" ? "coffee" : "kits";
+
+const GONE_PRODUCT = "Ese producto ya no existe. Puede que alguien lo haya borrado.";
+
+type ProductRowLite = {
+  id: number;
+  slug: string;
+  shelf: string;
+  coffee_id: number | null;
+  sort_order: number;
+};
+
+async function nextSortOrder(db: WritableDb, shelf: string): Promise<number> {
+  const row = await db
+    .prepare("SELECT coalesce(max(sort_order), 0) AS n FROM products WHERE shelf = ?")
+    .bind(shelf)
+    .first<{ n: number }>();
+  return (row?.n ?? 0) + 1;
+}
+
+/** "molinillo-manual", o "molinillo-manual-2" si ya hay uno. */
+async function freeSlug(db: WritableDb, name: string): Promise<string> {
+  const base = slugify(name) || "producto";
+  for (let n = 1; ; n++) {
+    const slug = n === 1 ? base : `${base}-${n}`;
+    if (!(await exists(db, "SELECT 1 FROM products WHERE slug = ?", slug))) return slug;
+  }
+}
+
+function validateProduct(draft: ProductDraft):
+  | { ok: true; product: z.output<typeof productInputSchema>; coffee?: z.output<typeof coffeeInputSchema>; options: z.output<typeof productOptionInputSchema>[] }
+  | { ok: false; errors: Record<string, string> } {
+  const errors: Record<string, string> = {};
+  const product = productInputSchema.safeParse({
+    ...draft.product,
+    // La dirección y el orden los decide el guardado, no el formulario.
+    slug: "producto",
+    shelf: shelfFor(draft.product.kind),
+    sortOrder: 0,
+  });
+  if (!product.success) Object.assign(errors, fieldErrors(product.error));
+
+  let coffee: z.output<typeof coffeeInputSchema> | undefined;
+  if (draft.product.kind === "coffee") {
+    const parsed = coffeeInputSchema.safeParse(draft.coffee ?? {});
+    if (parsed.success) coffee = parsed.data;
+    else
+      for (const [key, message] of Object.entries(fieldErrors(parsed.error)))
+        errors[`coffee.${key}`] ??= message;
+  }
+
+  const options: z.output<typeof productOptionInputSchema>[] = [];
+  draft.options.forEach((option, index) => {
+    const parsed = productOptionInputSchema.safeParse({ ...option, sortOrder: index + 1 });
+    if (parsed.success) options.push(parsed.data);
+    else
+      for (const [key, message] of Object.entries(fieldErrors(parsed.error)))
+        errors[`options.${index}.${key}`] ??= message;
+  });
+  const labels = options.map((o) => o.label.toLowerCase());
+  if (new Set(labels).size !== labels.length)
+    errors.options = "Hay dos moliendas con el mismo nombre.";
+
+  if (Object.keys(errors).length > 0 || !product.success) return { ok: false, errors };
+  return { ok: true, product: product.data, coffee, options };
+}
+
+/**
+ * Crea (`id` undefined) o edita un producto, con su origen si es café y sus
+ * moliendas. Al editar, la dirección (`slug`) no cambia aunque cambie el
+ * nombre: es el link que alguien pudo haber compartido. Y las moliendas
+ * conservan su id: el pedido guardado de un cliente apunta a ese id.
+ */
+export async function saveProduct(
+  db: WritableDb,
+  id: number | undefined,
+  draft: ProductDraft,
+  by: string,
+): Promise<MutationResult<{ id: number }>> {
+  const valid = validateProduct(draft);
+  if (!valid.ok) return { ok: false, errors: valid.errors };
+  const { product, coffee, options } = valid;
+
+  const current = id
+    ? await db
+        .prepare("SELECT id, slug, shelf, coffee_id, sort_order FROM products WHERE id = ?")
+        .bind(id)
+        .first<ProductRowLite>()
+    : undefined;
+  if (id && !current) return fail(GONE_PRODUCT);
+
+  // El origen primero: el producto necesita su id. Si es un café que ya tenía
+  // origen, se actualiza el mismo.
+  let coffeeId: number | null = null;
+  if (coffee) {
+    if (current?.coffee_id) {
+      await db
+        .prepare(
+          `UPDATE coffees SET ${COFFEE_COLUMNS.map((c) => `${c} = ?`).join(", ")},
+             updated_at = ${NOW}, updated_by = ? WHERE id = ?`,
+        )
+        .bind(...coffeeValues(coffee), by, current.coffee_id)
+        .run();
+      coffeeId = current.coffee_id;
+    } else {
+      const row = await db
+        .prepare(
+          `INSERT INTO coffees (${COFFEE_COLUMNS.join(", ")}, updated_by)
+           VALUES (${COFFEE_COLUMNS.map(() => "?").join(", ")}, ?) RETURNING id`,
+        )
+        .bind(...coffeeValues(coffee), by)
+        .first<{ id: number }>();
+      coffeeId = row?.id ?? null;
+    }
+  }
+
+  const values = [
+    product.kind,
+    product.shelf,
+    coffeeId,
+    product.name,
+    product.detail,
+    product.description ?? null,
+    product.priceCardArs,
+    product.priceCashArs,
+    product.isNew ? 1 : 0,
+    product.isVisible ? 1 : 0,
+    product.askStock ? 1 : 0,
+  ];
+
+  let productId: number;
+  if (!current) {
+    const row = await db
+      .prepare(
+        `INSERT INTO products (slug, kind, shelf, coffee_id, name, detail, description,
+           price_card_ars, price_cash_ars, is_new, is_visible, ask_stock, sort_order, updated_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
+      )
+      .bind(await freeSlug(db, product.name), ...values, await nextSortOrder(db, product.shelf), by)
+      .first<{ id: number }>();
+    if (!row) return fail("No se pudo guardar el producto. Probá de nuevo.");
+    productId = row.id;
+  } else {
+    productId = current.id;
+    // Si cambió de estante, va al final del nuevo.
+    const sortOrder =
+      current.shelf === product.shelf ? current.sort_order : await nextSortOrder(db, product.shelf);
+    await db
+      .prepare(
+        `UPDATE products SET kind = ?, shelf = ?, coffee_id = ?, name = ?, detail = ?,
+           description = ?, price_card_ars = ?, price_cash_ars = ?, is_new = ?, is_visible = ?,
+           ask_stock = ?, sort_order = ?, updated_at = ${NOW}, updated_by = ? WHERE id = ?`,
+      )
+      .bind(...values, sortOrder, by, productId)
+      .run();
+  }
+
+  // Las moliendas: se actualizan las que tienen id, se crean las nuevas y se
+  // borran las que ya no están.
+  const existing = await db
+    .prepare("SELECT id FROM product_options WHERE product_id = ?")
+    .bind(productId)
+    .all<{ id: number }>();
+  const existingIds = (Array.isArray(existing) ? existing : existing.results).map((r) => r.id);
+  const keptIds = draft.options.map((o) => o.id).filter((x): x is number => x !== undefined);
+
+  const statements: WritableStatement[] = existingIds
+    .filter((optionId) => !keptIds.includes(optionId))
+    .map((optionId) => db.prepare("DELETE FROM product_options WHERE id = ?").bind(optionId));
+  options.forEach((option, index) => {
+    const optionId = draft.options[index]?.id;
+    statements.push(
+      optionId && existingIds.includes(optionId)
+        ? db
+            .prepare(
+              `UPDATE product_options SET label = ?, is_available = ?, sort_order = ?,
+                 updated_at = ${NOW}, updated_by = ? WHERE id = ? AND product_id = ?`,
+            )
+            .bind(option.label, option.isAvailable ? 1 : 0, index + 1, by, optionId, productId)
+        : db
+            .prepare(
+              "INSERT INTO product_options (product_id, label, is_available, sort_order, updated_by) VALUES (?, ?, ?, ?, ?)",
+            )
+            .bind(productId, option.label, option.isAvailable ? 1 : 0, index + 1, by),
+    );
+  });
+
+  // Dejó de ser café: su origen ya no sirve.
+  if (current?.coffee_id && !coffee) {
+    statements.push(
+      db
+        .prepare(
+          "DELETE FROM coffees WHERE id = ? AND NOT EXISTS (SELECT 1 FROM products WHERE coffee_id = ?)",
+        )
+        .bind(current.coffee_id, current.coffee_id),
+    );
+  }
+  if (statements.length > 0) await db.batch(statements);
+  return { ok: true, id: productId };
+}
+
+/** Borra un producto con sus moliendas y, si es un café, su origen. */
+export async function deleteProduct(db: WritableDb, id: number): Promise<MutationResult> {
+  const current = await db
+    .prepare("SELECT id, slug, shelf, coffee_id, sort_order FROM products WHERE id = ?")
+    .bind(id)
+    .first<ProductRowLite>();
+  if (!current) return fail(GONE_PRODUCT);
+  const statements: WritableStatement[] = [
+    db.prepare("DELETE FROM product_options WHERE product_id = ?").bind(id),
+    db.prepare("DELETE FROM products WHERE id = ?").bind(id),
+  ];
+  if (current.coffee_id) {
+    statements.push(
+      db
+        .prepare(
+          "DELETE FROM coffees WHERE id = ? AND NOT EXISTS (SELECT 1 FROM products WHERE coffee_id = ?)",
+        )
+        .bind(current.coffee_id, current.coffee_id),
+    );
+  }
+  await db.batch(statements);
   return { ok: true };
 }
