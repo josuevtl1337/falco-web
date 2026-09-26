@@ -1,0 +1,103 @@
+---
+import { aSelector, type TramoForm } from "../horarios";
+
+interface Props {
+  /** El prefijo de los campos: "d1" para el lunes, "f" para un feriado. */
+  prefijo: string;
+  /** El nombre para los lectores de pantalla: "Lunes", "El día especial". */
+  nombre: string;
+  tramos: TramoForm[];
+  abierto: boolean;
+  /** Los errores de este día, ya juntados. */
+  errores?: string[];
+}
+
+const { prefijo, nombre, tramos, abierto, errores = [] } = Astro.props;
+// Siempre una fila vacía de más: sin JavaScript, alcanza para sumar un tramo.
+const filas = [...tramos, { opensAt: "", closesAt: "" }];
+---
+
+<div class="tramos" data-tramos={prefijo}>
+  <label class="tramos__abierto">
+    <input class="sw" type="checkbox" name={`${prefijo}-abierto`} checked={abierto} data-abierto />
+    <span data-abierto-texto>{abierto ? "Abierto" : "Cerrado"}</span>
+  </label>
+
+  <div class="tramos__filas" data-filas hidden={!abierto}>
+    {
+      filas.map((tramo, i) => (
+        <div class="tramo" data-fila>
+          <input
+            class="input tramo__hora"
+            type="time"
+            name={`${prefijo}-abre`}
+            value={aSelector(tramo.opensAt)}
+            aria-label={`${nombre}: abre, tramo ${i + 1}`}
+          />
+          <span aria-hidden="true">a</span>
+          <input
+            class="input tramo__hora"
+            type="time"
+            name={`${prefijo}-cierra`}
+            value={aSelector(tramo.closesAt)}
+            aria-label={`${nombre}: cierra, tramo ${i + 1}`}
+          />
+          <button class="tramo__quitar" type="button" data-quitar aria-label={`Quitar este tramo de ${nombre}`}>✕</button>
+        </div>
+      ))
+    }
+    <button class="enlace" type="button" data-sumar>+ tramo</button>
+  </div>
+
+  <p class="error" data-errores role="alert" hidden={errores.length === 0}>{errores.join(" ")}</p>
+</div>
+
+<style>
+  .tramos {
+    display: grid;
+    gap: 8px;
+  }
+
+  .tramos__abierto {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    font-size: 14px;
+    color: var(--color-ceniza);
+    cursor: pointer;
+  }
+
+  .tramos__filas {
+    display: grid;
+    gap: 8px;
+    justify-items: start;
+  }
+
+  .tramo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) 44px;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 360px;
+    color: var(--color-ceniza);
+  }
+
+  .tramo__hora {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tramo__quitar {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: none;
+    color: var(--color-ceniza);
+    cursor: pointer;
+  }
+
+  .error {
+    margin: 0;
+  }
+</style>

@@ -2,6 +2,16 @@ INSERT INTO coffees (id, name, farm, country, variety, process, altitude_masl, t
 VALUES (1, 'Huila', 'Finca La Esperanza', 'Colombia', 'Caturra', 'Lavado', 1750, 'Durazno, panela, cítrico',
         'Luminoso y dulce. Se parece a un té de durazno, sin amargor.', 4, 5, 2, 4, 3);
 
+-- La tolva, su propio catálogo. Huila está en tolva y además se vende (vive
+-- en las dos tablas); los otros dos son de ejemplo, para probar el admin.
+INSERT INTO hopper_coffees (id, name, farm, country, variety, process, altitude_masl, tasting_notes, description, acidity, sweetness, body, aroma, finish) VALUES
+  (1, 'Huila', 'Finca La Esperanza', 'Colombia', 'Caturra', 'Lavado', 1750, 'Durazno, panela, cítrico',
+      'Luminoso y dulce. Se parece a un té de durazno, sin amargor.', 4, 5, 2, 4, 3),
+  (2, 'Sidama', 'Guji', 'Etiopía', 'Heirloom', 'Natural', 2100, 'Floral, bergamota, miel',
+      'Perfumado y liviano, como un té negro con miel.', 4, 4, 2, 5, 4),
+  (3, 'Cerrado', 'Fazenda Esperança', 'Brasil', 'Catuaí', 'Natural', 1100, 'Chocolate, nuez, caramelo',
+      'Redondo y dulce, para quien viene del café de siempre.', 2, 4, 4, 3, 3);
+
 -- El catálogo real que mandó el dueño el 2026-09-21. price_card_ars es lo
 -- que se cobra con crédito o débito; price_cash_ars, con efectivo o
 -- transferencia (siempre el más barato de los dos).

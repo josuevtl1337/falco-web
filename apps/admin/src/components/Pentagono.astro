@@ -1,0 +1,59 @@
+---
+import { PENTAGON_AXES, PENTAGON_LABELS, pentagonPolygon, type TastingProfile } from "@falco/ui/pentagono";
+
+interface Props {
+  perfil: TastingProfile;
+  /** Con nombres en cada eje (la ficha) o sin ellos (la tarjeta chica). */
+  etiquetas?: boolean;
+}
+
+const { perfil, etiquetas = true } = Astro.props;
+const anillo = (k: number) =>
+  pentagonPolygon({ acidity: k, sweetness: k, body: k, aroma: k, finish: k });
+
+// Donde va cada nombre: un poco más afuera del anillo del 5.
+const posiciones = PENTAGON_AXES.map((eje, i) => {
+  const angulo = -Math.PI / 2 + (i * 2 * Math.PI) / PENTAGON_AXES.length;
+  return {
+    texto: PENTAGON_LABELS[eje],
+    x: 50 + 50 * Math.cos(angulo),
+    y: 50 + 50 * Math.sin(angulo) + 3,
+  };
+});
+---
+
+<svg
+  class="pentagono"
+  viewBox={etiquetas ? "-16 -6 132 112" : "5 5 90 90"}
+  role="img"
+  aria-label={`Perfil: ${PENTAGON_AXES.map((e) => `${PENTAGON_LABELS[e]} ${perfil[e]}`).join(", ")}`}
+  data-pentagono
+>
+  {[1, 2, 3, 4, 5].map((k) => (
+    <polygon points={anillo(k)} fill="none" stroke={`rgba(232,226,208,${k === 5 ? 0.3 : 0.12})`} />
+  ))}
+  <polygon
+    points={pentagonPolygon(perfil)}
+    fill="rgba(136,83,51,0.75)"
+    stroke="#F2C48B"
+    stroke-width="1.2"
+    data-perfil
+  />
+  {
+    etiquetas &&
+      posiciones.map((p) => (
+        <text x={p.x} y={p.y} text-anchor="middle" fill="#9A9C9E" font-family="Martian Mono, monospace" font-size="6.5">
+          {p.texto}
+        </text>
+      ))
+  }
+</svg>
+
+<style>
+  .pentagono {
+    display: block;
+    width: 100%;
+    max-width: 180px;
+    height: auto;
+  }
+</style>

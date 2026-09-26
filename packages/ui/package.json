@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/tokens.ts",
-    "./tokens.css": "./src/tokens.css"
+    "./tokens.css": "./src/tokens.css",
+    "./pentagono": "./src/pentagono.ts"
   },
   "scripts": {
     "test": "vitest run",

@@ -1,0 +1,104 @@
+---
+import { env } from "cloudflare:workers";
+import {
+  countProducts,
+  getHopperCoffee,
+  getUpcomingSpecialDays,
+  getWeekHours,
+  listHopperCoffees,
+} from "@falco/db";
+import { getOpenStatus, toArgentina } from "@falco/domain";
+import Admin from "../layouts/Admin.astro";
+import { nombreCafe } from "../cafe";
+import { DIAS, nombreDeFecha } from "../horarios";
+
+const ahora = new Date();
+const hoy = toArgentina(ahora);
+const [semana, especiales, enTolva, cafes, productos] = await Promise.all([
+  getWeekHours(env.DB),
+  getUpcomingSpecialDays(env.DB, hoy.date, 60),
+  getHopperCoffee(env.DB),
+  listHopperCoffees(env.DB),
+  countProducts(env.DB),
+]);
+// El mismo cálculo que el sitio: si acá dice "abierto", allá también.
+const estado = getOpenStatus(ahora, semana, especiales);
+const proximo = especiales[0];
+const [, mes, dia] = hoy.date.split("-");
+const sitio = (env as unknown as { SITE_URL?: string }).SITE_URL ?? "https://falcocafe.com.ar";
+
+const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
+---
+
+<Admin titulo="Inicio" pestana="inicio">
+  <Fragment slot="barra">
+    <span class="marca">Falco · admin</span>
+    <a class="enlace" href={sitio} target="_blank" rel="noopener">Ver el sitio ↗</a>
+  </Fragment>
+
+  <section class="caja caja--brasa" aria-labelledby="estado-titulo">
+    <span class="k" id="estado-titulo">El sitio dice ahora</span>
+    <span class:list={["estado", estado.state === "open" ? "estado--abierto" : "estado--cerrado"]}>
+      {estado.label}
+    </span>
+    <span class="sub">{DIAS[hoy.weekday]} {Number(dia)}/{Number(mes)}. Sale de los horarios cargados.</span>
+  </section>
+
+  <section class="caja" aria-labelledby="tolva-titulo">
+    <span class="k" id="tolva-titulo">En tolva</span>
+    {
+      enTolva ? (
+        <>
+          <span class="v">{nombreCafe(enTolva)}</span>
+          <span class="sub">{[enTolva.farm, enTolva.roaster].filter(Boolean).join(" · ")}</span>
+        </>
+      ) : (
+        <span class="sub">No hay ningún café en tolva: la home no muestra la tarjeta.</span>
+      )
+    }
+    <a class="btn btn--sec btn--ancho" href="/tolva">Cambiar el café en tolva</a>
+  </section>
+
+  <nav class="accesos" aria-label="Accesos">
+    <a class="acceso" href="/tolva"><b>Tolva</b><small>{plural(cafes.length, "café cargado", "cafés cargados")}</small></a>
+    <a class="acceso" href="/productos">
+      <b>Productos</b>
+      <small>{plural(productos.visible, "visible", "visibles")}{productos.hidden > 0 && ` · ${plural(productos.hidden, "oculto", "ocultos")}`}</small>
+    </a>
+    <a class="acceso" href="/horarios">
+      <b>Horarios</b>
+      <small>{proximo ? `Próximo día especial: ${nombreDeFecha(proximo.date)}` : "Sin feriados cargados"}</small>
+    </a>
+    <a class="acceso" href="/ajustes"><b>Ajustes</b><small>WhatsApp, carta, Instagram</small></a>
+  </nav>
+</Admin>
+
+<style>
+  .accesos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .acceso {
+    display: grid;
+    gap: 2px;
+    align-content: start;
+    min-height: 72px;
+    padding: 12px;
+    border: 1px solid var(--linea);
+    border-radius: 10px;
+    background: var(--color-piedra);
+    text-decoration: none;
+  }
+
+  .acceso b {
+    font-family: var(--font-display);
+    font-size: 16px;
+  }
+
+  .acceso small {
+    font-size: 12.5px;
+    color: var(--color-ceniza);
+  }
+</style>

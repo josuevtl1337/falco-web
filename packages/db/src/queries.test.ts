@@ -2,6 +2,8 @@ import Database from "better-sqlite3";
 import { readFileSync } from "node:fs";
 import { beforeAll, describe, expect, it } from "vitest";
 import {
+  countProducts,
+  getProductForAdmin,
   getHopperCoffee,
   getProductBySlug,
   getSettings,
@@ -47,11 +49,15 @@ function toReadableDb(real: Database.Database): ReadableDb {
 
 let db: ReadableDb;
 
-beforeAll(() => {
+function freshDb(): Database.Database {
   const real = new Database(":memory:");
   real.exec(sql("../migrations/0001_init.sql"));
   real.exec(sql("../seed/seed.sql"));
-  db = toReadableDb(real);
+  return real;
+}
+
+beforeAll(() => {
+  db = toReadableDb(freshDb());
 });
 
 describe("getSettings", () => {
@@ -67,6 +73,25 @@ describe("getHopperCoffee", () => {
     const coffee = await getHopperCoffee(db);
     expect(coffee?.name).toBe("Huila");
     expect(coffee?.profile.acidity).toBeGreaterThanOrEqual(1);
+  });
+
+  // La tolva tiene su propio catálogo: sus cafés rotan y no tienen nada que
+  // ver con los que se venden. Sidama sólo existe en hopper_coffees.
+  it("lee de su propio catálogo, no de los cafés que se venden", async () => {
+    const real = freshDb();
+    real.exec("UPDATE settings SET value = '2' WHERE key = 'hopper_coffee_id'");
+    const coffee = await getHopperCoffee(toReadableDb(real));
+    expect(coffee?.name).toBe("Sidama");
+    const enVenta = real
+      .prepare("SELECT count(*) AS n FROM coffees WHERE name = 'Sidama'")
+      .get() as { n: number };
+    expect(enVenta.n).toBe(0);
+  });
+
+  it("si el café en tolva ya no existe, no hay tolva (y nada se rompe)", async () => {
+    const real = freshDb();
+    real.exec("UPDATE settings SET value = '999' WHERE key = 'hopper_coffee_id'");
+    expect(await getHopperCoffee(toReadableDb(real))).toBeUndefined();
   });
 });
 
@@ -176,5 +201,22 @@ describe("getUpcomingSpecialDays", () => {
     expect(christmas?.shifts).toEqual([
       { opensAt: "16:00", closesAt: "20:00" },
     ]);
+  });
+});
+
+describe("countProducts", () => {
+  it("cuenta los visibles y los ocultos por separado", async () => {
+    const { visible, hidden } = await countProducts(db);
+    expect(visible).toBeGreaterThan(0);
+    // El seed tiene un único borrador oculto.
+    expect(hidden).toBe(1);
+  });
+});
+
+describe("getProductForAdmin", () => {
+  it("trae también un producto oculto, con sus moliendas", async () => {
+    const oculto = await getProductForAdmin(db, 8);
+    expect(oculto?.isVisible).toBe(false);
+    expect(await getProductForAdmin(db, 999)).toBeUndefined();
   });
 });
