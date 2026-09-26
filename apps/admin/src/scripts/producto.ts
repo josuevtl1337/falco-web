@@ -13,8 +13,38 @@ export const conectarFichaProducto = (): void => {
   // cumple con Element (ver la nota de estado).
   const tipo = form.querySelector<HTMLElement & { value: string }>("[data-tipo]");
   const origen = form.querySelector<HTMLElement>("[data-origen]");
+  const bloque = form.querySelector<HTMLElement>("[data-opciones-bloque]");
+  const titulo = form.querySelector<HTMLElement>("[data-opciones-titulo]");
+  const ayuda = form.querySelector<HTMLElement>("[data-opciones-ayuda]");
+  const sumar = form.querySelector<HTMLElement>("[data-sumar-opcion]");
   tipo?.addEventListener("change", () => {
-    if (origen) origen.hidden = tipo.value !== "coffee";
+    const cafe = tipo.value === "coffee";
+    const ropa = tipo.value === "apparel";
+    if (origen) origen.hidden = !cafe;
+    // Moliendas para un café, talles para ropa; accesorios y kits, nada.
+    if (bloque) bloque.hidden = !cafe && !ropa;
+    if (titulo) titulo.textContent = ropa ? "Talles" : "Moliendas";
+    if (ayuda)
+      ayuda.textContent = ropa
+        ? "Los talles que hay. Si ninguno tiene stock, el sitio muestra “Sin stock por ahora”."
+        : "Cómo se vende: “En grano”, “Molido”. Si ninguna tiene stock, el sitio muestra “Sin stock por ahora”.";
+    if (sumar) sumar.textContent = ropa ? "+ talle" : "+ molienda";
+    const nombres = [...form.querySelectorAll<HTMLInputElement>("input[name=opcion-label]")];
+    for (const input of nombres) input.placeholder = ropa ? "Talle" : "Molienda";
+    // Un café sin moliendas cargadas arranca con las dos de siempre.
+    if (cafe && nombres.every((i) => i.value.trim() === "")) {
+      const lista = form.querySelector<HTMLElement>("[data-opciones]");
+      const primera = nombres[0];
+      if (primera) primera.value = "En grano";
+      if (lista && primera) {
+        const fila = primera.closest<HTMLElement>("[data-opcion]")?.cloneNode(true) as HTMLElement | undefined;
+        const input = fila?.querySelector<HTMLInputElement>("input[name=opcion-label]");
+        if (fila && input) {
+          input.value = "Molido";
+          lista.insertBefore(fila, sumar);
+        }
+      }
+    }
   });
 
   const efectivo = form.querySelector<HTMLInputElement>("input[name=priceCashArs]");

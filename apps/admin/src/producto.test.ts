@@ -47,4 +47,11 @@ describe("el formulario de producto", () => {
     const { borrador } = leerProducto(form([["kind", "gear"], ["coffee-name", "X"]]));
     expect(borrador.coffee).toBeUndefined();
   });
+
+  it("un accesorio no manda opciones aunque el formulario las traiga ocultas", () => {
+    const { borrador } = leerProducto(
+      form([["kind", "kit"], ["opcion-id", ""], ["opcion-label", "En grano"], ["opcion-stock", "1"]]),
+    );
+    expect(borrador.options).toEqual([]);
+  });
 });

@@ -83,7 +83,10 @@ export function leerProducto(form: FormData): { borrador: ProductDraft; valores:
       disponible: stock[i] !== "0",
     }))
     // Una fila sin nombre es la fila vacía de más: no es una molienda.
-    .filter((o) => o.label !== "");
+    .filter((o) => o.label !== "")
+    // Accesorios y kits no tienen opciones: lo que haya quedado oculto en el
+    // formulario (por haber cambiado el tipo) no se manda.
+    .filter(() => kind === "coffee" || kind === "apparel");
 
   const cafe = kind === "coffee" ? leerCafe(form, "coffee-") : undefined;
 

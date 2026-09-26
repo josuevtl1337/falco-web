@@ -50,7 +50,19 @@ const hayErrores = Object.keys(errores).length > 0;
 const sitio = (env as unknown as { SITE_URL?: string }).SITE_URL ?? "https://falcocafe.com.ar";
 const titulo = nuevo ? "Nuevo producto" : valores.name || producto?.name || "Producto";
 // Siempre una fila vacía de más para sumar una molienda sin JavaScript.
-const opciones = [...valores.opciones, { id: undefined, label: "", disponible: true }];
+// Las opciones: moliendas para un café, talles para ropa. Accesorios y kits
+// no tienen. Un café nuevo arranca con las dos moliendas de siempre.
+const conOpciones = (kind: string) => kind === "coffee" || kind === "apparel";
+const opciones =
+  valores.opciones.length > 0
+    ? valores.opciones
+    : nuevo && valores.kind === "coffee"
+      ? [
+          { id: undefined, label: "En grano", disponible: true },
+          { id: undefined, label: "Molido", disponible: true },
+        ]
+      : [{ id: undefined, label: "", disponible: true }];
+const esRopa = valores.kind === "apparel";
 ---
 
 <Admin titulo={titulo} pestana="productos">
@@ -124,24 +136,30 @@ const opciones = [...valores.opciones, { id: undefined, label: "", disponible: t
       <Perfil perfil={valores.cafe.perfil} errores={erroresPerfil} />
     </fieldset>
 
-    <fieldset class="campo bloque">
-      <legend>Opciones · molienda</legend>
-      <p class="nota">Para un café: “En grano”, “Molido”. Si ninguna tiene stock, el sitio muestra “Sin stock por ahora”. Vacío si no aplica.</p>
+    <fieldset class="campo bloque" data-opciones-bloque hidden={!conOpciones(valores.kind)}>
+      <legend data-opciones-titulo>{esRopa ? "Talles" : "Moliendas"}</legend>
+      <p class="nota" data-opciones-ayuda>
+        {
+          esRopa
+            ? "Los talles que hay. Si ninguno tiene stock, el sitio muestra “Sin stock por ahora”."
+            : "Cómo se vende: “En grano”, “Molido”. Si ninguna tiene stock, el sitio muestra “Sin stock por ahora”."
+        }
+      </p>
       <div class="opciones" data-opciones>
         {
           opciones.map((o) => (
             <div class="opcion" data-opcion>
               <input type="hidden" name="opcion-id" value={o.id ?? ""} />
-              <input class="input" name="opcion-label" value={o.label} maxlength={12} placeholder="Nueva molienda" aria-label="Nombre de la molienda" />
+              <input class="input" name="opcion-label" value={o.label} maxlength={12} placeholder={esRopa ? "Talle" : "Molienda"} aria-label={esRopa ? "Nombre del talle" : "Nombre de la molienda"} />
               <select class="input" name="opcion-stock" aria-label="Stock">
                 <option value="1" selected={o.disponible}>Hay</option>
                 <option value="0" selected={!o.disponible}>Sin stock</option>
               </select>
-              <button class="quitar" type="button" data-quitar-opcion aria-label="Quitar esta molienda">✕</button>
+              <button class="quitar" type="button" data-quitar-opcion aria-label="Quitar esta opción">✕</button>
             </div>
           ))
         }
-        <button class="enlace" type="button" data-sumar-opcion>+ molienda</button>
+        <button class="enlace" type="button" data-sumar-opcion>{esRopa ? "+ talle" : "+ molienda"}</button>
       </div>
       {erroresOpciones.length > 0 && <span class="error">{erroresOpciones[0]}</span>}
     </fieldset>
