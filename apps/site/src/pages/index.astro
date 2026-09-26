@@ -10,6 +10,7 @@ import {
 } from "@falco/db";
 import { addDays, getOpenStatus, toArgentina } from "@falco/domain";
 import Base from "../layouts/Base.astro";
+import { cafeJsonLd, jsonForScript } from "../seo";
 import Calendario from "../components/Calendario.astro";
 import Dialogo from "../components/Dialogo.astro";
 import DondeEstamos from "../components/DondeEstamos.astro";
@@ -92,12 +93,20 @@ const tickerCopies = Math.max(
 );
 const tickerGroup = tickerText.repeat(tickerCopies);
 const tickerDuration = `${tickerCopies * TICKER_SECONDS_PER_COPY}s`;
+
+const cafe = cafeJsonLd({
+  site: Astro.site ?? Astro.url,
+  week,
+  specials,
+  instagramUrl: settings.instagram_url,
+});
 ---
 
 <Base
   title="Falco · café de santoto"
   description="Café de especialidad en Santo Tomé. Mirá qué hay en la tolva y llevate un cuarto."
 >
+  <script slot="head" is:inline type="application/ld+json" set:html={jsonForScript(cafe)} />
   <!--
     La barra queda arriba de la primera pantalla y sigue visible al scrollear
     (position: sticky, en Nav.astro). Como sticky ocupa su lugar en el flujo,

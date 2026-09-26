@@ -1,12 +1,27 @@
 ---
+import { env } from "cloudflare:workers";
 import "../styles/global.css";
 
 interface Props {
   title: string;
   description: string;
+  /** La imagen al compartir el link. Sin ella, la general de Falco. */
+  image?: string;
+  /** Páginas que no tienen que salir en Google: el pedido y el 404. */
+  noindex?: boolean;
 }
 
-const { title, description } = Astro.props;
+const { title, description, image = "/og.png", noindex = false } = Astro.props;
+
+// La dirección canónica siempre es la del dominio, sin la query: /?x=1 y /
+// son la misma página para Google.
+const site = Astro.site ?? Astro.url;
+const canonical = new URL(Astro.url.pathname, site).toString();
+const imageUrl = new URL(image, site).toString();
+
+// Cloudflare Web Analytics: sin cookies ni datos personales. Sin token (en
+// desarrollo), no se carga nada.
+const beaconToken = (env as unknown as { CF_BEACON_TOKEN?: string }).CF_BEACON_TOKEN;
 ---
 
 <!doctype html>
@@ -16,7 +31,30 @@ const { title, description } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#292a2c" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:site_name" content="Falco" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={imageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <slot name="head" />
+    {
+      beaconToken && (
+        <script
+          defer
+          is:inline
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={JSON.stringify({ token: beaconToken })}
+        />
+      )
+    }
   </head>
   <body>
     <a class="skip-link" href="#contenido">Ir al contenido</a>

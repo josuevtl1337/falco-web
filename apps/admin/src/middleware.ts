@@ -5,6 +5,7 @@ import { authenticate } from "./auth";
 /**
  * Nadie pasa sin el login de Cloudflare Access, en ningún pedido. Y nada del
  * admin se guarda en ninguna caché: lo que se ve tiene que ser lo de ahora.
+ * Y ningún buscador lo indexa.
  */
 export const onRequest: MiddlewareHandler = async (context, next) => {
   // ADMIN_DEV_EMAIL no está en wrangler.jsonc a propósito: sólo existe en el
@@ -22,6 +23,7 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
       headers: {
         "content-type": "text/plain; charset=utf-8",
         "cache-control": "no-store",
+        "x-robots-tag": "noindex, nofollow",
       },
     });
   }
@@ -29,5 +31,8 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
   context.locals.email = auth.email;
   const response = await next();
   response.headers.set("cache-control", "no-store");
+  // Detrás del login Google no llega, pero si algún día se abre, que no lo
+  // indexe igual.
+  response.headers.set("x-robots-tag", "noindex, nofollow");
   return response;
 };
