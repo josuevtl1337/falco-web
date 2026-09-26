@@ -50,15 +50,14 @@ hacer borrar la que está en uso.
 **Task 11 (cierre del Plan 3):** probar en un celular real (arrastrar productos con el dedo y subir
 una foto desde la cámara), y abrir el PR.
 
-**Para el Plan 4 (deploy):**
+**Plan 4 (deploy):** hecho en `feat/plan-4-launch`, ver
+`docs/superpowers/plans/2026-09-26-plan-4-lanzamiento.md`. Falta que el dueño siga
+`docs/guia-cloudflare.md`.
 
-- Crear la aplicación de Cloudflare Access, con los mails de los dos, y completar `ACCESS_TEAM` y
-  `ACCESS_AUD` en `apps/admin/wrangler.jsonc`.
-- Crear la base D1 y el bucket R2 (`falco-photos`) de producción.
-- **Si se activa la caché real del sitio:** hoy, al cambiar una foto, la vieja se borra al instante.
-  Con caché, una página guardada hasta 60 segundos seguiría pidiendo la foto vieja y se vería rota.
-  Al activar la caché hay que limpiarla desde el admin al guardar, o borrar la foto vieja más
-  tarde.
+La caché de 60 segundos del sitio (`s-maxage=60`) **no se aplica** detrás de un Worker: Cloudflare
+no guarda en caché lo que responde un Worker salvo que el Worker use la Cache API, y el sitio no lo
+hace. Por eso borrar la foto vieja al instante no rompe nada hoy. Si algún día se cachea de verdad,
+hay que limpiar la caché al guardar desde el admin o borrar la foto vieja más tarde.
 
 ## Decisiones que tomé sin preguntar (revisar)
 
