@@ -1,0 +1,44 @@
+# Backup semanal de la base: todos los lunes a las 6 de la mañana (hora de
+# Argentina), una copia entera de D1 en el bucket falco-backups de R2.
+# Las copias viejas las borra R2 solo (regla de 60 días, ver la guía).
+#
+# Es la segunda capa: la primera es Time Travel de D1, que deja volver la
+# base a cualquier minuto de los últimos días. Se puede correr a mano desde
+# la pestaña Actions ("Run workflow").
+name: Backup
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+env:
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Apuntar a la base de producción
+        env:
+          D1_DATABASE_ID: ${{ vars.D1_DATABASE_ID }}
+        run: |
+          test -n "$D1_DATABASE_ID" || { echo "::error::Falta la variable D1_DATABASE_ID"; exit 1; }
+          sed -i "s/\"database_id\": \"local\"/\"database_id\": \"$D1_DATABASE_ID\"/" apps/site/wrangler.jsonc
+
+      - name: Exportar y guardar en R2
+        working-directory: apps/site
+        run: |
+          archivo="falco-$(date -u +%Y-%m-%d).sql"
+          npx wrangler d1 export falco --remote --output "$archivo"
+          test -s "$archivo" || { echo "::error::El backup salió vacío"; exit 1; }
+          npx wrangler r2 object put "falco-backups/d1/$archivo" --file "$archivo" --remote
+          echo "Backup guardado: falco-backups/d1/$archivo ($(du -h "$archivo" | cut -f1))"

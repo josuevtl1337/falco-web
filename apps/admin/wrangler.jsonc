@@ -6,6 +6,11 @@
   "main": "@astrojs/cloudflare/entrypoints/server",
   "compatibility_date": "2026-09-20",
   "compatibility_flags": ["nodejs_compat"],
+  // Sólo en su dominio, detrás de Cloudflare Access: sin la dirección
+  // automática *.workers.dev, que sería una puerta más.
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{ "pattern": "admin.falcocafe.com.ar", "custom_domain": true }],
   "assets": { "directory": "dist", "binding": "ASSETS" },
   // La misma base que el sitio.
   "d1_databases": [

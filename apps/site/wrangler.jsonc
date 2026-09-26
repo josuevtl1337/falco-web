@@ -4,6 +4,17 @@
   "main": "@astrojs/cloudflare/entrypoints/server",
   "compatibility_date": "2026-09-20",
   "compatibility_flags": ["nodejs_compat"],
+  // Sólo en su dominio: sin la dirección automática *.workers.dev, que para
+  // Google sería el mismo sitio duplicado. www redirige al dominio sin www
+  // (src/middleware.ts).
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "falcocafe.com.ar", "custom_domain": true },
+    { "pattern": "www.falcocafe.com.ar", "custom_domain": true },
+  ],
+  // El token de Cloudflare Web Analytics. Vacío (en desarrollo), no se mide.
+  "vars": { "CF_BEACON_TOKEN": "" },
   "assets": { "directory": "dist", "binding": "ASSETS" },
   "d1_databases": [
     {
