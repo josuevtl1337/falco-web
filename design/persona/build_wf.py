@@ -31,7 +31,7 @@ CARA_USES = "".join(f'<use class="tubo tubo--{k}" href="#tubo-{k}"/>' for k, _ i
 CARA_LLENA = (MARCA / "cara-llena.svg").read_text()
 
 
-def cartel(alto, variante="b"):
+def cartel(alto, variante="c"):
     """El cartel de neón: los tubos apagados (vidrio) y encima los prendidos, que titilan al entrar."""
     svg = lambda cls: f'<svg class="{cls}" viewBox="{CARA_VB}" aria-hidden="true">{CARA_USES}</svg>'
     return (
@@ -244,8 +244,8 @@ def main():
         .replace("%%SEND_ICON%%", SEND_ICON)
         .replace("%%PENTA_MINI%%", PENTA_MINI)
         .replace("%%M_TOP%%", M_TOP)
-        .replace("%%CARTEL_M%%", cartel(46))
-        .replace("%%CARTEL_D%%", cartel(62))
+        .replace("%%CARTEL_M%%", cartel(70))
+        .replace("%%CARTEL_D%%", cartel(104))
         .replace("%%CARTEL_A%%", cartel(150, "a"))
         .replace("%%CARTEL_B%%", cartel(150, "b"))
         .replace("%%CARTEL_C%%", cartel(150, "c"))

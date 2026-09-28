@@ -2,7 +2,7 @@
 <html lang="es">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Falco · Wireframes v7.11</title>
+<title>Falco · Wireframes v7.12</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
@@ -1783,11 +1783,13 @@
   }
 
   /* ---- el cartel: la cara del murciélago como neón (v7.11) ---- */
+  /* En la barra cuelga: arranca arriba y pasa el borde de abajo, como un
+     cartel colgado del techo. */
   .nav .cartel {
     position: absolute;
     left: 50%;
-    top: 50%;
-    translate: -50% -50%;
+    top: 12%;
+    translate: -50% 0;
   }
   .cartel {
     position: relative;
@@ -1808,10 +1810,11 @@
     color: #3c3d40;
   }
   /* Los tubos prendidos: casi blanco en el centro y el halo en brasa. */
+  /* Los tubos prendidos: crema tibio, con un halo corto en brasa. */
   .cartel__prendido {
-    color: #fff1dc;
-    filter: drop-shadow(0 0 1px #fff7ea) drop-shadow(0 0 4px rgba(242, 196, 139, 0.9))
-      drop-shadow(0 0 12px rgba(226, 140, 70, 0.55));
+    color: #f6e4c8;
+    filter: drop-shadow(0 0 1px rgba(255, 240, 215, 0.8)) drop-shadow(0 0 3px rgba(242, 196, 139, 0.55))
+      drop-shadow(0 0 8px rgba(226, 140, 70, 0.28));
   }
   /* La luz que el cartel tira sobre la pared, cuando ya prendió todo. */
   .cartel--reinicio::before,
@@ -1822,7 +1825,7 @@
     content: "";
     position: absolute;
     inset: -45% -70%;
-    background: radial-gradient(closest-side, rgba(242, 176, 110, 0.16), transparent);
+    background: radial-gradient(closest-side, rgba(242, 176, 110, 0.09), transparent);
     opacity: 0;
     animation: cartel-pared 0.9s ease-out forwards;
     animation-delay: var(--listo, 1.2s);
@@ -1949,7 +1952,7 @@
 %%CARA_DEFS%%
 <div class="b-wrap">
   <header class="b-head">
-    <div class="b-eyebrow">Falco · café de santoto · wireframes v7.11</div>
+    <div class="b-eyebrow">Falco · café de santoto · wireframes v7.12</div>
     <h1>La Cueva, con acento Persona</h1>
     <p>
       Todas las vistas, en escritorio (1440 px) y en celular (390 px), con los
@@ -2762,14 +2765,15 @@
   <!-- ============================== 08 EL CARTEL ============================== -->
   <section class="b-view" id="v-cartel">
     <div class="b-vhead">
-      <h2><small>08</small>El cartel · v7.11</h2>
+      <h2><small>08</small>El cartel · v7.12</h2>
       <button class="b-replay" type="button" data-replay>Prender de nuevo</button>
     </div>
     <div class="b-notes">
       <p class="b-note">
-        <b>La cara, en el medio de la barra</b>El murciélago va centrado en la
-        barra de arriba, entre el logo y los links. En el celular, entre el logo
-        y "Menú". No es un link: el logo de la izquierda ya lleva al inicio.
+        <b>La cara, colgando de la barra</b>El murciélago va centrado en la
+        barra de arriba y pasa un poco el borde de abajo, como un cartel colgado.
+        En el celular, entre el logo y "Menú". No es un link: el logo de la
+        izquierda ya lleva al inicio.
       </p>
       <p class="b-note">
         <b>Se prende como un neón</b>Al cargar, el dibujo se ve apagado (vidrio
@@ -2827,12 +2831,12 @@
             </div>
             <div class="cartel-tile">
               %%CARTEL_B%%
-              <p><b>B · Por tubos (recomendada)</b>Primero el contorno, después la cara, la nariz y la boca. Los ojos tardan en agarrar, como un tubo viejo. Unos dos segundos y medio.</p>
+              <p><b>B · Por tubos</b>Primero el contorno, después la cara, la nariz y la boca. Los ojos tardan en agarrar, como un tubo viejo. Unos dos segundos y medio.</p>
               <button class="b-replay" type="button" data-prender>Prender</button>
             </div>
             <div class="cartel-tile">
               %%CARTEL_C%%
-              <p><b>C · Por tubos, y los ojos vivos</b>Igual que B, y después los ojos pestañean solos cada tanto. Le da vida, pero es un movimiento que nunca termina.</p>
+              <p><b>C · Por tubos, y los ojos vivos (elegida)</b>Igual que B, y después los ojos pestañean solos cada tanto. Le da vida, pero es un movimiento que nunca termina.</p>
               <button class="b-replay" type="button" data-prender>Prender</button>
             </div>
           </div>
