@@ -13,6 +13,15 @@ npm run db:reset --workspace @falco/site     # la tabla nueva de tolva lo necesi
 cp apps/admin/.dev.vars.example apps/admin/.dev.vars
 ```
 
+Cuando llega una migración nueva (`packages/db/migrations/0002_...sql` en adelante), aplicala a tu
+base local sin perder lo que cargaste:
+
+```bash
+npm run db:migrate --workspace @falco/site
+```
+
+Si el admin dice "No se pudo guardar" justo después de traer cambios, casi siempre es esto.
+
 Cada vez, en dos terminales:
 
 ```bash

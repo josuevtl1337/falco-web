@@ -60,7 +60,12 @@ export const rutaDeFoto =
     const clave = await claveDeFoto(carpeta, id, bytes, archivo.type);
     await env.PHOTOS.put(clave, bytes, { httpMetadata: { contentType: archivo.type } });
 
-    const r = await guardar(id, clave, locals.email).catch(() => undefined);
+    const r = await guardar(id, clave, locals.email).catch((error: unknown) => {
+      // Un error de la base (por ejemplo, una migración sin aplicar en local)
+      // queda en el log; a la persona le llega el mensaje de siempre.
+      console.error("No se pudo guardar la foto en la base", clave, error);
+      return undefined;
+    });
     if (!r?.ok) {
       // No quedó guardada: la foto recién subida no le sirve a nadie, salvo que
       // otra pestaña haya subido justo la misma (misma clave) y esté en uso.
