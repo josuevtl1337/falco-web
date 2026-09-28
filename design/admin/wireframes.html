@@ -1,0 +1,1646 @@
+<title>Falco Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;600&family=Martian+Mono:wght@400;600&display=swap"
+/>
+<style>
+  /*
+   * Falco · Admin · wireframes v0.2
+   *
+   * Misma paleta y tipografías del sitio, sin los detalles de Persona (spec §7:
+   * "es una herramienta, no una vidriera"). Nada inclinado, nada animado: bordes
+   * rectos, jerarquía por tamaño y color. El tostado marca la acción principal y
+   * la brasa sólo el estado "abierto" y el "guardado".
+   */
+  :root {
+    color-scheme: dark;
+    --carbon: #292a2c;
+    --piedra: #313335;
+    --sombra: #1e1f21;
+    --tostado: #885333;
+    --hueso: #e8e2d0;
+    --ceniza: #9a9c9e;
+    --brasa: #f2c48b;
+    --linea: rgba(232, 226, 208, 0.12);
+    --error: #e0907a;
+    --display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+    --body: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+    --mono: "Martian Mono", ui-monospace, Menlo, monospace;
+  }
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  body {
+    background: #1a1b1d;
+    color: var(--hueso);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .lamina {
+    max-width: 1560px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 40px 80px;
+    display: grid;
+    gap: 56px;
+  }
+  .cabeza {
+    display: grid;
+    gap: 14px;
+    max-width: 78ch;
+  }
+  .ojo {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ceniza);
+  }
+  .cabeza h1 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(32px, 5vw, 52px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .cabeza p {
+    margin: 0;
+    color: var(--hueso);
+  }
+  .reglas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1px;
+    background: var(--linea);
+    border: 1px solid var(--linea);
+  }
+  .reglas div {
+    background: #1a1b1d;
+    padding: 14px 16px;
+    display: grid;
+    gap: 4px;
+    align-content: start;
+  }
+  .reglas b {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--brasa);
+    font-weight: 400;
+  }
+  .reglas span {
+    font-size: 13px;
+    color: var(--hueso);
+  }
+
+  .grupo {
+    display: grid;
+    gap: 18px;
+  }
+  .grupo > h2 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 24px;
+    letter-spacing: -0.02em;
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+    flex-wrap: wrap;
+  }
+  .grupo > h2 small {
+    font-family: var(--mono);
+    font-weight: 400;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--ceniza);
+    text-transform: uppercase;
+  }
+  .fila {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    align-items: flex-start;
+  }
+
+  .pieza {
+    display: grid;
+    gap: 10px;
+    width: 360px;
+    max-width: 100%;
+  }
+  .pieza > .ojo {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .nota {
+    font-size: 12.5px;
+    color: var(--ceniza);
+    margin: 0;
+  }
+  .nota b {
+    color: var(--hueso);
+    font-weight: 600;
+  }
+
+  /* ---- el teléfono ---- */
+  .tel {
+    position: relative;
+    width: 360px;
+    max-width: 100%;
+    height: 740px;
+    overflow: hidden;
+    background: var(--carbon);
+    border: 1px solid rgba(232, 226, 208, 0.18);
+    border-radius: 28px;
+    display: flex;
+    flex-direction: column;
+  }
+  .tel__barra {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid var(--linea);
+  }
+  .tel__barra h3 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.01em;
+  }
+  .atras {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brasa);
+  }
+  .marca {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--ceniza);
+    text-transform: uppercase;
+  }
+  .tel__cuerpo {
+    flex: 1;
+    overflow: hidden;
+    padding: 16px 18px;
+    display: grid;
+    gap: 14px;
+    align-content: start;
+  }
+
+  /* barra de pestañas */
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border-top: 1px solid var(--linea);
+    background: var(--sombra);
+  }
+  .tabs span {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    padding: 10px 2px 14px;
+    font-family: var(--mono);
+    font-size: 8.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ceniza);
+  }
+  .tabs i {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid currentColor;
+    border-radius: 5px;
+  }
+  .tabs .on {
+    color: var(--hueso);
+  }
+  .tabs .on i {
+    background: var(--tostado);
+    border-color: var(--tostado);
+  }
+
+  /* bloques */
+  .caja {
+    background: var(--piedra);
+    border: 1px solid var(--linea);
+    border-radius: 10px;
+    padding: 14px;
+    display: grid;
+    gap: 8px;
+  }
+  .caja--brasa {
+    border-color: rgba(242, 196, 139, 0.5);
+  }
+  .k {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ceniza);
+  }
+  .v {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 20px;
+    line-height: 1.1;
+  }
+  .sub {
+    font-size: 13px;
+    color: var(--ceniza);
+  }
+  .estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brasa);
+  }
+  .estado::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--brasa);
+  }
+  .accesos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .acceso {
+    background: var(--piedra);
+    border: 1px solid var(--linea);
+    border-radius: 10px;
+    padding: 12px;
+    display: grid;
+    gap: 2px;
+  }
+  .acceso b {
+    font-family: var(--display);
+    font-size: 16px;
+  }
+  .acceso small {
+    font-size: 12px;
+    color: var(--ceniza);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 8px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+  }
+  .btn--pri {
+    background: var(--tostado);
+    color: var(--hueso);
+  }
+  .btn--sec {
+    border-color: rgba(232, 226, 208, 0.35);
+    color: var(--hueso);
+  }
+  .btn--peligro {
+    border-color: rgba(224, 144, 122, 0.5);
+    color: var(--error);
+  }
+  .btn--ancho {
+    width: 100%;
+  }
+  .enlace {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brasa);
+  }
+
+  /* listas */
+  .lista {
+    display: grid;
+    border: 1px solid var(--linea);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-top: 1px solid var(--linea);
+    background: var(--piedra);
+  }
+  .item:first-child {
+    border-top: 0;
+  }
+  .item__txt {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+  }
+  .item__txt b {
+    font-weight: 600;
+    font-size: 14.5px;
+  }
+  .item__txt small {
+    font-size: 12px;
+    color: var(--ceniza);
+  }
+  .item__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .chip {
+    font-family: var(--mono);
+    font-size: 8.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--linea);
+    color: var(--ceniza);
+    white-space: nowrap;
+  }
+  .chip--brasa {
+    border-color: rgba(242, 196, 139, 0.55);
+    color: var(--brasa);
+  }
+  .chip--tostado {
+    background: var(--tostado);
+    border-color: var(--tostado);
+    color: var(--hueso);
+  }
+  .foto {
+    width: 44px;
+    height: 44px;
+    flex: none;
+    border-radius: 6px;
+    background: linear-gradient(150deg, #3b2519, #232426);
+    border: 1px solid var(--linea);
+  }
+  .asa {
+    flex: none;
+    display: grid;
+    gap: 3px;
+    padding: 4px 2px;
+  }
+  .asa i {
+    width: 14px;
+    height: 2px;
+    background: var(--ceniza);
+    border-radius: 1px;
+  }
+  .flecha {
+    color: var(--ceniza);
+  }
+  .radio {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    border-radius: 50%;
+    border: 1.5px solid var(--ceniza);
+  }
+  .radio--on {
+    border-color: var(--brasa);
+    box-shadow: inset 0 0 0 4px var(--piedra);
+    background: var(--brasa);
+  }
+  .estante {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ceniza);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* formularios */
+  .campo {
+    display: grid;
+    gap: 5px;
+  }
+  .campo label {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ceniza);
+  }
+  .input {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    border-radius: 8px;
+    background: var(--sombra);
+    border: 1px solid rgba(232, 226, 208, 0.18);
+    font-size: 14.5px;
+  }
+  .input--area {
+    min-height: 64px;
+    align-items: flex-start;
+    padding-top: 10px;
+    color: var(--hueso);
+    font-size: 13.5px;
+  }
+  .input--error {
+    border-color: var(--error);
+  }
+  .error {
+    font-size: 12px;
+    color: var(--error);
+  }
+  .dos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .tog {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 0;
+    border-top: 1px solid var(--linea);
+  }
+  .tog div {
+    display: grid;
+  }
+  .tog b {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .tog small {
+    font-size: 12px;
+    color: var(--ceniza);
+  }
+  .sw {
+    width: 38px;
+    height: 22px;
+    flex: none;
+    border-radius: 11px;
+    background: var(--sombra);
+    border: 1px solid rgba(232, 226, 208, 0.25);
+    position: relative;
+  }
+  .sw::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--ceniza);
+  }
+  .sw--on {
+    background: var(--tostado);
+    border-color: var(--tostado);
+  }
+  .sw--on::after {
+    left: 18px;
+    background: var(--hueso);
+  }
+  .seg {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    border: 1px solid rgba(232, 226, 208, 0.25);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .seg span {
+    text-align: center;
+    padding: 9px 4px;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ceniza);
+    border-left: 1px solid rgba(232, 226, 208, 0.25);
+  }
+  .seg span:first-child {
+    border-left: 0;
+  }
+  .seg .on {
+    background: var(--hueso);
+    color: var(--carbon);
+  }
+
+  /* pie fijo de guardar */
+  .guardar {
+    padding: 12px 18px 16px;
+    border-top: 1px solid var(--linea);
+    background: var(--sombra);
+    display: grid;
+    gap: 6px;
+  }
+  .guardar small {
+    font-size: 11.5px;
+    color: var(--ceniza);
+    text-align: center;
+  }
+
+  /* aviso de guardado */
+  .toast {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 86px;
+    background: var(--hueso);
+    color: var(--carbon);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  }
+  .toast b {
+    display: block;
+    font-weight: 600;
+  }
+  .toast small {
+    font-size: 12px;
+  }
+  .toast i {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--tostado);
+    margin-top: 2px;
+  }
+
+  /* hoja y diálogo */
+  .velo {
+    position: absolute;
+    inset: 0;
+    background: rgba(12, 12, 13, 0.62);
+  }
+  .hoja {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--carbon);
+    border-top: 1px solid var(--linea);
+    border-radius: 18px 18px 0 0;
+    padding: 10px 18px 18px;
+    display: grid;
+    gap: 12px;
+  }
+  .tirador {
+    justify-self: center;
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(232, 226, 208, 0.3);
+  }
+  .hoja h4,
+  .dialogo h4 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 19px;
+  }
+  .dialogo {
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    top: 190px;
+    background: var(--carbon);
+    border: 1px solid var(--linea);
+    border-radius: 14px;
+    padding: 18px;
+    display: grid;
+    gap: 12px;
+  }
+  .dialogo p {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  /* horarios */
+  .dia {
+    display: grid;
+    gap: 6px;
+    padding: 10px 0;
+    border-top: 1px solid var(--linea);
+  }
+  .dia:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .dia__cab {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .dia__cab b {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .tramos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tramo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: var(--sombra);
+    border: 1px solid rgba(232, 226, 208, 0.18);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+  .tramo--error {
+    border-color: var(--error);
+    color: var(--error);
+  }
+  .mas {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--brasa);
+    padding: 6px 4px;
+  }
+
+  /* pentágono */
+  .penta {
+    display: grid;
+    grid-template-columns: 132px 1fr;
+    gap: 12px;
+    align-items: center;
+  }
+  .penta svg {
+    width: 132px;
+    height: 132px;
+    display: block;
+  }
+  .deslizadores {
+    display: grid;
+    gap: 7px;
+  }
+  .desl {
+    display: grid;
+    grid-template-columns: 56px 1fr 14px;
+    gap: 8px;
+    align-items: center;
+    font-size: 12px;
+  }
+  .desl .pasos {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px;
+  }
+  .desl .pasos i {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--sombra);
+    border: 1px solid rgba(232, 226, 208, 0.18);
+  }
+  .desl .pasos i.on {
+    background: var(--tostado);
+    border-color: var(--tostado);
+  }
+  .desl b {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-align: right;
+  }
+
+  /* tarjeta de tolva como en el sitio */
+  .tolva {
+    background: var(--sombra);
+    border: 1px solid var(--linea);
+    border-radius: 10px;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 1fr 86px;
+    gap: 10px;
+    align-items: center;
+  }
+  .tolva .k {
+    color: var(--brasa);
+  }
+  .tolva .v {
+    font-size: 18px;
+  }
+  .tolva svg {
+    width: 86px;
+    height: 86px;
+  }
+
+  /* escritorio */
+  .esc {
+    width: 1100px;
+    max-width: 100%;
+    height: 640px;
+    overflow: hidden;
+    background: var(--carbon);
+    border: 1px solid rgba(232, 226, 208, 0.18);
+    border-radius: 12px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+  }
+  .esc__lado {
+    background: var(--sombra);
+    border-right: 1px solid var(--linea);
+    padding: 22px 16px;
+    display: grid;
+    gap: 4px;
+    align-content: start;
+  }
+  .esc__lado .marca {
+    padding: 0 10px 18px;
+  }
+  .esc__lado span {
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--ceniza);
+  }
+  .esc__lado .on {
+    background: var(--piedra);
+    color: var(--hueso);
+    box-shadow: inset 3px 0 0 var(--tostado);
+  }
+  .esc__main {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    min-width: 0;
+  }
+  .esc__lista {
+    padding: 22px 24px;
+    display: grid;
+    gap: 14px;
+    align-content: start;
+    min-width: 0;
+    border-right: 1px solid var(--linea);
+  }
+  .esc__ficha {
+    padding: 22px 22px;
+    display: grid;
+    gap: 12px;
+    align-content: start;
+  }
+  .esc__cab {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .esc__cab h3 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 24px;
+  }
+  .item--sel {
+    box-shadow: inset 3px 0 0 var(--tostado);
+    background: #383a3c;
+  }
+  .envoltorio {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  @media (max-width: 420px) {
+    .tel,
+    .pieza {
+      width: 100%;
+    }
+  }
+</style>
+
+<main class="lamina">
+  <header class="cabeza">
+    <span class="ojo">Falco · admin · wireframes v0.2</span>
+    <h1>El panel de Falco</h1>
+    <p>
+      Todas las pantallas del admin, pensadas primero para el celular: es donde
+      se va a usar, parado detrás de la barra. Misma paleta y tipografías del
+      sitio, sin los detalles de Persona. Nada se inclina ni se anima: es una
+      herramienta. Los datos son los del catálogo real.
+    </p>
+    <div class="reglas">
+      <div>
+        <b>Navegación</b
+        ><span
+          >Cinco pestañas abajo: Inicio, Tolva, Productos, Horarios y Ajustes. Los cafés de tolva son un catálogo propio.</span
+        >
+      </div>
+      <div>
+        <b>Guardar</b
+        ><span
+          >Un solo botón fijo abajo. Al guardar: “Guardado. Ya se ve en el
+          sitio.”</span
+        >
+      </div>
+      <div>
+        <b>Errores</b
+        ><span
+          >Al lado del campo, con los mensajes que ya existen en la
+          validación.</span
+        >
+      </div>
+      <div>
+        <b>Acceso</b
+        ><span
+          >Cloudflare Access: código por mail a una lista de mails. No hay
+          pantalla de login propia.</span
+        >
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ 1. INICIO ============ -->
+<section class="grupo">
+  <h2>Inicio <small>qué está diciendo el sitio ahora</small></h2>
+  <div class="fila">
+    <div class="pieza">
+      <span class="ojo"><span>01 · Inicio</span><span>/</span></span>
+      <div class="tel">
+        <div class="tel__barra">
+          <span class="marca">Falco · admin</span
+          ><span class="enlace">Ver el sitio ↗</span>
+        </div>
+        <div class="tel__cuerpo">
+          <div class="caja caja--brasa">
+            <span class="k">El sitio dice ahora</span>
+            <span class="estado">Abierto ahora · cierra 20:30</span>
+            <span class="sub">Jueves 24/9. Sale de los horarios cargados.</span>
+          </div>
+          <div class="caja">
+            <span class="k">En tolva</span>
+            <span class="v">Huila · Colombia</span>
+            <span class="sub">Finca La Esperanza · Puerto Blest</span>
+            <span class="btn btn--sec btn--ancho"
+              >Cambiar el café en tolva</span
+            >
+          </div>
+          <div class="accesos">
+            <div class="acceso">
+              <b>Tolva</b><small>4 cafés cargados</small>
+            </div>
+            <div class="acceso">
+              <b>Productos</b><small>8 visibles · 1 oculto</small>
+            </div>
+            <div class="acceso">
+              <b>Horarios</b><small>Próximo feriado: 12/10</small>
+            </div>
+            <div class="acceso">
+              <b>Ajustes</b><small>WhatsApp, carta, Instagram</small>
+            </div>
+          </div>
+        </div>
+        <div class="tabs"><span class="on"><i></i>Inicio</span><span><i></i>Tolva</span><span><i></i>Productos</span><span><i></i>Horarios</span><span><i></i>Ajustes</span></div>
+      </div>
+      <p class="nota">
+        Lo primero que se ve es <b>qué está diciendo el sitio</b>. “Cambiar el
+        café en tolva” lleva a la pestaña Tolva.
+      </p>
+    </div>
+
+    <div class="pieza">
+      <span class="ojo"><span>02 · Guardado</span><span>estado</span></span>
+      <div class="tel">
+        <div class="tel__barra">
+          <span class="marca">Falco · admin</span
+          ><span class="enlace">Ver el sitio ↗</span>
+        </div>
+        <div class="tel__cuerpo">
+          <div class="caja caja--brasa">
+            <span class="k">El sitio dice ahora</span
+            ><span class="estado">Abierto ahora · cierra 20:30</span>
+          </div>
+          <div class="caja">
+            <span class="k">En tolva</span
+            ><span class="v">Sidama · Etiopía</span
+            ><span class="sub">Guji · Puerto Blest</span
+            ><span class="btn btn--sec btn--ancho"
+              >Cambiar el café en tolva</span
+            >
+          </div>
+        </div>
+        <div class="toast">
+          <i></i>
+          <div>
+            <b>Guardado. Ya se ve en el sitio.</b
+            ><small>La home muestra Sidama · Etiopía en tolva.</small>
+          </div>
+        </div>
+        <div class="tabs"><span class="on"><i></i>Inicio</span><span><i></i>Tolva</span><span><i></i>Productos</span><span><i></i>Horarios</span><span><i></i>Ajustes</span></div>
+      </div>
+      <p class="nota">
+        Cada guardado dice <b>exactamente qué cambió</b> y que ya está
+        publicado.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. TOLVA ============ -->
+<section class="grupo">
+  <h2>Tolva <small>un catálogo propio, aparte de lo que se vende</small></h2>
+  <div class="fila">
+    <div class="pieza">
+      <span class="ojo"
+        ><span>03 · Cafés de tolva</span><span>/tolva</span></span
+      >
+      <div class="tel">
+        <div class="tel__barra">
+          <h3>Tolva</h3>
+          <span class="btn btn--pri" style="min-height: 34px">+ Nuevo</span>
+        </div>
+        <div class="tel__cuerpo">
+          <div class="lista">
+            <div class="item">
+              <span class="radio radio--on"></span>
+              <div class="item__txt">
+                <b>Huila · Colombia</b><small>Lavado · 1750 m</small
+                ><span class="item__chips"
+                  ><span class="chip chip--brasa">En tolva ahora</span></span
+                >
+              </div>
+              <span class="flecha">›</span>
+            </div>
+            <div class="item">
+              <span class="radio"></span>
+              <div class="item__txt">
+                <b>Sidama · Etiopía</b><small>Natural · 2100 m</small>
+              </div>
+              <span class="flecha">›</span>
+            </div>
+            <div class="item">
+              <span class="radio"></span>
+              <div class="item__txt">
+                <b>Cerrado · Brasil</b><small>Natural · 1100 m</small>
+              </div>
+              <span class="flecha">›</span>
+            </div>
+            <div class="item">
+              <span class="radio"></span>
+              <div class="item__txt">
+                <b>Tarrazú · Costa Rica</b><small>Honey · 1600 m</small>
+              </div>
+              <span class="flecha">›</span>
+            </div>
+          </div>
+          <span class="k">Así se ve en la home</span>
+          <div class="tolva">
+            <div style="display: grid; gap: 3px">
+              <span class="k">En tolva ahora</span
+              ><span class="v">Huila · Colombia</span
+              ><span class="sub">Durazno, panela, cítrico</span>
+            </div>
+            <svg
+              viewBox="0 0 100 100"
+              data-penta="4,5,2,4,3"
+              aria-hidden="true"
+            ></svg>
+          </div>
+          <p class="nota">
+            Estos cafés <b>no son los de la tienda</b>: rotan seguido y se
+            borran cuando ya no vuelven. Tocar el círculo lo pone en tolva.
+          </p>
+        </div>
+        <div class="tabs"><span><i></i>Inicio</span><span class="on"><i></i>Tolva</span><span><i></i>Productos</span><span><i></i>Horarios</span><span><i></i>Ajustes</span></div>
+      </div>
+    </div>
+
+    <div class="pieza">
+      <span class="ojo"
+        ><span>04 · Ficha de un café de tolva</span><span>/tolva/2</span></span
+      >
+      <div class="tel">
+        <div class="tel__barra">
+          <span class="atras">‹ Tolva</span
+          ><span class="enlace">Poner en tolva</span>
+        </div>
+        <div class="tel__cuerpo">
+          <div class="dos">
+            <div class="campo">
+              <label>Nombre</label>
+              <div class="input">Sidama</div>
+            </div>
+            <div class="campo">
+              <label>País</label>
+              <div class="input">Etiopía</div>
+            </div>
+          </div>
+          <div class="dos">
+            <div class="campo">
+              <label>Proceso</label>
+              <div class="input">Natural</div>
+            </div>
+            <div class="campo">
+              <label>Altura (m)</label>
+              <div class="input">2100</div>
+            </div>
+          </div>
+          <div class="campo">
+            <label>Notas de cata</label>
+            <div class="input">Floral, bergamota, miel</div>
+          </div>
+          <div class="campo">
+            <label>A qué sabe · perfil</label>
+            <div class="penta">
+              <svg
+                viewBox="0 0 100 100"
+                data-penta="4,4,2,5,4"
+                data-etiquetas
+                aria-hidden="true"
+              ></svg>
+              <div class="deslizadores">
+                <div class="desl">
+                  <span>Acidez</span><span class="pasos" data-v="4"></span
+                  ><b>4</b>
+                </div>
+                <div class="desl">
+                  <span>Dulzor</span><span class="pasos" data-v="4"></span
+                  ><b>4</b>
+                </div>
+                <div class="desl">
+                  <span>Cuerpo</span><span class="pasos" data-v="2"></span
+                  ><b>2</b>
+                </div>
+                <div class="desl">
+                  <span>Aroma</span><span class="pasos" data-v="5"></span
+                  ><b>5</b>
+                </div>
+                <div class="desl">
+                  <span>Final</span><span class="pasos" data-v="4"></span
+                  ><b>4</b>
+                </div>
+              </div>
+            </div>
+          </div>
+          <span class="btn btn--peligro btn--ancho">Borrar este café</span>
+        </div>
+        <div class="guardar">
+          <span class="btn btn--pri btn--ancho">Guardar</span
+          ><small>Finca, variedad, tostadero y descripción, más arriba.</small>
+        </div>
+      </div>
+      <p class="nota">
+        El pentágono <b>se dibuja mientras se tocan los cinco controles</b> del
+        1 al 5: se ve lo mismo que en el sitio.
+      </p>
+    </div>
+
+    <div class="pieza">
+      <span class="ojo"><span>05 · Borrar</span><span>diálogo</span></span>
+      <div class="tel">
+        <div class="tel__barra">
+          <span class="atras">‹ Tolva</span
+          ><span class="enlace">Poner en tolva</span>
+        </div>
+        <div class="tel__cuerpo" style="opacity: 0.35">
+          <div class="campo">
+            <label>Nombre</label>
+            <div class="input">Sidama</div>
+          </div>
+          <div class="campo">
+            <label>País</label>
+            <div class="input">Etiopía</div>
+          </div>
+        </div>
+        <div class="velo"></div>
+        <div class="dialogo">
+          <h4>¿Borrar Sidama · Etiopía?</h4>
+          <p>Se borra de la lista de tolva. No se puede deshacer.</p>
+          <span class="btn btn--peligro btn--ancho">Sí, borrar</span>
+          <span class="btn btn--sec btn--ancho">Cancelar</span>
+          <p class="nota">
+            El que está en tolva ahora no se puede borrar: primero se pone otro.
+          </p>
+        </div>
+      </div>
+      <p class="nota">
+        Se borran <b>con un toque y una confirmación</b>, así la lista no
+        acumula cafés que ya no vuelven.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+  <!-- ============ 3. PRODUCTOS ============ -->
+  <section class="grupo">
+    <h2>Productos <small>la tienda</small></h2>
+    <div class="fila">
+      <div class="pieza">
+        <span class="ojo"
+          ><span>07 · Lista de productos</span><span>/productos</span></span
+        >
+        <div class="tel">
+          <div class="tel__barra">
+            <h3>Productos</h3>
+            <span class="btn btn--pri" style="min-height: 34px">+ Nuevo</span>
+          </div>
+          <div class="tel__cuerpo">
+            <span class="estante"
+              ><span>Estante · Café</span><span>1</span></span
+            >
+            <div class="lista">
+              <div class="item">
+                <span class="asa"><i></i><i></i><i></i></span
+                ><span class="foto"></span>
+                <div class="item__txt">
+                  <b>Huila · Colombia</b><small>250 g · $ 12.000 efectivo</small
+                  ><span class="item__chips"
+                    ><span class="chip chip--tostado">Nuevo</span></span
+                  >
+                </div>
+              </div>
+            </div>
+            <span class="estante"
+              ><span>Estante · Kits y accesorios</span><span>7</span></span
+            >
+            <div class="lista">
+              <div class="item">
+                <span class="asa"><i></i><i></i><i></i></span
+                ><span class="foto"></span>
+                <div class="item__txt">
+                  <b>Prensa</b><small>Cafetera de émbolo · $ 33.000</small>
+                </div>
+              </div>
+              <div class="item">
+                <span class="asa"><i></i><i></i><i></i></span
+                ><span class="foto"></span>
+                <div class="item__txt">
+                  <b>Filtro Aeropress</b><small>$ 26.000</small
+                  ><span class="item__chips"
+                    ><span class="chip">Consultar stock</span></span
+                  >
+                </div>
+              </div>
+              <div class="item">
+                <span class="asa"><i></i><i></i><i></i></span
+                ><span class="foto"></span>
+                <div class="item__txt">
+                  <b>Filtros V60 · 2</b><small>$ 26.000</small>
+                </div>
+              </div>
+              <div class="item">
+                <span class="asa"><i></i><i></i><i></i></span
+                ><span class="foto"></span>
+                <div class="item__txt">
+                  <b>Kit V60 · 1</b><small>$ 50.500</small
+                  ><span class="item__chips"
+                    ><span class="chip">Oculto</span></span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="tabs">
+            <span><i></i>Inicio</span><span><i></i>Tolva</span
+            ><span class="on"><i></i>Productos</span><span><i></i>Horarios</span
+            ><span><i></i>Ajustes</span>
+          </div>
+        </div>
+        <p class="nota">
+          Ordenados <b>como salen en los estantes del sitio</b>. Se reordena
+          arrastrando el asa; también hay “subir / bajar” para quien no quiera
+          arrastrar.
+        </p>
+      </div>
+
+      <div class="pieza">
+        <span class="ojo"
+          ><span>08 · Ficha de producto</span><span>/productos/1</span></span
+        >
+        <div class="tel">
+          <div class="tel__barra">
+            <span class="atras">‹ Productos</span
+            ><span class="enlace">Ver en el sitio ↗</span>
+          </div>
+          <div class="tel__cuerpo">
+            <div style="display: flex; gap: 12px; align-items: center">
+              <span class="foto" style="width: 78px; height: 78px"></span>
+              <div style="display: grid; gap: 6px">
+                <span class="btn btn--sec" style="min-height: 36px"
+                  >Cambiar foto</span
+                ><small class="sub">Se achica sola antes de subir.</small>
+              </div>
+            </div>
+            <div class="campo">
+              <label>Estante</label>
+              <div class="seg">
+                <span class="on">Café</span><span>Kits y accesorios</span>
+              </div>
+            </div>
+            <div class="dos">
+              <div class="campo">
+                <label>Nombre</label>
+                <div class="input">Huila · Colombia</div>
+              </div>
+              <div class="campo">
+                <label>Detalle</label>
+                <div class="input">250 g</div>
+              </div>
+            </div>
+            <div class="dos">
+              <div class="campo">
+                <label>Efectivo ($)</label>
+                <div class="input">12.000</div>
+              </div>
+              <div class="campo">
+                <label>Tarjeta ($)</label>
+                <div class="input input--error">1.300</div>
+                <span class="error">¿Seguro? Es menos que en efectivo.</span>
+              </div>
+            </div>
+            <div class="campo">
+              <label>Origen y perfil · sólo café</label>
+              <div class="input" style="justify-content:space-between"><span>Colombia · Lavado · 1750 m</span><span class="flecha">›</span></div>
+            </div>
+            <div class="campo">
+              <label>Opciones · molienda</label>
+              <div class="tramos">
+                <span class="tramo">En grano ✓</span
+                ><span class="tramo">Molido ✓</span
+                ><span class="mas">+ opción</span>
+              </div>
+            </div>
+            <div>
+              <div class="tog">
+                <div>
+                  <b>Visible en la tienda</b
+                  ><small>Apagado, no aparece en el sitio.</small>
+                </div>
+                <span class="sw sw--on"></span>
+              </div>
+              <div class="tog">
+                <div><b>Sello “Nuevo”</b></div>
+                <span class="sw sw--on"></span>
+              </div>
+              <div class="tog">
+                <div>
+                  <b>Consultar stock</b
+                  ><small>Avisa que hay que preguntar antes.</small>
+                </div>
+                <span class="sw"></span>
+              </div>
+            </div>
+          </div>
+          <div class="guardar">
+            <span class="btn btn--pri btn--ancho">Guardar</span>
+          </div>
+        </div>
+        <p class="nota">
+          Si es de café, <b>el origen y el pentágono se cargan acá mismo</b>: son del producto, no de la tolva. Los precios se escriben en pesos, sin
+          centavos.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4. HORARIOS Y AJUSTES ============ -->
+  <section class="grupo">
+    <h2>
+      Horarios y ajustes
+      <small>se tocan poco, pero tienen que estar bien</small>
+    </h2>
+    <div class="fila">
+      <div class="pieza">
+        <span class="ojo"
+          ><span>09 · Horarios</span><span>/horarios</span></span
+        >
+        <div class="tel">
+          <div class="tel__barra">
+            <h3>Horarios</h3>
+            <div class="seg" style="width: 170px">
+              <span class="on">Semana</span><span>Feriados</span>
+            </div>
+          </div>
+          <div class="tel__cuerpo">
+            <div>
+              <div class="dia">
+                <div class="dia__cab">
+                  <b>Lunes</b><span class="sw sw--on"></span>
+                </div>
+                <div class="tramos">
+                  <span class="tramo">08:00 – 12:30</span
+                  ><span class="tramo">16:30 – 20:30</span
+                  ><span class="mas">+ tramo</span>
+                </div>
+              </div>
+              <div class="dia">
+                <div class="dia__cab">
+                  <b>Martes</b><span class="sw sw--on"></span>
+                </div>
+                <div class="tramos">
+                  <span class="tramo">08:00 – 12:30</span
+                  ><span class="tramo tramo--error">16:30 – 14:00</span>
+                </div>
+                <span class="error"
+                  >Cierra antes de abrir: revisá el segundo tramo.</span
+                >
+              </div>
+              <div class="dia">
+                <div class="dia__cab">
+                  <b>Miércoles a viernes</b><span class="sw sw--on"></span>
+                </div>
+                <div class="tramos">
+                  <span class="tramo">08:00 – 12:30</span
+                  ><span class="tramo">16:30 – 20:30</span>
+                </div>
+              </div>
+              <div class="dia">
+                <div class="dia__cab">
+                  <b>Sábado</b><span class="sw sw--on"></span>
+                </div>
+                <div class="tramos">
+                  <span class="tramo">09:00 – 13:00</span
+                  ><span class="tramo">16:30 – 20:30</span>
+                </div>
+              </div>
+              <div class="dia">
+                <div class="dia__cab">
+                  <b>Domingo</b><span class="sw sw--on"></span>
+                </div>
+                <div class="tramos">
+                  <span class="tramo">16:00 – 20:00</span>
+                </div>
+              </div>
+            </div>
+            <span class="enlace">Copiar el lunes a toda la semana</span>
+          </div>
+          <div class="guardar">
+            <span class="btn btn--pri btn--ancho">Guardar horarios</span>
+          </div>
+        </div>
+        <p class="nota">
+          El interruptor de cada día es <b>abierto / cerrado</b>. Los errores se
+          marcan en el tramo, antes de guardar.
+        </p>
+      </div>
+
+      <div class="pieza">
+        <span class="ojo"
+          ><span>10 · Feriados</span><span>/horarios</span></span
+        >
+        <div class="tel">
+          <div class="tel__barra">
+            <h3>Horarios</h3>
+            <div class="seg" style="width: 170px">
+              <span>Semana</span><span class="on">Feriados</span>
+            </div>
+          </div>
+          <div class="tel__cuerpo">
+            <span class="btn btn--sec btn--ancho"
+              >+ Agregar un día especial</span
+            >
+            <div class="lista">
+              <div class="item">
+                <div class="item__txt">
+                  <b>Lunes 12/10 · Diversidad Cultural</b
+                  ><small>16:00 – 20:00</small>
+                </div>
+                <span class="flecha">›</span>
+              </div>
+              <div class="item">
+                <div class="item__txt">
+                  <b>Lunes 23/11 · Soberanía Nacional</b
+                  ><small>16:00 – 20:00</small>
+                </div>
+                <span class="flecha">›</span>
+              </div>
+              <div class="item">
+                <div class="item__txt">
+                  <b>Martes 8/12 · Inmaculada Concepción</b
+                  ><small>16:00 – 20:00</small>
+                </div>
+                <span class="flecha">›</span>
+              </div>
+              <div class="item">
+                <div class="item__txt">
+                  <b>Viernes 25/12 · Navidad</b><small>Cerrado</small>
+                </div>
+                <span class="flecha">›</span>
+              </div>
+            </div>
+            <p class="nota">
+              Sólo los que vienen. Un día especial manda sobre la semana: si
+              dice cerrado, el sitio dice cerrado.
+            </p>
+          </div>
+          <div class="tabs">
+            <span><i></i>Inicio</span><span><i></i>Tolva</span
+            ><span><i></i>Productos</span><span class="on"><i></i>Horarios</span
+            ><span><i></i>Ajustes</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pieza">
+        <span class="ojo"><span>11 · Ajustes</span><span>/ajustes</span></span>
+        <div class="tel">
+          <div class="tel__barra"><h3>Ajustes</h3></div>
+          <div class="tel__cuerpo">
+            <div class="campo">
+              <label>WhatsApp del local</label>
+              <div class="input">+54 9 342 466-7646</div>
+              <span class="enlace">Probar: abrir un chat ↗</span>
+            </div>
+            <div class="campo">
+              <label>Link de la carta</label>
+              <div
+                class="input"
+                style="overflow: hidden; white-space: nowrap; font-size: 13px"
+              >
+                https://drive.google.com/drive/folders/1Kc…
+              </div>
+              <span class="enlace">Abrir la carta ↗</span>
+            </div>
+            <div class="campo">
+              <label>Instagram</label>
+              <div class="input">https://www.instagram.com/falco.cafe/</div>
+            </div>
+            <p class="nota">
+              Los pedidos de la web llegan a ese WhatsApp. Probalo después de
+              cambiarlo.
+            </p>
+          </div>
+          <div class="guardar">
+            <span class="btn btn--pri btn--ancho">Guardar ajustes</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5. ESCRITORIO ============ -->
+  <section class="grupo">
+    <h2>En la computadora <small>las mismas pantallas, con más aire</small></h2>
+    <div class="envoltorio">
+      <div class="esc">
+        <aside class="esc__lado">
+          <span class="marca">Falco · admin</span>
+          <span>Inicio</span><span>Tolva</span><span class="on">Productos</span
+          ><span>Horarios</span><span>Ajustes</span>
+        </aside>
+        <div class="esc__main">
+          <div class="esc__lista">
+            <div class="esc__cab">
+              <h3>Productos</h3>
+              <span class="btn btn--pri">+ Nuevo producto</span>
+            </div>
+            <span class="estante"
+              ><span>Estante · Café</span><span>1</span></span
+            >
+            <div class="lista">
+              <div class="item item--sel">
+                <span class="asa"><i></i><i></i><i></i></span
+                ><span class="foto"></span>
+                <div class="item__txt">
+                  <b>Huila · Colombia</b
+                  ><small>250 g · $ 12.000 efectivo · $ 13.000 tarjeta</small>
+                </div>
+                <span class="chip chip--tostado">Nuevo</span>
+              </div>
+            </div>
+            <span class="estante"
+              ><span>Estante · Kits y accesorios</span><span>7</span></span
+            >
+            <div class="lista">
+              <div class="item">
+                <span class="asa"><i></i><i></i><i></i></span
+                ><span class="foto"></span>
+                <div class="item__txt">
+                  <b>Prensa</b><small>Cafetera de émbolo · $ 33.000</small>
+                </div>
+              </div>
+              <div class="item">
+                <span class="asa"><i></i><i></i><i></i></span
+                ><span class="foto"></span>
+                <div class="item__txt">
+                  <b>Filtro Aeropress</b><small>$ 26.000</small>
+                </div>
+                <span class="chip">Consultar stock</span>
+              </div>
+              <div class="item">
+                <span class="asa"><i></i><i></i><i></i></span
+                ><span class="foto"></span>
+                <div class="item__txt">
+                  <b>Kit V60 · 1</b><small>$ 50.500</small>
+                </div>
+                <span class="chip">Oculto</span>
+              </div>
+            </div>
+          </div>
+          <div class="esc__ficha">
+            <span class="k">Editando</span>
+            <div style="display: flex; gap: 12px; align-items: center">
+              <span class="foto" style="width: 64px; height: 64px"></span
+              ><span class="btn btn--sec" style="min-height: 36px"
+                >Cambiar foto</span
+              >
+            </div>
+            <div class="dos">
+              <div class="campo">
+                <label>Nombre</label>
+                <div class="input">Huila · Colombia</div>
+              </div>
+              <div class="campo">
+                <label>Detalle</label>
+                <div class="input">250 g</div>
+              </div>
+            </div>
+            <div class="dos">
+              <div class="campo">
+                <label>Efectivo ($)</label>
+                <div class="input">12.000</div>
+              </div>
+              <div class="campo">
+                <label>Tarjeta ($)</label>
+                <div class="input">13.000</div>
+              </div>
+            </div>
+            <div class="tog">
+              <div><b>Visible en la tienda</b></div>
+              <span class="sw sw--on"></span>
+            </div>
+            <div class="tog">
+              <div><b>Sello “Nuevo”</b></div>
+              <span class="sw sw--on"></span>
+            </div>
+            <span class="btn btn--pri btn--ancho">Guardar</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="nota">
+      Barra lateral en vez de pestañas, y <b>lista y ficha lado a lado</b>: se
+      edita sin perder de vista el estante.
+    </p>
+  </section>
+</main>
+
+<script>
+  // El pentágono, con la misma geometría del sitio: cinco ejes empezando arriba.
+  const EJES = ["Acidez", "Dulzor", "Cuerpo", "Aroma", "Final"];
+  const punto = (i, r) => {
+    const a = ((-90 + i * 72) * Math.PI) / 180;
+    return [50 + r * Math.cos(a), 50 + r * Math.sin(a)];
+  };
+  for (const svg of document.querySelectorAll("svg[data-penta]")) {
+    const vals = svg.dataset.penta.split(",").map(Number);
+    const etiquetas = svg.hasAttribute("data-etiquetas");
+    if (etiquetas) svg.setAttribute("viewBox", "-14 -4 128 108");
+    if (etiquetas) svg.setAttribute("viewBox", "-14 -4 128 108");
+    const R = etiquetas ? 30 : 40;
+    const anillo = (k) =>
+      EJES.map((_, i) => punto(i, (R * k) / 5).join(",")).join(" ");
+    let html = "";
+    for (let k = 1; k <= 5; k++)
+      html += `<polygon points="${anillo(k)}" fill="none" stroke="rgba(232,226,208,${k === 5 ? 0.3 : 0.12})"/>`;
+    html += `<polygon points="${vals.map((v, i) => punto(i, (R * v) / 5).join(",")).join(" ")}" fill="rgba(136,83,51,0.75)" stroke="#F2C48B" stroke-width="1.2"/>`;
+    if (etiquetas) {
+      EJES.forEach((e, i) => {
+        const [x, y] = punto(i, R + 11);
+        html += `<text x="${x}" y="${y + 3}" text-anchor="middle" fill="#9A9C9E" font-family="Martian Mono, monospace" font-size="6.5">${e}</text>`;
+      });
+    }
+    svg.innerHTML = html;
+  }
+  for (const pasos of document.querySelectorAll(".pasos[data-v]")) {
+    const v = Number(pasos.dataset.v);
+    pasos.innerHTML = [1, 2, 3, 4, 5]
+      .map((n) => `<i class="${n <= v ? "on" : ""}"></i>`)
+      .join("");
+  }
+</script>

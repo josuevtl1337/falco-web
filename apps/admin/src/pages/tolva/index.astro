@@ -1,0 +1,146 @@
+---
+import { env } from "cloudflare:workers";
+import { getHopperCoffee, listHopperCoffees, setHopperCoffee } from "@falco/db";
+import Admin from "../../layouts/Admin.astro";
+import Pentagono from "../../components/Pentagono.astro";
+import { conAviso } from "../../avisos";
+import { nombreCafe } from "../../cafe";
+
+let error = "";
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  const id = Number(form.get("id"));
+  const resultado = await setHopperCoffee(env.DB, id, Astro.locals.email);
+  if (resultado.ok) {
+    const cafe = (await listHopperCoffees(env.DB)).find((c) => c.id === id);
+    return Astro.redirect(conAviso("/tolva", "tolva", cafe ? nombreCafe(cafe) : ""), 303);
+  }
+  error = resultado.reason ?? "No se pudo cambiar el café en tolva.";
+}
+
+const [cafes, enTolva] = await Promise.all([listHopperCoffees(env.DB), getHopperCoffee(env.DB)]);
+const detalle = (c: (typeof cafes)[number]) =>
+  [c.process, c.altitudeMasl && `${c.altitudeMasl} m`].filter(Boolean).join(" · ");
+---
+
+<Admin titulo="Tolva" pestana="tolva">
+  <Fragment slot="barra">
+    <h1>Tolva</h1>
+    <a class="btn btn--pri" href="/tolva/nuevo">+ Nuevo</a>
+  </Fragment>
+
+  {error && <div class="aviso aviso--error" role="alert"><div><b>No se cambió.</b><small>{error}</small></div></div>}
+
+  {
+    cafes.length === 0 ? (
+      <p class="nota">Todavía no hay cafés de tolva. Cargá el primero con “+ Nuevo”.</p>
+    ) : (
+      <ul class="lista">
+        {cafes.map((c) => {
+          const actual = c.id === enTolva?.id;
+          return (
+            <li class="item">
+              <form method="post">
+                <input type="hidden" name="id" value={c.id} />
+                <button
+                  class:list={["radio", { "radio--on": actual }]}
+                  type="submit"
+                  disabled={actual}
+                  aria-label={actual ? `${nombreCafe(c)} está en tolva` : `Poner ${nombreCafe(c)} en tolva`}
+                />
+              </form>
+              <a class="item__txt" href={`/tolva/${c.id}`}>
+                <b>{nombreCafe(c)}</b>
+                {detalle(c) && <small>{detalle(c)}</small>}
+                {actual && <span class="chip chip--brasa">En tolva ahora</span>}
+              </a>
+              <span class="nota" aria-hidden="true">›</span>
+            </li>
+          );
+        })}
+      </ul>
+    )
+  }
+
+  {
+    enTolva && (
+      <section class="caja tolva" aria-label="Así se ve en la home">
+        <span class="k">Así se ve en la home</span>
+        <div class="tolva__tarjeta">
+          <div class="tolva__txt">
+            <span class="k tolva__ojo">En tolva ahora</span>
+            <span class="v">{nombreCafe(enTolva)}</span>
+            {enTolva.tastingNotes && <span class="sub">{enTolva.tastingNotes}</span>}
+          </div>
+          <Pentagono perfil={enTolva.profile} etiquetas={false} />
+        </div>
+      </section>
+    )
+  }
+
+  <p class="nota">
+    Estos cafés no son los de la tienda: rotan seguido y se borran cuando ya no vuelven. Tocar el
+    círculo pone ese café en tolva.
+  </p>
+</Admin>
+
+<style>
+  .item form {
+    display: contents;
+  }
+
+  .radio {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    margin: -6px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+
+  .radio::before {
+    content: "";
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-ceniza);
+  }
+
+  .radio--on::before {
+    border-color: var(--color-brasa);
+    background: var(--color-brasa);
+    box-shadow: inset 0 0 0 4px var(--color-piedra);
+  }
+
+  .radio:disabled {
+    cursor: default;
+  }
+
+  .item__txt .chip {
+    justify-self: start;
+    margin-top: 2px;
+  }
+
+  .tolva__tarjeta {
+    display: grid;
+    grid-template-columns: 1fr 90px;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--color-sombra);
+  }
+
+  .tolva__txt {
+    display: grid;
+    gap: 3px;
+  }
+
+  .tolva__ojo {
+    color: var(--color-brasa);
+  }
+</style>

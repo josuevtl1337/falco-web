@@ -1,0 +1,128 @@
+---
+import { env } from "cloudflare:workers";
+import { deleteSpecialDay, getUpcomingSpecialDays, saveSpecialDay } from "@falco/db";
+import Admin from "../../../layouts/Admin.astro";
+import Campo from "../../../components/Campo.astro";
+import Tramos from "../../../components/Tramos.astro";
+import { conAviso } from "../../../avisos";
+import { erroresDe, leerTramos, nombreDeFecha, type TramoForm } from "../../../horarios";
+
+const parametro = Astro.params.fecha ?? "";
+const nuevo = parametro === "nuevo";
+
+let valores: { date: string; note: string; abierto: boolean; tramos: TramoForm[] } = {
+  date: "",
+  note: "",
+  abierto: false,
+  tramos: [],
+};
+
+if (!nuevo) {
+  // Se busca justo esa fecha: la consulta trae desde ahí en adelante.
+  const [dia] = await getUpcomingSpecialDays(env.DB, parametro, 20);
+  if (!dia || dia.date !== parametro) return Astro.redirect("/horarios/feriados", 303);
+  valores = {
+    date: dia.date,
+    note: dia.note ?? "",
+    abierto: dia.shifts.length > 0,
+    tramos: [...dia.shifts],
+  };
+}
+
+let errores: Record<string, string> = {};
+
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+
+  if (form.get("accion") === "borrar" && !nuevo) {
+    await deleteSpecialDay(env.DB, parametro);
+    return Astro.redirect(conAviso("/horarios/feriados", "feriado-borrado"), 303);
+  }
+
+  valores = {
+    date: String(form.get("date") ?? ""),
+    note: String(form.get("note") ?? ""),
+    abierto: form.has("f-abierto"),
+    tramos: leerTramos(form, "f"),
+  };
+
+  if (valores.abierto && valores.tramos.length === 0) {
+    errores.shifts = "Cargá al menos un horario, o marcá el día como cerrado.";
+  } else {
+    const resultado = await saveSpecialDay(
+      env.DB,
+      { date: valores.date, note: valores.note, shifts: valores.abierto ? valores.tramos : [] },
+      Astro.locals.email,
+      nuevo ? undefined : parametro,
+    );
+    if (resultado.ok) return Astro.redirect(conAviso("/horarios/feriados", "feriado"), 303);
+    errores = resultado.errors;
+  }
+}
+
+const titulo = nuevo ? "Nuevo día especial" : nombreDeFecha(parametro);
+---
+
+<Admin titulo={titulo} pestana="horarios">
+  <Fragment slot="barra">
+    <a class="atras" href="/horarios/feriados">‹ Feriados</a>
+  </Fragment>
+
+  <h1>{titulo}</h1>
+
+  <form class="form" method="post">
+    <Campo etiqueta="Fecha" name="date" type="date" value={valores.date} error={errores.date} required />
+    <Campo
+      etiqueta="Qué es (opcional)"
+      name="note"
+      value={valores.note}
+      error={errores.note}
+      maxlength={60}
+      ayuda="Por ejemplo: Día de la Diversidad Cultural, o Cerramos por inventario."
+    />
+
+    <fieldset class="campo">
+      <legend>Ese día</legend>
+      <Tramos
+        prefijo="f"
+        nombre="El día especial"
+        tramos={valores.tramos}
+        abierto={valores.abierto}
+        errores={erroresDe(errores, "shifts")}
+      />
+    </fieldset>
+
+    <div class="guardar">
+      <button class="btn btn--pri btn--ancho" type="submit">Guardar</button>
+    </div>
+  </form>
+
+  {
+    !nuevo && (
+      <>
+        <button class="btn btn--peligro btn--ancho" type="button" data-abrir-borrar>
+          Borrar este día especial
+        </button>
+        <dialog class="confirmar" data-borrar>
+          <form method="post">
+            <h2>¿Borrar {titulo}?</h2>
+            <p>Ese día vuelve a tener el horario de siempre de la semana.</p>
+            <button class="btn btn--peligro btn--ancho" type="submit" name="accion" value="borrar">
+              Sí, borrar
+            </button>
+            <button class="btn btn--sec btn--ancho" type="submit" formmethod="dialog">
+              Cancelar
+            </button>
+          </form>
+        </dialog>
+      </>
+    )
+  }
+</Admin>
+
+<script>
+  import { conectarTramos } from "../../../scripts/tramos";
+  import { conectarConfirmar } from "../../../scripts/confirmar";
+  conectarTramos();
+  conectarConfirmar();
+</script>

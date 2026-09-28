@@ -156,6 +156,17 @@ describe("0001_init + seed", () => {
     ).toThrow(/CHECK/);
   });
 
+  // La tolva tiene su propia tabla, con las mismas reglas que coffees.
+  it("los cafés de tolva tampoco aceptan un pentágono fuera de 1 a 5", () => {
+    expect(() =>
+      db
+        .prepare(
+          "INSERT INTO hopper_coffees (name, country, acidity, sweetness, body, aroma, finish) VALUES ('X', 'Brasil', 3, 0, 3, 3, 3)",
+        )
+        .run(),
+    ).toThrow(/CHECK/);
+  });
+
   it("rechaza un tipo de producto desconocido", () => {
     expect(() =>
       db
@@ -236,7 +247,9 @@ describe("tipos estrictos", () => {
     const tables = db
       .prepare("SELECT name, sql FROM sqlite_master WHERE type = 'table'")
       .all() as { name: string; sql: string }[];
-    expect(tables).toHaveLength(8);
+    // 9: las 8 del Plan 1 más hopper_coffees (Plan 3). Contarlas obliga a
+    // que una tabla nueva pase por acá y se declare STRICT.
+    expect(tables).toHaveLength(9);
     for (const table of tables) expect(table.sql).toMatch(/\)\s*STRICT$/);
   });
 

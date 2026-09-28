@@ -34,10 +34,16 @@ const { product, shelfLabel, copy = false } = Astro.props;
       )
     }
 
-    <!-- El hueco de la foto. Todavía no hay fotos de producto: en la lámina
-         este espacio es un degradado con una luz arriba, que se lee como algo
-         puesto a propósito y no como una imagen rota. -->
-    <span class="ficha__foto" aria-hidden="true"></span>
+    <!-- El hueco de la foto. Sin foto, en la lámina este espacio es un
+         degradado con una luz arriba, que se lee como algo puesto a propósito
+         y no como una imagen rota. Con foto, la foto lo tapa. -->
+    <span class="ficha__foto" aria-hidden="true">
+      {
+        product.imageKey && (
+          <img src={`/fotos/${product.imageKey}`} alt="" loading="lazy" decoding="async" />
+        )
+      }
+    </span>
 
     <span class="ficha__cuerpo">
       <span class="ficha__codigo">{shelfLabel}</span>
@@ -87,6 +93,15 @@ const { product, shelfLabel, copy = false } = Astro.props;
     height: 150px;
     background: linear-gradient(150deg, #3b2519, rgb(35, 36, 38));
     border-bottom: 1px solid rgba(232, 226, 208, 0.1);
+  }
+
+  .ficha__foto img {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   /* La luz que entra desde arriba, como en el resto del sitio. */

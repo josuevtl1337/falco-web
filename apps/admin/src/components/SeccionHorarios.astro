@@ -1,0 +1,44 @@
+---
+interface Props {
+  actual: "semana" | "feriados";
+}
+const { actual } = Astro.props;
+---
+
+<nav class="seg" aria-label="Horarios">
+  <a href="/horarios" aria-current={actual === "semana" ? "page" : undefined}>La semana</a>
+  <a href="/horarios/feriados" aria-current={actual === "feriados" ? "page" : undefined}>Feriados y días especiales</a>
+</nav>
+
+<style>
+  .seg {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid rgba(232, 226, 208, 0.25);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .seg a {
+    display: grid;
+    place-items: center;
+    min-height: 44px;
+    padding: 6px 8px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--color-ceniza);
+  }
+
+  .seg a + a {
+    border-left: 1px solid rgba(232, 226, 208, 0.25);
+  }
+
+  .seg a[aria-current="page"] {
+    background: var(--color-hueso);
+    color: var(--color-carbon);
+  }
+</style>

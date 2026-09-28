@@ -32,6 +32,7 @@ const shelfLabel = product.shelf === "coffee" ? "Café" : "Kits y accesorios";
 <Base
   title={`${product.name} · Falco`}
   description={product.description ?? product.detail}
+  image={product.imageKey ? `/fotos/${product.imageKey}` : undefined}
 >
   <Nav slot="nav" />
 

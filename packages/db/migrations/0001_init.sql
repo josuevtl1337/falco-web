@@ -1,5 +1,32 @@
--- Cafés: catálogo. Un café puede estar en la tolva, en la tienda, o en los dos.
+-- Cafés que se venden: el origen y el perfil de cata de un producto de café.
+-- La tolva tiene su propio catálogo (hopper_coffees).
 CREATE TABLE coffees (
+  id              INTEGER PRIMARY KEY,
+  name            TEXT NOT NULL CHECK (length(trim(name)) > 0),
+  farm            TEXT,
+  country         TEXT NOT NULL CHECK (length(trim(country)) > 0),
+  variety         TEXT,
+  process         TEXT,
+  altitude_masl   INTEGER CHECK (altitude_masl IS NULL OR altitude_masl BETWEEN 0 AND 3000),
+  tasting_notes   TEXT,
+  description     TEXT,
+  roaster         TEXT NOT NULL DEFAULT 'Puerto Blest' CHECK (length(trim(roaster)) > 0),
+  acidity         INTEGER NOT NULL CHECK (acidity BETWEEN 1 AND 5),
+  sweetness       INTEGER NOT NULL CHECK (sweetness BETWEEN 1 AND 5),
+  body            INTEGER NOT NULL CHECK (body BETWEEN 1 AND 5),
+  aroma           INTEGER NOT NULL CHECK (aroma BETWEEN 1 AND 5),
+  finish          INTEGER NOT NULL CHECK (finish BETWEEN 1 AND 5),
+  created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+  updated_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+  updated_by      TEXT
+) STRICT;
+
+-- Cafés de tolva: su propio catálogo, aparte de los cafés que se venden.
+-- Rotan seguido y se borran cuando ya no vuelven, así que no los referencia
+-- ningún producto. El que está en tolva lo dice settings.hopper_coffee_id.
+-- Mismas columnas y mismas reglas que coffees: la home muestra uno u otro
+-- con la misma tarjeta.
+CREATE TABLE hopper_coffees (
   id              INTEGER PRIMARY KEY,
   name            TEXT NOT NULL CHECK (length(trim(name)) > 0),
   farm            TEXT,
@@ -103,7 +130,8 @@ CREATE TABLE special_day_shifts (
   CHECK (closes_at > opens_at)
 ) STRICT;
 
--- Ajustes sueltos. Claves: hopper_coffee_id, whatsapp_number, menu_url, instagram_url.
+-- Ajustes sueltos. Claves: hopper_coffee_id (un id de hopper_coffees),
+-- whatsapp_number, menu_url, instagram_url.
 CREATE TABLE settings (
   key             TEXT PRIMARY KEY CHECK (length(trim(key)) > 0),
   value           TEXT NOT NULL CHECK (length(trim(value)) > 0),

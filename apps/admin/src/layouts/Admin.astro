@@ -1,0 +1,68 @@
+---
+import "../styles/admin.css";
+import { avisoDe } from "../avisos";
+
+export type Pestana = "inicio" | "tolva" | "productos" | "horarios" | "ajustes";
+
+interface Props {
+  /** El título de la pestaña del navegador y, si no hay slot "barra", de la barra. */
+  titulo: string;
+  pestana: Pestana;
+}
+
+const { titulo, pestana } = Astro.props;
+const aviso = avisoDe(Astro.url);
+
+// Íconos dibujados a mano, simples: sólo tienen que distinguirse de un vistazo.
+const PESTANAS: { id: Pestana; href: string; nombre: string; icono: string }[] = [
+  { id: "inicio", href: "/", nombre: "Inicio", icono: "M4 11 12 4l8 7v9h-5v-6H9v6H4z" },
+  { id: "tolva", href: "/tolva", nombre: "Tolva", icono: "M5 4h14l-3 8h-8zM9 12l1 8h4l1-8" },
+  { id: "productos", href: "/productos", nombre: "Productos", icono: "M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2" },
+  { id: "horarios", href: "/horarios", nombre: "Horarios", icono: "M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM12 8v4l3 2" },
+  { id: "ajustes", href: "/ajustes", nombre: "Ajustes", icono: "M4 7h10M18 7h2M4 17h4M12 17h8M14 5v4M8 15v4" },
+];
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{titulo} · Falco admin</title>
+  </head>
+  <body>
+    <div class="admin">
+      <header class="barra">
+        <slot name="barra"><h1>{titulo}</h1></slot>
+      </header>
+
+      <main class="cuerpo">
+        {
+          aviso && (
+            <div class:list={["aviso", { "aviso--error": aviso.error }]} role={aviso.error ? "alert" : "status"}>
+              <div>
+                <b>{aviso.titulo}</b>
+                <small>{aviso.detalle}</small>
+              </div>
+            </div>
+          )
+        }
+        <slot />
+      </main>
+
+      <nav class="pestanas" aria-label="Secciones del admin">
+        {
+          PESTANAS.map((p) => (
+            <a href={p.href} aria-current={p.id === pestana ? "page" : undefined}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d={p.icono} />
+              </svg>
+              {p.nombre}
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+  </body>
+</html>

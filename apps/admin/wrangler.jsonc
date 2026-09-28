@@ -1,0 +1,37 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // El admin es otro Worker, con otro dominio: el sitio sigue siendo de solo
+  // lectura y nunca comparte código de escritura con este.
+  "name": "falco-admin",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-09-20",
+  "compatibility_flags": ["nodejs_compat"],
+  // Sólo en su dominio, detrás de Cloudflare Access: sin la dirección
+  // automática *.workers.dev, que sería una puerta más.
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{ "pattern": "admin.falcocafe.com.ar", "custom_domain": true }],
+  "assets": { "directory": "dist", "binding": "ASSETS" },
+  // La misma base que el sitio.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "falco",
+      "database_id": "local",
+      "migrations_dir": "../../packages/db/migrations",
+    },
+  ],
+  // Los datos de la aplicación de Cloudflare Access. Se completan en el Plan 4,
+  // al crearla; vacíos, ningún pedido pasa (salvo ADMIN_DEV_EMAIL en local).
+  "vars": {
+    "ACCESS_TEAM": "",
+    "ACCESS_AUD": "",
+    // A dónde lleva "Ver el sitio". En desarrollo, .dev.vars lo cambia.
+    "SITE_URL": "https://falcocafe.com.ar",
+  },
+  // Las fotos de los productos. El admin las sube; el sitio las sirve en
+  // /fotos/<clave>. En desarrollo comparten el estado local (persistState).
+  // PHOTOS y no IMAGES: el adaptador de Astro reserva IMAGES para el
+  // servicio Cloudflare Images y pisa cualquier binding con ese nombre.
+  "r2_buckets": [{ "binding": "PHOTOS", "bucket_name": "falco-photos" }],
+}

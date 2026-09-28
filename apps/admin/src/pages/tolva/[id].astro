@@ -1,0 +1,174 @@
+---
+import { env } from "cloudflare:workers";
+import {
+  createHopperCoffee,
+  deleteHopperCoffee,
+  getHopperCoffee,
+  getHopperCoffeeById,
+  setHopperCoffee,
+  updateHopperCoffee,
+} from "@falco/db";
+import Admin from "../../layouts/Admin.astro";
+import Campo from "../../components/Campo.astro";
+import Perfil from "../../components/Perfil.astro";
+import { conAviso } from "../../avisos";
+import { borradorAForm, CAFE_VACIO, cafeAForm, leerCafe, nombreCafe, type CafeForm } from "../../cafe";
+
+const nuevo = Astro.params.id === "nuevo";
+const id = Number(Astro.params.id);
+
+let valores: CafeForm = CAFE_VACIO;
+if (!nuevo) {
+  const cafe = Number.isInteger(id) ? await getHopperCoffeeById(env.DB, id) : undefined;
+  if (!cafe) return Astro.redirect("/tolva", 303);
+  valores = cafeAForm(cafe);
+}
+
+const enTolva = !nuevo && (await getHopperCoffee(env.DB))?.id === id;
+let errores: Record<string, string> = {};
+let problema = "";
+
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  const accion = form.get("accion");
+
+  if (accion === "borrar") {
+    const r = await deleteHopperCoffee(env.DB, id);
+    if (r.ok) return Astro.redirect(conAviso("/tolva", "cafe-borrado", nombreCafe(valores)), 303);
+    problema = r.reason ?? "No se pudo borrar.";
+  } else if (accion === "poner") {
+    const r = await setHopperCoffee(env.DB, id, Astro.locals.email);
+    if (r.ok) return Astro.redirect(conAviso("/tolva", "tolva", nombreCafe(valores)), 303);
+    problema = r.reason ?? "No se pudo poner en tolva.";
+  } else {
+    const borrador = leerCafe(form);
+    valores = borradorAForm(borrador);
+    if (nuevo) {
+      const r = await createHopperCoffee(env.DB, borrador, Astro.locals.email);
+      if (r.ok) return Astro.redirect(conAviso(`/tolva/${r.id}`, "cafe", nombreCafe(valores)), 303);
+      errores = r.errors;
+      problema = r.reason ?? "";
+    } else {
+      const r = await updateHopperCoffee(env.DB, id, borrador, Astro.locals.email);
+      if (r.ok) return Astro.redirect(conAviso(`/tolva/${id}`, "cafe", nombreCafe(valores)), 303);
+      errores = r.errors;
+      problema = r.reason ?? "";
+    }
+  }
+}
+
+const titulo = nuevo ? "Nuevo café de tolva" : nombreCafe(valores);
+const hayErrores = Object.keys(errores).length > 0;
+---
+
+<Admin titulo={titulo} pestana="tolva">
+  <Fragment slot="barra">
+    <a class="atras" href="/tolva">‹ Tolva</a>
+    {
+      enTolva ? (
+        <span class="chip chip--brasa">En tolva ahora</span>
+      ) : (
+        !nuevo && (
+          <form method="post">
+            <button class="enlace" type="submit" name="accion" value="poner">Poner en tolva</button>
+          </form>
+        )
+      )
+    }
+  </Fragment>
+
+  <h1>{titulo}</h1>
+
+  {
+    (problema || hayErrores) && (
+      <div class="aviso aviso--error" role="alert">
+        <div>
+          <b>{problema ? "No se pudo." : "Falta revisar algunos campos."}</b>
+          <small>{problema || "Están marcados abajo. No se guardó nada."}</small>
+        </div>
+      </div>
+    )
+  }
+
+  <form class="form" method="post">
+    <div class="dos">
+      <Campo etiqueta="Nombre" name="name" value={valores.name} error={errores.name} required maxlength={60} />
+      <Campo etiqueta="País" name="country" value={valores.country} error={errores.country} required maxlength={40} />
+    </div>
+    <Campo etiqueta="Finca (opcional)" name="farm" value={valores.farm} error={errores.farm} maxlength={80} />
+    <div class="dos">
+      <Campo etiqueta="Variedad" name="variety" value={valores.variety} error={errores.variety} maxlength={60} />
+      <Campo etiqueta="Proceso" name="process" value={valores.process} error={errores.process} maxlength={60} />
+    </div>
+    <div class="dos">
+      <Campo
+        etiqueta="Altura (m)"
+        name="altitudeMasl"
+        value={valores.altitudeMasl}
+        error={errores.altitudeMasl}
+        type="number"
+        inputmode="numeric"
+        min={0}
+        max={3000}
+      />
+      <Campo etiqueta="Tostadero" name="roaster" value={valores.roaster} error={errores.roaster} maxlength={60} />
+    </div>
+    <Campo
+      etiqueta="Notas de cata"
+      name="tastingNotes"
+      value={valores.tastingNotes}
+      error={errores.tastingNotes}
+      maxlength={120}
+      ayuda="Tres o cuatro palabras: Durazno, panela, cítrico."
+    />
+    <Campo
+      etiqueta="Descripción (opcional)"
+      name="description"
+      value={valores.description}
+      error={errores.description}
+      largo
+      ayuda="Una o dos frases para quien recién empieza."
+    />
+
+    <Perfil perfil={valores.perfil} errores={errores} />
+
+    <div class="guardar">
+      <button class="btn btn--pri btn--ancho" type="submit">{nuevo ? "Crear el café" : "Guardar"}</button>
+    </div>
+  </form>
+
+  {
+    !nuevo &&
+      (enTolva ? (
+        <p class="nota">
+          Es el café que está en tolva ahora, así que no se puede borrar. Poné otro en tolva y después vas a poder
+          borrarlo.
+        </p>
+      ) : (
+        <>
+          <button class="btn btn--peligro btn--ancho" type="button" data-abrir-borrar>
+            Borrar este café
+          </button>
+          <dialog class="confirmar" data-borrar>
+            <form method="post">
+              <h2>¿Borrar {titulo}?</h2>
+              <p>Se borra de la lista de tolva. No se puede deshacer.</p>
+              <button class="btn btn--peligro btn--ancho" type="submit" name="accion" value="borrar">
+                Sí, borrar
+              </button>
+              <button class="btn btn--sec btn--ancho" type="submit" formmethod="dialog">
+                Cancelar
+              </button>
+            </form>
+          </dialog>
+        </>
+      ))
+  }
+</Admin>
+
+<script>
+  import { conectarPerfil } from "../../scripts/perfil";
+  import { conectarConfirmar } from "../../scripts/confirmar";
+  conectarPerfil();
+  conectarConfirmar();
+</script>

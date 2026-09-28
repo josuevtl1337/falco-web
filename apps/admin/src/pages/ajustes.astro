@@ -1,0 +1,81 @@
+---
+import { env } from "cloudflare:workers";
+import { getSettings, saveSettings } from "@falco/db";
+import Admin from "../layouts/Admin.astro";
+import Campo from "../components/Campo.astro";
+import { conAviso } from "../avisos";
+
+let errores: Record<string, string> = {};
+let valores = await getSettings(env.DB).then((s) => ({
+  whatsappNumber: s.whatsapp_number ?? "",
+  menuUrl: s.menu_url ?? "",
+  instagramUrl: s.instagram_url ?? "",
+}));
+// Los links de prueba usan siempre lo GUARDADO, no lo que se está escribiendo:
+// sirven para confirmar que lo que quedó en la base anda.
+const guardado = { ...valores };
+
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  valores = {
+    whatsappNumber: String(form.get("whatsappNumber") ?? ""),
+    menuUrl: String(form.get("menuUrl") ?? ""),
+    instagramUrl: String(form.get("instagramUrl") ?? ""),
+  };
+  const resultado = await saveSettings(env.DB, valores, Astro.locals.email);
+  if (resultado.ok) return Astro.redirect(conAviso("/ajustes", "ajustes"), 303);
+  errores = resultado.errors;
+}
+---
+
+<Admin titulo="Ajustes" pestana="ajustes">
+  <form class="form" method="post">
+    <Campo
+      etiqueta="WhatsApp del local"
+      name="whatsappNumber"
+      value={valores.whatsappNumber}
+      error={errores.whatsappNumber}
+      inputmode="tel"
+      autocomplete="off"
+      ayuda="54, después 9, la característica y el número, sin el 15. Por ejemplo 5493424667646. Los pedidos de la web llegan acá."
+    />
+    {
+      guardado.whatsappNumber && (
+        <a class="enlace" href={`https://wa.me/${guardado.whatsappNumber}`} target="_blank" rel="noopener">
+          Probar: abrir un chat ↗
+        </a>
+      )
+    }
+
+    <Campo
+      etiqueta="Link de la carta"
+      name="menuUrl"
+      value={valores.menuUrl}
+      error={errores.menuUrl}
+      type="url"
+      inputmode="url"
+      ayuda="El de Google Drive. El QR de las mesas lleva a falcocafe.com.ar/carta, que redirige acá."
+    />
+    {
+      guardado.menuUrl && (
+        <a class="enlace" href={guardado.menuUrl} target="_blank" rel="noopener">
+          Abrir la carta ↗
+        </a>
+      )
+    }
+
+    <Campo
+      etiqueta="Instagram"
+      name="instagramUrl"
+      value={valores.instagramUrl}
+      error={errores.instagramUrl}
+      type="url"
+      inputmode="url"
+      ayuda="El link al perfil. De acá salen “Escribir por DM” y el pie del sitio."
+    />
+
+    <div class="guardar">
+      <button class="btn btn--pri btn--ancho" type="submit">Guardar ajustes</button>
+    </div>
+  </form>
+</Admin>

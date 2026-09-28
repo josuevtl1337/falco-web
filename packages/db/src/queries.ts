@@ -20,12 +20,30 @@ export type PreparedLike = {
 
 export type ReadableDb = { prepare(sql: string): PreparedLike };
 
+/**
+ * Lo que necesita el admin para escribir: sentencias que además se ejecutan
+ * (`run`) y un `batch` que corre varias como una sola transacción. D1 no
+ * tiene BEGIN/COMMIT sueltos; `batch` es su forma de hacer "todo o nada".
+ */
+export type WritableStatement = {
+  bind(...values: unknown[]): WritableStatement;
+  first<T>(): Promise<T | null> | T | undefined;
+  all<T>(): Promise<{ results: T[] }> | T[];
+  run(): Promise<unknown> | unknown;
+};
+
+export type WritableDb = {
+  prepare(sql: string): WritableStatement;
+  batch(statements: WritableStatement[]): Promise<unknown> | unknown;
+};
+
 async function firstRow<T>(statement: PreparedLike): Promise<T | undefined> {
   const value = await statement.first<T>();
   return value ?? undefined;
 }
 
-async function allRows<T>(statement: PreparedLike): Promise<T[]> {
+/** D1 devuelve { results }; better-sqlite3, el arreglo suelto. */
+export async function allRows<T>(statement: PreparedLike): Promise<T[]> {
   const value = await statement.all<T>();
   return Array.isArray(value) ? value : value.results;
 }
@@ -50,8 +68,40 @@ export async function getHopperCoffee(
   if (!setting) return undefined;
   const id = Number(setting.value);
   if (!Number.isInteger(id)) return undefined;
+  // La tolva tiene su propio catálogo, con las mismas columnas que coffees:
+  // por eso se lee con el mismo tipo y la home no distingue.
   const row = await firstRow<CoffeeRow>(
-    db.prepare("SELECT * FROM coffees WHERE id = ?").bind(id),
+    db.prepare("SELECT * FROM hopper_coffees WHERE id = ?").bind(id),
+  );
+  return row ? toCoffee(row) : undefined;
+}
+
+/** Cuántos productos se ven en la tienda y cuántos están ocultos. */
+export async function countProducts(
+  db: ReadableDb,
+): Promise<{ visible: number; hidden: number }> {
+  const row = await firstRow<{ visible: number | null; hidden: number | null }>(
+    db.prepare(
+      "SELECT sum(is_visible = 1) AS visible, sum(is_visible = 0) AS hidden FROM products",
+    ),
+  );
+  return { visible: row?.visible ?? 0, hidden: row?.hidden ?? 0 };
+}
+
+/** Los cafés de tolva, para elegir cuál poner. */
+export async function listHopperCoffees(db: ReadableDb): Promise<Coffee[]> {
+  const rows = await allRows<CoffeeRow>(
+    db.prepare("SELECT * FROM hopper_coffees ORDER BY name, id"),
+  );
+  return rows.map(toCoffee);
+}
+
+export async function getHopperCoffeeById(
+  db: ReadableDb,
+  id: number,
+): Promise<Coffee | undefined> {
+  const row = await firstRow<CoffeeRow>(
+    db.prepare("SELECT * FROM hopper_coffees WHERE id = ?").bind(id),
   );
   return row ? toCoffee(row) : undefined;
 }
@@ -117,6 +167,35 @@ export async function listShelf(
       .bind(shelf),
   );
   return withOptions(db, rows);
+}
+
+/**
+ * Todos los productos de un estante, también los ocultos: es lo que ve el
+ * admin, en el orden en que salen en el sitio.
+ */
+export async function listShelfForAdmin(
+  db: ReadableDb,
+  shelf: "coffee" | "kits",
+): Promise<ProductWithOptions[]> {
+  const rows = await allRows<ProductRow>(
+    db
+      .prepare("SELECT * FROM products WHERE shelf = ? ORDER BY sort_order, id")
+      .bind(shelf),
+  );
+  return withOptions(db, rows);
+}
+
+/** Un producto por id, también si está oculto: la ficha del admin. */
+export async function getProductForAdmin(
+  db: ReadableDb,
+  id: number,
+): Promise<ProductWithOptions | undefined> {
+  const row = await firstRow<ProductRow>(
+    db.prepare("SELECT * FROM products WHERE id = ?").bind(id),
+  );
+  if (!row) return undefined;
+  const [product] = await withOptions(db, [row]);
+  return product;
 }
 
 export async function getProductBySlug(

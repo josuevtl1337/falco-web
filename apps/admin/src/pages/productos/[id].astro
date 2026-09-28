@@ -1,0 +1,322 @@
+---
+import { env } from "cloudflare:workers";
+import { deleteProduct, getProductForAdmin, listCoffeesByIds, saveProduct } from "@falco/db";
+import Admin from "../../layouts/Admin.astro";
+import Campo from "../../components/Campo.astro";
+import Perfil from "../../components/Perfil.astro";
+import { conAviso } from "../../avisos";
+import { leerProducto, PRODUCTO_VACIO, productoAForm, TIPOS, type ProductoForm } from "../../producto";
+
+const nuevo = Astro.params.id === "nuevo";
+const id = Number(Astro.params.id);
+
+const producto = !nuevo && Number.isInteger(id) ? await getProductForAdmin(env.DB, id) : undefined;
+if (!nuevo && !producto) return Astro.redirect("/productos", 303);
+const [cafe] = producto?.coffeeId ? await listCoffeesByIds(env.DB, [producto.coffeeId]) : [];
+
+let valores: ProductoForm = producto ? productoAForm(producto, cafe) : PRODUCTO_VACIO;
+let errores: Record<string, string> = {};
+let problema = "";
+
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  if (form.get("accion") === "borrar" && producto) {
+    const r = await deleteProduct(env.DB, producto.id);
+    if (r.ok) {
+      // Su foto ya no la usa nadie.
+      if (producto.imageKey) await env.PHOTOS.delete(producto.imageKey);
+      return Astro.redirect(conAviso("/productos", "producto-borrado", producto.name), 303);
+    }
+    problema = r.reason ?? "No se pudo borrar.";
+  } else {
+    const leido = leerProducto(form);
+    valores = leido.valores;
+    const r = await saveProduct(env.DB, producto?.id, leido.borrador, Astro.locals.email);
+    if (r.ok) return Astro.redirect(conAviso(`/productos/${r.id}`, "producto", valores.name), 303);
+    errores = r.errors;
+    problema = r.reason ?? "";
+  }
+}
+
+// Los errores del origen vienen como "coffee.name"; el perfil los quiere sin prefijo.
+const deCafe = (campo: string) => errores[`coffee.${campo}`];
+const erroresPerfil = Object.fromEntries(
+  Object.entries(errores)
+    .filter(([k]) => k.startsWith("coffee."))
+    .map(([k, v]) => [k.slice("coffee.".length), v]),
+);
+const erroresOpciones = Object.entries(errores).filter(([k]) => k === "options" || k.startsWith("options.")).map(([, v]) => v);
+const hayErrores = Object.keys(errores).length > 0;
+const sitio = (env as unknown as { SITE_URL?: string }).SITE_URL ?? "https://falcocafe.com.ar";
+const titulo = nuevo ? "Nuevo producto" : valores.name || producto?.name || "Producto";
+// Siempre una fila vacía de más para sumar una molienda sin JavaScript.
+// Las opciones: moliendas para un café, talles para ropa. Accesorios y kits
+// no tienen. Un café nuevo arranca con las dos moliendas de siempre.
+const conOpciones = (kind: string) => kind === "coffee" || kind === "apparel";
+const opciones =
+  valores.opciones.length > 0
+    ? valores.opciones
+    : nuevo && valores.kind === "coffee"
+      ? [
+          { id: undefined, label: "En grano", disponible: true },
+          { id: undefined, label: "Molido", disponible: true },
+        ]
+      : [{ id: undefined, label: "", disponible: true }];
+const esRopa = valores.kind === "apparel";
+---
+
+<Admin titulo={titulo} pestana="productos">
+  <Fragment slot="barra">
+    <a class="atras" href="/productos">‹ Productos</a>
+    {
+      producto?.isVisible && (
+        <a class="enlace" href={`${sitio}/tienda/${producto.slug}`} target="_blank" rel="noopener">Ver en el sitio ↗</a>
+      )
+    }
+  </Fragment>
+
+  <h1>{titulo}</h1>
+
+  {
+    (problema || hayErrores) && (
+      <div class="aviso aviso--error" role="alert">
+        <div>
+          <b>{problema ? "No se pudo." : "Falta revisar algunos campos."}</b>
+          <small>{problema || "Están marcados abajo. No se guardó nada."}</small>
+        </div>
+      </div>
+    )
+  }
+
+  <form class="form" method="post" data-producto>
+    <div class="campo">
+      <label for="campo-kind">Tipo</label>
+      <select class="input" id="campo-kind" name="kind" data-tipo>
+        {TIPOS.map((t) => <option value={t.id} selected={t.id === valores.kind}>{t.nombre}</option>)}
+      </select>
+      <span class="nota">Los cafés van al estante Café; lo demás, a Kits y accesorios.</span>
+    </div>
+
+    <div class="dos">
+      <Campo etiqueta="Nombre" name="name" value={valores.name} error={errores.name} required maxlength={60} />
+      <Campo etiqueta="Detalle" name="detail" value={valores.detail} error={errores.detail} required maxlength={80} ayuda="250 g · Para café filtrado" />
+    </div>
+
+    <div class="dos">
+      <Campo etiqueta="Efectivo ($)" name="priceCashArs" value={valores.priceCashArs} error={errores.priceCashArs} inputmode="numeric" required data-efectivo />
+      <Campo etiqueta="Tarjeta ($)" name="priceCardArs" value={valores.priceCardArs} error={errores.priceCardArs} inputmode="numeric" required data-tarjeta />
+    </div>
+    <p class="nota aviso-precio" data-aviso-precio hidden>¿Seguro? Con tarjeta sale menos que en efectivo.</p>
+
+    <Campo etiqueta="Descripción (opcional)" name="description" value={valores.description} error={errores.description} largo />
+
+    <div class="interruptores">
+      <label class="tog"><span><b>Visible en la tienda</b><small>Apagado, no aparece en el sitio.</small></span><input class="sw" type="checkbox" name="isVisible" checked={valores.isVisible} /></label>
+      <label class="tog"><span><b>Sello “Nuevo”</b></span><input class="sw" type="checkbox" name="isNew" checked={valores.isNew} /></label>
+      <label class="tog"><span><b>Consultar stock</b><small>Avisa que hay que preguntar antes.</small></span><input class="sw" type="checkbox" name="askStock" checked={valores.askStock} /></label>
+    </div>
+
+    <fieldset class="campo bloque" data-origen hidden={valores.kind !== "coffee"}>
+      <legend>Origen y perfil · sólo café</legend>
+      <p class="nota">Es el origen de este café de la tienda, aparte de la tolva.</p>
+      <div class="dos">
+        <Campo etiqueta="Café" name="coffee-name" value={valores.cafe.name} error={deCafe("name")} maxlength={60} ayuda="Huila" />
+        <Campo etiqueta="País" name="coffee-country" value={valores.cafe.country} error={deCafe("country")} maxlength={40} />
+      </div>
+      <div class="dos">
+        <Campo etiqueta="Proceso" name="coffee-process" value={valores.cafe.process} error={deCafe("process")} maxlength={60} />
+        <Campo etiqueta="Altura (m)" name="coffee-altitudeMasl" value={valores.cafe.altitudeMasl} error={deCafe("altitudeMasl")} type="number" inputmode="numeric" min={0} max={3000} />
+      </div>
+      <div class="dos">
+        <Campo etiqueta="Finca" name="coffee-farm" value={valores.cafe.farm} error={deCafe("farm")} maxlength={80} />
+        <Campo etiqueta="Variedad" name="coffee-variety" value={valores.cafe.variety} error={deCafe("variety")} maxlength={60} />
+      </div>
+      <Campo etiqueta="Notas de cata" name="coffee-tastingNotes" value={valores.cafe.tastingNotes} error={deCafe("tastingNotes")} maxlength={120} />
+      <Campo etiqueta="Tostadero" name="coffee-roaster" value={valores.cafe.roaster} error={deCafe("roaster")} maxlength={60} />
+      <Perfil perfil={valores.cafe.perfil} errores={erroresPerfil} />
+    </fieldset>
+
+    <fieldset class="campo bloque" data-opciones-bloque hidden={!conOpciones(valores.kind)}>
+      <legend data-opciones-titulo>{esRopa ? "Talles" : "Moliendas"}</legend>
+      <p class="nota" data-opciones-ayuda>
+        {
+          esRopa
+            ? "Los talles que hay. Si ninguno tiene stock, el sitio muestra “Sin stock por ahora”."
+            : "Cómo se vende: “En grano”, “Molido”. Si ninguna tiene stock, el sitio muestra “Sin stock por ahora”."
+        }
+      </p>
+      <div class="opciones" data-opciones>
+        {
+          opciones.map((o) => (
+            <div class="opcion" data-opcion>
+              <input type="hidden" name="opcion-id" value={o.id ?? ""} />
+              <input class="input" name="opcion-label" value={o.label} maxlength={12} placeholder={esRopa ? "Talle" : "Molienda"} aria-label={esRopa ? "Nombre del talle" : "Nombre de la molienda"} />
+              <select class="input" name="opcion-stock" aria-label="Stock">
+                <option value="1" selected={o.disponible}>Hay</option>
+                <option value="0" selected={!o.disponible}>Sin stock</option>
+              </select>
+              <button class="quitar" type="button" data-quitar-opcion aria-label="Quitar esta opción">✕</button>
+            </div>
+          ))
+        }
+        <button class="enlace" type="button" data-sumar-opcion>{esRopa ? "+ talle" : "+ molienda"}</button>
+      </div>
+      {erroresOpciones.length > 0 && <span class="error">{erroresOpciones[0]}</span>}
+    </fieldset>
+
+    <div class="guardar">
+      <button class="btn btn--pri btn--ancho" type="submit">{nuevo ? "Crear el producto" : "Guardar"}</button>
+    </div>
+  </form>
+
+  <section class="campo bloque foto" aria-labelledby="foto-titulo">
+    <h2 class="k" id="foto-titulo">Foto</h2>
+    {
+      producto ? (
+        <>
+          {producto.imageKey ? (
+            <img class="foto__actual" src={`${sitio}/fotos/${producto.imageKey}`} alt={`La foto de ${producto.name}`} />
+          ) : (
+            <p class="nota">Todavía no tiene foto: en la tienda se ve el fondo de siempre.</p>
+          )}
+          <form method="post" action={`/productos/${producto.id}/foto`} enctype="multipart/form-data" data-foto>
+            <label class="btn btn--sec btn--ancho foto__elegir">
+              {producto.imageKey ? "Cambiar la foto" : "Subir una foto"}
+              <input type="file" name="foto" accept="image/*" data-foto-archivo />
+            </label>
+            <noscript><button class="btn btn--sec btn--ancho" type="submit">Subir</button></noscript>
+            <p class="nota" data-foto-estado>Se achica sola antes de subir: una foto del celular llega liviana.</p>
+          </form>
+          {producto.imageKey && (
+            <form method="post" action={`/productos/${producto.id}/foto`}>
+              <button class="enlace" type="submit" name="accion" value="quitar">Quitar la foto</button>
+            </form>
+          )}
+        </>
+      ) : (
+        <p class="nota">Primero creá el producto; después le subís la foto desde acá.</p>
+      )
+    }
+  </section>
+
+  {
+    producto && (
+      <>
+        <button class="btn btn--peligro btn--ancho" type="button" data-abrir-borrar>Borrar este producto</button>
+        <dialog class="confirmar" data-borrar>
+          <form method="post">
+            <h2>¿Borrar {producto.name}?</h2>
+            <p>Sale de la tienda y de los pedidos que alguien tenga a medio armar. No se puede deshacer. Si sólo querés sacarlo un tiempo, apagá “Visible”.</p>
+            <button class="btn btn--peligro btn--ancho" type="submit" name="accion" value="borrar">Sí, borrar</button>
+            <button class="btn btn--sec btn--ancho" type="submit" formmethod="dialog">Cancelar</button>
+          </form>
+        </dialog>
+      </>
+    )
+  }
+</Admin>
+
+<script>
+  import { conectarPerfil } from "../../scripts/perfil";
+  import { conectarConfirmar } from "../../scripts/confirmar";
+  import { conectarFichaProducto } from "../../scripts/producto";
+  import { conectarFoto } from "../../scripts/achicar-foto";
+  conectarFoto();
+  conectarPerfil();
+  conectarConfirmar();
+  conectarFichaProducto();
+</script>
+
+<style>
+  select.input {
+    appearance: auto;
+  }
+
+  .interruptores {
+    display: grid;
+  }
+
+  .tog {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 56px;
+    border-top: 1px solid var(--linea);
+    cursor: pointer;
+  }
+
+  .tog span {
+    display: grid;
+  }
+
+  .tog b {
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .tog small {
+    font-size: 12.5px;
+    color: var(--color-ceniza);
+  }
+
+  .bloque {
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--linea);
+    border-radius: 10px;
+  }
+
+  .bloque > legend {
+    padding: 0 6px;
+  }
+
+  .opciones {
+    display: grid;
+    gap: 8px;
+  }
+
+  .opcion {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 118px 44px;
+    gap: 8px;
+  }
+
+  .quitar {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: none;
+    color: var(--color-ceniza);
+    cursor: pointer;
+  }
+
+  .foto__actual {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--linea);
+  }
+
+  .foto__elegir {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* El input de archivo real, invisible encima del botón: tocar el botón lo abre. */
+  .foto__elegir input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .aviso-precio {
+    margin-top: -6px;
+    color: var(--color-brasa);
+  }
+</style>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cacheHeaderFor } from "../src/middleware";
+import { apexRedirect, cacheHeaderFor } from "../src/middleware";
 
 describe("la caché de las páginas", () => {
   it("las páginas se cachean 60 segundos en el borde", () => {
@@ -17,5 +17,17 @@ describe("la caché de las páginas", () => {
     expect(cacheHeaderFor("/404")).toBe("no-store");
     // Una dirección inventada también responde 404, con otra ruta.
     expect(cacheHeaderFor("/una-ruta-inventada", 404)).toBe("no-store");
+  });
+});
+
+describe("www", () => {
+  it("lleva al dominio sin www, con la misma ruta", () => {
+    expect(apexRedirect(new URL("https://www.falcocafe.com.ar/tienda/prensa?x=1"))).toBe(
+      "https://falcocafe.com.ar/tienda/prensa?x=1",
+    );
+  });
+
+  it("el dominio sin www no se redirige", () => {
+    expect(apexRedirect(new URL("https://falcocafe.com.ar/"))).toBeNull();
   });
 });
