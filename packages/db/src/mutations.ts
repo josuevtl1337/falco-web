@@ -324,16 +324,53 @@ const hopperId = async (db: WritableDb): Promise<number | undefined> => {
 };
 
 /** Se borra cualquiera menos el que está en tolva: primero hay que poner otro. */
+/**
+ * Devuelve la clave de su foto, si tenía, para que quien lo borró la saque
+ * del bucket. La base no toca R2.
+ */
 export async function deleteHopperCoffee(
   db: WritableDb,
   id: number,
-): Promise<MutationResult> {
+): Promise<MutationResult<{ imageKey: string | null }>> {
   if ((await hopperId(db)) === id)
     return fail(
       "Es el café que está en tolva ahora. Poné otro en tolva y después vas a poder borrarlo.",
     );
+  const current = await db
+    .prepare("SELECT image_key FROM hopper_coffees WHERE id = ?")
+    .bind(id)
+    .first<{ image_key: string | null }>();
   await db.prepare("DELETE FROM hopper_coffees WHERE id = ?").bind(id).run();
-  return { ok: true };
+  return { ok: true, imageKey: current?.image_key ?? null };
+}
+
+/**
+ * La foto de un café de tolva. Igual que setProductImage: guarda la clave
+ * nueva sólo si la foto sigue siendo la que leyó, y devuelve la anterior.
+ */
+export async function setHopperCoffeeImage(
+  db: WritableDb,
+  id: number,
+  key: string | null,
+  by: string,
+): Promise<MutationResult<{ previousKey: string | null }>> {
+  const current = await db
+    .prepare("SELECT image_key FROM hopper_coffees WHERE id = ?")
+    .bind(id)
+    .first<{ image_key: string | null }>();
+  if (!current) return fail(GONE);
+
+  const result = (await db
+    .prepare(
+      `UPDATE hopper_coffees SET image_key = ?, updated_at = ${NOW}, updated_by = ?
+       WHERE id = ? AND image_key IS ?`,
+    )
+    .bind(key, by, id, current.image_key)
+    .run()) as { changes?: number; meta?: { changes?: number } } | undefined;
+  const changes = result?.meta?.changes ?? result?.changes;
+  if (changes === 0)
+    return fail("La foto cambió mientras tanto. Recargá la página y probá de nuevo.");
+  return { ok: true, previousKey: current.image_key };
 }
 
 export async function setHopperCoffee(

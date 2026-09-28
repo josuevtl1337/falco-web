@@ -4,6 +4,7 @@ import { deleteProduct, getProductForAdmin, listCoffeesByIds, saveProduct } from
 import Admin from "../../layouts/Admin.astro";
 import Campo from "../../components/Campo.astro";
 import Perfil from "../../components/Perfil.astro";
+import SeccionFoto from "../../components/SeccionFoto.astro";
 import { conAviso } from "../../avisos";
 import { leerProducto, PRODUCTO_VACIO, productoAForm, TIPOS, type ProductoForm } from "../../producto";
 
@@ -169,35 +170,14 @@ const esRopa = valores.kind === "apparel";
     </div>
   </form>
 
-  <section class="campo bloque foto" aria-labelledby="foto-titulo">
-    <h2 class="k" id="foto-titulo">Foto</h2>
-    {
-      producto ? (
-        <>
-          {producto.imageKey ? (
-            <img class="foto__actual" src={`${sitio}/fotos/${producto.imageKey}`} alt={`La foto de ${producto.name}`} />
-          ) : (
-            <p class="nota">Todavía no tiene foto: en la tienda se ve el fondo de siempre.</p>
-          )}
-          <form method="post" action={`/productos/${producto.id}/foto`} enctype="multipart/form-data" data-foto>
-            <label class="btn btn--sec btn--ancho foto__elegir">
-              {producto.imageKey ? "Cambiar la foto" : "Subir una foto"}
-              <input type="file" name="foto" accept="image/*" data-foto-archivo />
-            </label>
-            <noscript><button class="btn btn--sec btn--ancho" type="submit">Subir</button></noscript>
-            <p class="nota" data-foto-estado>Se achica sola antes de subir: una foto del celular llega liviana.</p>
-          </form>
-          {producto.imageKey && (
-            <form method="post" action={`/productos/${producto.id}/foto`}>
-              <button class="enlace" type="submit" name="accion" value="quitar">Quitar la foto</button>
-            </form>
-          )}
-        </>
-      ) : (
-        <p class="nota">Primero creá el producto; después le subís la foto desde acá.</p>
-      )
-    }
-  </section>
+  <SeccionFoto
+    accion={producto && `/productos/${producto.id}/foto`}
+    imageKey={producto?.imageKey}
+    alt={`La foto de ${producto?.name ?? "este producto"}`}
+    sitio={sitio}
+    sinFoto="Todavía no tiene foto: en la tienda se ve el fondo de siempre."
+    primero="Primero creá el producto; después le subís la foto desde acá."
+  />
 
   {
     producto && (
@@ -220,8 +200,6 @@ const esRopa = valores.kind === "apparel";
   import { conectarPerfil } from "../../scripts/perfil";
   import { conectarConfirmar } from "../../scripts/confirmar";
   import { conectarFichaProducto } from "../../scripts/producto";
-  import { conectarFoto } from "../../scripts/achicar-foto";
-  conectarFoto();
   conectarPerfil();
   conectarConfirmar();
   conectarFichaProducto();
@@ -289,29 +267,6 @@ const esRopa = valores.kind === "apparel";
     border: 0;
     background: none;
     color: var(--color-ceniza);
-    cursor: pointer;
-  }
-
-  .foto__actual {
-    display: block;
-    width: 100%;
-    max-width: 320px;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 1px solid var(--linea);
-  }
-
-  .foto__elegir {
-    position: relative;
-    overflow: hidden;
-  }
-
-  /* El input de archivo real, invisible encima del botón: tocar el botón lo abre. */
-  .foto__elegir input {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
     cursor: pointer;
   }
 

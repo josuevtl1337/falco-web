@@ -1,0 +1,111 @@
+---
+/**
+ * La sección "Foto" de una ficha: la foto actual, el botón para subir otra
+ * (se achica en el navegador, scripts/achicar-foto.ts) y el de quitarla.
+ * La usan los productos y los cafés de tolva.
+ */
+interface Props {
+  /** Dónde se sube: `/productos/3/foto`. Sin ruta (ficha nueva), avisa que primero hay que crearla. */
+  accion?: string;
+  imageKey?: string;
+  alt: string;
+  sitio: string;
+  /** Qué se ve en el sitio mientras no hay foto. */
+  sinFoto: string;
+  /** Qué hacer antes de poder subir una foto (ficha nueva). */
+  primero: string;
+  ayuda?: string;
+  /** "contain" para una foto recortada (un paquete sobre fondo transparente). */
+  encuadre?: "cover" | "contain";
+}
+
+const {
+  accion,
+  imageKey,
+  alt,
+  sitio,
+  sinFoto,
+  primero,
+  ayuda = "Se achica sola antes de subir: una foto del celular llega liviana.",
+  encuadre = "cover",
+} = Astro.props;
+---
+
+<section class="campo bloque foto" aria-labelledby="foto-titulo">
+  <h2 class="k" id="foto-titulo">Foto</h2>
+  {
+    accion ? (
+      <>
+        {imageKey ? (
+          <img class:list={["foto__actual", `foto__actual--${encuadre}`]} src={`${sitio}/fotos/${imageKey}`} alt={alt} />
+        ) : (
+          <p class="nota">{sinFoto}</p>
+        )}
+        <form method="post" action={accion} enctype="multipart/form-data" data-foto>
+          <label class="btn btn--sec btn--ancho foto__elegir">
+            {imageKey ? "Cambiar la foto" : "Subir una foto"}
+            <input type="file" name="foto" accept="image/*" data-foto-archivo />
+          </label>
+          <noscript>
+            <button class="btn btn--sec btn--ancho" type="submit">Subir</button>
+          </noscript>
+          <p class="nota" data-foto-estado>{ayuda}</p>
+        </form>
+        {imageKey && (
+          <form method="post" action={accion}>
+            <button class="enlace" type="submit" name="accion" value="quitar">Quitar la foto</button>
+          </form>
+        )}
+      </>
+    ) : (
+      <p class="nota">{primero}</p>
+    )
+  }
+</section>
+
+<script>
+  import { conectarFoto } from "../scripts/achicar-foto";
+  conectarFoto();
+</script>
+
+<style>
+  .bloque {
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--linea);
+    border-radius: 10px;
+  }
+
+  .foto__actual {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    aspect-ratio: 4 / 3;
+    border-radius: 8px;
+    border: 1px solid var(--linea);
+  }
+
+  .foto__actual--cover {
+    object-fit: cover;
+  }
+
+  /* Un paquete recortado se ve entero, sobre el fondo de la ficha. */
+  .foto__actual--contain {
+    object-fit: contain;
+    background: var(--color-sombra);
+  }
+
+  .foto__elegir {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* El input de archivo real, invisible encima del botón: tocar el botón lo abre. */
+  .foto__elegir input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+</style>

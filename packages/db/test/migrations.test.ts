@@ -434,3 +434,14 @@ describe("textos obligatorios", () => {
     expect(setting({ value: "'   '" })).toThrow(/CHECK/);
   });
 });
+
+describe("0002: la foto de la tolva", () => {
+  it("agrega image_key a hopper_coffees, vacía para los que ya estaban", () => {
+    db.exec(read("../migrations/0002_hopper_photo.sql"));
+    expect(one<{ image_key: string | null }>("SELECT image_key FROM hopper_coffees WHERE id = 1").image_key).toBeNull();
+    run("UPDATE hopper_coffees SET image_key = 'tolva/1-abc.webp' WHERE id = 1")();
+    expect(one<{ image_key: string }>("SELECT image_key FROM hopper_coffees WHERE id = 1").image_key).toBe(
+      "tolva/1-abc.webp",
+    );
+  });
+});

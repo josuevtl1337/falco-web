@@ -24,8 +24,8 @@ const AVISOS: Record<string, Aviso> = {
   orden: { titulo: "Guardado. Ya se ve en el sitio.", detalle: "El estante ya sale en el orden nuevo." },
   producto: { titulo: "Guardado. Ya se ve en el sitio.", detalle: "{que} quedó actualizado en la tienda." },
   "producto-borrado": { titulo: "Borrado.", detalle: "{que} ya no está en la tienda." },
-  foto: { titulo: "Guardado. Ya se ve en el sitio.", detalle: "La foto nueva ya está en la tienda." },
-  "foto-quitada": { titulo: "Listo.", detalle: "El producto vuelve a mostrarse sin foto." },
+  foto: { titulo: "Guardado. Ya se ve en el sitio.", detalle: "La foto nueva ya está en el sitio." },
+  "foto-quitada": { titulo: "Listo.", detalle: "El sitio vuelve a mostrar lo de siempre, sin foto." },
   "foto-error": { titulo: "No se subió la foto.", detalle: "{que}", error: true },
   "cafe-borrado": { titulo: "Borrado.", detalle: "{que} ya no está en la lista de tolva." },
 };

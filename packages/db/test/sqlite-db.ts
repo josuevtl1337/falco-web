@@ -1,15 +1,23 @@
 import Database from "better-sqlite3";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import type { WritableDb, WritableStatement } from "../src/queries";
 
 const sql = (name: string) =>
   readFileSync(new URL(name, import.meta.url), "utf8");
 
-/** Una base en memoria con la migración y el seed, como la local del sitio. */
+/** Todas las migraciones, en orden: lo mismo que aplica wrangler. */
+export function applyMigrations(real: Database.Database): void {
+  const files = readdirSync(new URL("../migrations/", import.meta.url))
+    .filter((name) => name.endsWith(".sql"))
+    .sort();
+  for (const name of files) real.exec(sql(`../migrations/${name}`));
+}
+
+/** Una base en memoria con las migraciones y el seed, como la local del sitio. */
 export function seededDatabase(): Database.Database {
   const real = new Database(":memory:");
   real.pragma("foreign_keys = ON");
-  real.exec(sql("../migrations/0001_init.sql"));
+  applyMigrations(real);
   real.exec(sql("../seed/seed.sql"));
   return real;
 }

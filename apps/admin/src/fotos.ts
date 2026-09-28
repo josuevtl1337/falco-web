@@ -1,5 +1,6 @@
 /**
- * Las fotos de los productos: qué se acepta y con qué nombre se guarda.
+ * Las fotos (de los productos y de la tolva): qué se acepta y con qué nombre
+ * se guardan.
  *
  * El navegador ya las achica y las pasa a WebP (scripts/achicar-foto.ts). Si
  * el navegador no sabe escribir WebP (Safari viejo), llega JPEG. Nada más: una
@@ -20,17 +21,25 @@ export function validarFoto(tipo: string, tamanio: number): string | null {
   return null;
 }
 
+/** Dónde vive cada foto en R2: el sitio sólo sirve estas carpetas. */
+export type CarpetaDeFotos = "productos" | "tolva";
+
 /**
- * `productos/<id>-<hash>.<ext>`: el hash del contenido hace que cada foto
+ * `<carpeta>/<id>-<hash>.<ext>`: el hash del contenido hace que cada foto
  * tenga su propia dirección, así el sitio la puede cachear para siempre.
  */
-export async function claveDeFoto(id: number, bytes: ArrayBuffer, tipo: string): Promise<string> {
+export async function claveDeFoto(
+  carpeta: CarpetaDeFotos,
+  id: number,
+  bytes: ArrayBuffer,
+  tipo: string,
+): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   const hash = [...new Uint8Array(digest)]
     .slice(0, 8)
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
-  return `productos/${id}-${hash}.${EXTENSIONES[tipo] ?? "bin"}`;
+  return `${carpeta}/${id}-${hash}.${EXTENSIONES[tipo] ?? "bin"}`;
 }
 
 /**

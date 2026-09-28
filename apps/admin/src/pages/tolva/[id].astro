@@ -11,6 +11,8 @@ import {
 import Admin from "../../layouts/Admin.astro";
 import Campo from "../../components/Campo.astro";
 import Perfil from "../../components/Perfil.astro";
+import SeccionFoto from "../../components/SeccionFoto.astro";
+import { borrarSinRomper } from "../../subir-foto";
 import { conAviso } from "../../avisos";
 import { borradorAForm, CAFE_VACIO, cafeAForm, leerCafe, nombreCafe, type CafeForm } from "../../cafe";
 
@@ -18,8 +20,8 @@ const nuevo = Astro.params.id === "nuevo";
 const id = Number(Astro.params.id);
 
 let valores: CafeForm = CAFE_VACIO;
+const cafe = !nuevo && Number.isInteger(id) ? await getHopperCoffeeById(env.DB, id) : undefined;
 if (!nuevo) {
-  const cafe = Number.isInteger(id) ? await getHopperCoffeeById(env.DB, id) : undefined;
   if (!cafe) return Astro.redirect("/tolva", 303);
   valores = cafeAForm(cafe);
 }
@@ -34,7 +36,11 @@ if (Astro.request.method === "POST") {
 
   if (accion === "borrar") {
     const r = await deleteHopperCoffee(env.DB, id);
-    if (r.ok) return Astro.redirect(conAviso("/tolva", "cafe-borrado", nombreCafe(valores)), 303);
+    if (r.ok) {
+      // Su foto ya no la usa nadie.
+      if (r.imageKey) await borrarSinRomper(r.imageKey);
+      return Astro.redirect(conAviso("/tolva", "cafe-borrado", nombreCafe(valores)), 303);
+    }
     problema = r.reason ?? "No se pudo borrar.";
   } else if (accion === "poner") {
     const r = await setHopperCoffee(env.DB, id, Astro.locals.email);
@@ -58,6 +64,7 @@ if (Astro.request.method === "POST") {
 }
 
 const titulo = nuevo ? "Nuevo café de tolva" : nombreCafe(valores);
+const sitio = (env as unknown as { SITE_URL?: string }).SITE_URL ?? "https://falcocafe.com.ar";
 const hayErrores = Object.keys(errores).length > 0;
 ---
 
@@ -136,6 +143,17 @@ const hayErrores = Object.keys(errores).length > 0;
       <button class="btn btn--pri btn--ancho" type="submit">{nuevo ? "Crear el café" : "Guardar"}</button>
     </div>
   </form>
+
+  <SeccionFoto
+    accion={cafe && `/tolva/${cafe.id}/foto`}
+    imageKey={cafe?.imageKey}
+    alt={`El paquete de ${titulo}`}
+    sitio={sitio}
+    sinFoto="Todavía no tiene foto: cuando esté en tolva, la home muestra el molino."
+    primero="Primero creá el café; después le subís la foto desde acá."
+    ayuda="La del paquete, recortada y con fondo transparente, gira en la vitrina de la home. Se achica sola antes de subir."
+    encuadre="contain"
+  />
 
   {
     !nuevo &&

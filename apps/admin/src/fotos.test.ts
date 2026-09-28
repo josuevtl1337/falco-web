@@ -14,10 +14,12 @@ describe("las fotos", () => {
   });
 
   it("la clave depende del contenido: otra foto, otra dirección", async () => {
-    const a = await claveDeFoto(3, new TextEncoder().encode("una").buffer, "image/webp");
-    const b = await claveDeFoto(3, new TextEncoder().encode("otra").buffer, "image/webp");
+    const a = await claveDeFoto("productos", 3, new TextEncoder().encode("una").buffer, "image/webp");
+    const b = await claveDeFoto("productos", 3, new TextEncoder().encode("otra").buffer, "image/webp");
     expect(a).toMatch(/^productos\/3-[0-9a-f]{16}\.webp$/);
     expect(a).not.toBe(b);
+    const tolva = await claveDeFoto("tolva", 3, new TextEncoder().encode("una").buffer, "image/webp");
+    expect(tolva).toMatch(/^tolva\/3-[0-9a-f]{16}\.webp$/);
   });
 });
 

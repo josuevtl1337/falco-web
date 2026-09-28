@@ -21,6 +21,7 @@ import { placeLabel } from "../components/origen";
 import Pentagono from "../components/Pentagono.astro";
 import Pie from "../components/Pie.astro";
 import Tienda from "../components/Tienda.astro";
+import Vitrina from "../components/Vitrina.astro";
 import { OpenNow } from "../islands/OpenNow";
 
 const now = new Date();
@@ -202,10 +203,17 @@ const cafe = cafeJsonLd({
               </div>
             </div>
 
-            <figure class="tolva__molino" aria-hidden="true">
-              <img src="/molino-e65s.svg" alt="" width="240" height="560" />
-              <figcaption>Mahlkönig E65S</figcaption>
-            </figure>
+            {/* Con foto del paquete, la vitrina; sin foto, el molino de siempre. */}
+            {coffee.imageKey ? (
+              <div class="tolva__molino">
+                <Vitrina imageKey={coffee.imageKey} />
+              </div>
+            ) : (
+              <figure class="tolva__molino" aria-hidden="true">
+                <img src="/molino-e65s.svg" alt="" width="240" height="560" />
+                <figcaption>Mahlkönig E65S</figcaption>
+              </figure>
+            )}
           </div>
 
           <div class="tolva__pie">
@@ -306,10 +314,18 @@ const cafe = cafeJsonLd({
             </div>
           </div>
 
-          <figure class="hoja__molino" aria-hidden="true">
-            <img src="/molino-e65s.svg" alt="" width="240" height="560" />
-            <figcaption>Mahlkönig E65S</figcaption>
-          </figure>
+          {
+            coffee.imageKey ? (
+              <div class="hoja__molino">
+                <Vitrina imageKey={coffee.imageKey} size="chica" />
+              </div>
+            ) : (
+              <figure class="hoja__molino" aria-hidden="true">
+                <img src="/molino-e65s.svg" alt="" width="240" height="560" />
+                <figcaption>Mahlkönig E65S</figcaption>
+              </figure>
+            )
+          }
         </div>
 
         <div class="hoja__sabor">
@@ -794,6 +810,8 @@ const cafe = cafeJsonLd({
     .tolva__molino {
       display: grid;
       justify-items: center;
+      /* El paquete de la vitrina queda a media altura de la tarjeta. */
+      align-self: center;
       gap: var(--space-sm);
     }
 
