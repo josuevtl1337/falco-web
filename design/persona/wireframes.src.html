@@ -2,7 +2,7 @@
 <html lang="es">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Falco · Wireframes v7.12</title>
+<title>Falco · Wireframes v7.13</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
@@ -1791,11 +1791,13 @@
     top: 12%;
     translate: -50% 0;
   }
+  /* Apenas girado a la izquierda, como un cartel colgado que no quedó derecho. */
   .cartel {
     position: relative;
     display: inline-block;
     aspect-ratio: 365 / 445;
     vertical-align: middle;
+    rotate: -6deg;
   }
   .cartel svg {
     position: absolute;
@@ -1952,7 +1954,7 @@
 %%CARA_DEFS%%
 <div class="b-wrap">
   <header class="b-head">
-    <div class="b-eyebrow">Falco · café de santoto · wireframes v7.12</div>
+    <div class="b-eyebrow">Falco · café de santoto · wireframes v7.13</div>
     <h1>La Cueva, con acento Persona</h1>
     <p>
       Todas las vistas, en escritorio (1440 px) y en celular (390 px), con los
@@ -2765,7 +2767,7 @@
   <!-- ============================== 08 EL CARTEL ============================== -->
   <section class="b-view" id="v-cartel">
     <div class="b-vhead">
-      <h2><small>08</small>El cartel · v7.12</h2>
+      <h2><small>08</small>El cartel · v7.13</h2>
       <button class="b-replay" type="button" data-replay>Prender de nuevo</button>
     </div>
     <div class="b-notes">
@@ -2788,7 +2790,8 @@
       <p class="b-note">
         <b>Cinco tubos</b>Contorno con orejas, cara, nariz, boca y ojos. Salen
         del mismo dibujo que mandaste, sin redibujar nada: el archivo está en
-        design/marca/cara-linea.svg.
+        design/marca/cara-linea.svg. Con la A se prenden todos juntos; quedan
+        separados por si más adelante queremos otro efecto.
       </p>
     </div>
 
@@ -2826,7 +2829,7 @@
           <div class="cartel-variantes">
             <div class="cartel-tile">
               %%CARTEL_A%%
-              <p><b>A · De una</b>Todo el cartel parpadea junto y queda. Rápido, menos de un segundo.</p>
+              <p><b>A · De una (elegida)</b>Todo el cartel parpadea junto y queda. Rápido, menos de un segundo.</p>
               <button class="b-replay" type="button" data-prender>Prender</button>
             </div>
             <div class="cartel-tile">
@@ -2836,7 +2839,7 @@
             </div>
             <div class="cartel-tile">
               %%CARTEL_C%%
-              <p><b>C · Por tubos, y los ojos vivos (elegida)</b>Igual que B, y después los ojos pestañean solos cada tanto. Le da vida, pero es un movimiento que nunca termina.</p>
+              <p><b>C · Por tubos, y los ojos vivos</b>Igual que B, y después los ojos pestañean solos cada tanto. Le da vida, pero es un movimiento que nunca termina.</p>
               <button class="b-replay" type="button" data-prender>Prender</button>
             </div>
           </div>
