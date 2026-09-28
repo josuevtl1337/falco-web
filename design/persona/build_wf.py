@@ -71,7 +71,7 @@ PENTA_MINI = f"""<svg class="penta" data-values="{','.join(map(str, VALUES))}" v
 </svg>"""
 
 M_TOP = """<div class="glow" style="left:-60px; top:-200px; width:520px; height:520px"></div>
-<div class="nav" style="height:70px; padding:0 22px"><a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_M%%</a><div class="burger"><span>Menú</span></div></div>"""
+<div class="nav" style="height:70px; padding:0 22px"><a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_M%%</a><div class="logo logo--centro"><b style="font-size:32px">Falco</b></div><div class="burger"><span>Menú</span></div></div>"""
 
 M_DLG = """<div class="dlg sm">
   <span class="dlg-tag plate hi"><span>Falco</span></span>
@@ -221,7 +221,7 @@ def main():
     src = (HERE / "wireframes.src.html").read_text()
     src = src.replace("%%PEDIDO%%", (HERE / "pedido.section.html").read_text())
     d_tienda = f"""<div class="glow" style="left:170px; top:-260px; width:1100px; height:640px"></div>
-<div class="nav" style="height:92px; padding:0 72px"><a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_D%%</a>
+<div class="nav" style="height:92px; padding:0 72px"><a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_D%%</a><div class="logo logo--centro"><b>Falco</b><span>café de santoto</span></div>
 <nav><a href="#v-tienda" class="on">La tienda</a><a href="#v-donde">Dónde estamos</a><a class="ig" href="#v-home">@falco.cafe</a></nav></div>
 <div style="display:grid; gap:18px; padding:60px 72px 20px"><div><span class="plate hi"><span>La tienda</span></span></div>
 <div class="h-lg">Llevate Falco a casa</div></div>

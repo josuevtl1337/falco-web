@@ -2,7 +2,7 @@
 <html lang="es">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Falco · Wireframes v7.14</title>
+<title>Falco · Wireframes v7.15</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
@@ -1790,6 +1790,26 @@
     left: 0;
     top: 12%;
   }
+  /* El logo, en el medio de la barra. */
+  .logo--centro {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    white-space: nowrap;
+  }
+  /* En las vistas con calendario, la cara se prende junto con "Abierto
+     ahora": el mismo parpadeo, en el mismo momento, como un solo circuito. */
+  .cartel--sincro .tubo,
+  .cartel--sincro::before {
+    animation: none;
+  }
+  .cartel--sincro.prende .tubo {
+    animation: lightOn 0.9s steps(1) 1.15s both;
+  }
+  .cartel--sincro.prende::before {
+    animation: cartel-pared 0.9s ease-out 2.05s forwards;
+  }
   /* El cartel hace de logo: ocupa su lugar a la izquierda y lleva al inicio. */
   .logo--cartel {
     position: relative;
@@ -1818,7 +1838,7 @@
   }
   /* Los tubos apagados: vidrio sin luz, se ve el dibujo pero no brilla. */
   .cartel__apagado {
-    color: #3c3d40;
+    color: #4a4b4f;
   }
   /* Los tubos prendidos: casi blanco en el centro y el halo en brasa. */
   /* Los tubos prendidos: crema tibio, con un halo corto en brasa. */
@@ -1963,7 +1983,7 @@
 %%CARA_DEFS%%
 <div class="b-wrap">
   <header class="b-head">
-    <div class="b-eyebrow">Falco · café de santoto · wireframes v7.14</div>
+    <div class="b-eyebrow">Falco · café de santoto · wireframes v7.15</div>
     <h1>La Cueva, con acento Persona</h1>
     <p>
       Todas las vistas, en escritorio (1440 px) y en celular (390 px), con los
@@ -2024,7 +2044,7 @@
             style="left: -120px; top: -320px; width: 1100px; height: 860px"
           ></div>
           <div class="nav" style="height: 92px; padding: 0 72px">
-            <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_D%%</a>
+            <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_D%%</a><div class="logo logo--centro"><b>Falco</b><span>café de santoto</span></div>
             <nav>
               <a href="#v-tienda">La tienda</a
               ><a href="#v-donde">Dónde estamos</a
@@ -2212,7 +2232,7 @@
                 z-index: 3;
               "
             >
-              <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_M%%</a>
+              <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_M%%</a><div class="logo logo--centro"><b style="font-size:32px">Falco</b></div>
               <div class="burger"><span>Cerrar</span></div>
             </div>
             <nav class="menu-list" aria-label="Menú de ejemplo">
@@ -2265,7 +2285,7 @@
             style="left: 170px; top: -260px; width: 1100px; height: 640px"
           ></div>
           <div class="nav" style="height: 92px; padding: 0 72px">
-            <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_D%%</a>
+            <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_D%%</a><div class="logo logo--centro"><b>Falco</b><span>café de santoto</span></div>
             <nav>
               <a href="#v-tienda" class="on">La tienda</a
               ><a href="#v-donde">Dónde estamos</a
@@ -2331,7 +2351,7 @@
         <div class="frame" data-w="390">
           <div class="ab grainy m" style="width: 390px">
             <div class="nav" style="height: 70px; padding: 0 22px">
-              <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_M%%</a><div class="burger"><span>Menú</span></div>
+              <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_M%%</a><div class="logo logo--centro"><b style="font-size:32px">Falco</b></div><div class="burger"><span>Menú</span></div>
             </div>
             <div style="display: grid; gap: 18px; padding: 28px 22px 10px">
               <div>
@@ -2399,7 +2419,7 @@
             style="right: -160px; top: -180px; width: 900px; height: 700px"
           ></div>
           <div class="nav" style="height: 92px; padding: 0 72px">
-            <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_D%%</a>
+            <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_D%%</a><div class="logo logo--centro"><b>Falco</b><span>café de santoto</span></div>
             <nav>
               <a href="#v-tienda">La tienda</a
               ><a href="#v-donde" class="on">Dónde estamos</a
@@ -2502,7 +2522,7 @@
         <div class="frame" data-w="390">
           <div class="ab grainy" style="width: 390px">
             <div class="nav" style="height: 70px; padding: 0 22px">
-              <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_M%%</a><div class="burger"><span>Menú</span></div>
+              <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_M%%</a><div class="logo logo--centro"><b style="font-size:32px">Falco</b></div><div class="burger"><span>Menú</span></div>
             </div>
             <div style="display: grid; gap: 22px; padding: 28px 22px 30px">
               <div>
@@ -2774,15 +2794,14 @@
   <!-- ============================== 08 EL CARTEL ============================== -->
   <section class="b-view" id="v-cartel">
     <div class="b-vhead">
-      <h2><small>08</small>El cartel · v7.14</h2>
+      <h2><small>08</small>El cartel · v7.15</h2>
       <button class="b-replay" type="button" data-replay>Prender de nuevo</button>
     </div>
     <div class="b-notes">
       <p class="b-note">
-        <b>La cara es el logo</b>El murciélago reemplaza a "Falco" a la
+        <b>La cara a la izquierda, Falco en el medio</b>El murciélago va a la
         izquierda de la barra y pasa un poco el borde de abajo, como un cartel
-        colgado. Lleva al inicio, como llevaba el logo. El nombre sigue en el
-        título de la página, en el pie y en la cita de la home.
+        colgado; lleva al inicio. El logo "Falco" queda centrado.
       </p>
       <p class="b-note">
         <b>Se prende como un neón</b>Al cargar, el dibujo se ve apagado (vidrio
@@ -2790,9 +2809,10 @@
         Cuando está todo prendido, aparece la luz que tira sobre la pared.
       </p>
       <p class="b-note">
-        <b>Sólo la primera vez</b>Pasa al entrar al sitio. Si la persona ya lo
-        vio en esta visita (navega y vuelve al inicio), el cartel ya está
-        prendido. Con "reducir movimiento", aparece prendido directamente.
+        <b>Junto con "Abierto ahora"</b>En la home, la cara se prende en el
+        mismo momento y con el mismo parpadeo que la placa de "Abierto ahora",
+        como si fueran del mismo circuito. En las páginas sin calendario se
+        prende sola al entrar. Con "reducir movimiento", aparece prendida.
       </p>
       <p class="b-note">
         <b>Cinco tubos</b>Contorno con orejas, cara, nariz, boca y ojos. Salen
@@ -2803,12 +2823,12 @@
     </div>
 
     <div>
-      <div class="b-flabel"><span>Escritorio · 1440</span><span>La cara en lugar de "Falco"</span></div>
+      <div class="b-flabel"><span>Escritorio · 1440</span><span>La cara a la izquierda, Falco en el medio</span></div>
       <div class="frame" data-w="1440">
         <div class="ab grainy" style="width: 1440px; height: 260px">
           <div class="glow" style="left: -120px; top: -320px; width: 1100px; height: 860px"></div>
           <div class="nav" style="height: 92px; padding: 0 72px">
-            <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_D%%</a>
+            <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_D%%</a><div class="logo logo--centro"><b>Falco</b><span>café de santoto</span></div>
             <nav>
               <a href="#v-tienda">La tienda</a
               ><a href="#v-donde">Dónde estamos</a
@@ -2820,7 +2840,7 @@
     </div>
 
     <div>
-      <div class="b-flabel"><span>Celular · 390</span><span>La cara en lugar de "Falco"</span></div>
+      <div class="b-flabel"><span>Celular · 390</span><span>La cara a la izquierda, Falco en el medio</span></div>
       <div class="frame" data-w="390">
         <div class="ab grainy" style="width: 390px; height: 200px">
           %%M_TOP%%
@@ -2961,7 +2981,22 @@
       el.classList.remove("go");
       void el.offsetWidth;
       el.classList.add("go");
+      // la cara de la barra se prende con la placa de "Abierto ahora"
+      var ab = el.closest(".ab");
+      if (ab)
+        ab.querySelectorAll(".cartel--sincro").forEach(function (c) {
+          c.classList.remove("prende");
+          void c.offsetWidth;
+          c.classList.add("prende");
+        });
     }
+    // en las láminas con calendario, la cara espera a la placa
+    document.querySelectorAll(".ab").forEach(function (ab) {
+      if (!ab.querySelector("[data-hud]")) return;
+      ab.querySelectorAll(".nav .cartel").forEach(function (c) {
+        c.classList.add("cartel--sincro");
+      });
+    });
 
     // ---- pentágono que se forma punta por punta ----
     var CX = 110,
