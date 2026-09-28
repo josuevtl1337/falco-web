@@ -2,7 +2,7 @@
 <html lang="es">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Falco · Wireframes v7.10</title>
+<title>Falco · Wireframes v7.15</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
@@ -1781,11 +1781,209 @@
       transition-duration: 0.001ms !important;
     }
   }
+
+  /* ---- el cartel: la cara del murciélago como neón (v7.11) ---- */
+  /* En la barra cuelga: arranca arriba y pasa el borde de abajo, como un
+     cartel colgado del techo. */
+  .nav .cartel {
+    position: absolute;
+    left: 0;
+    top: 12%;
+  }
+  /* El logo, en el medio de la barra. */
+  .logo--centro {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    white-space: nowrap;
+  }
+  /* En las vistas con calendario, la cara se prende junto con "Abierto
+     ahora": el mismo parpadeo, en el mismo momento, como un solo circuito. */
+  .cartel--sincro .tubo,
+  .cartel--sincro::before {
+    animation: none;
+  }
+  .cartel--sincro.prende .tubo {
+    animation: lightOn 0.9s steps(1) 1.15s both;
+  }
+  .cartel--sincro.prende::before {
+    animation: cartel-pared 0.9s ease-out 2.05s forwards;
+  }
+  /* El cartel hace de logo: ocupa su lugar a la izquierda y lleva al inicio. */
+  .logo--cartel {
+    position: relative;
+    align-self: stretch;
+    width: 86px;
+  }
+  .nav[style*="height:70px"] .logo--cartel,
+  .nav[style*="height: 70px"] .logo--cartel {
+    width: 58px;
+  }
+  /* Apenas girado a la izquierda, como un cartel colgado que no quedó derecho. */
+  .cartel {
+    position: relative;
+    display: inline-block;
+    aspect-ratio: 365 / 445;
+    vertical-align: middle;
+    rotate: -6deg;
+  }
+  .cartel svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    fill: currentColor;
+  }
+  /* Los tubos apagados: vidrio sin luz, se ve el dibujo pero no brilla. */
+  .cartel__apagado {
+    color: #4a4b4f;
+  }
+  /* Los tubos prendidos: casi blanco en el centro y el halo en brasa. */
+  /* Los tubos prendidos: crema tibio, con un halo corto en brasa. */
+  .cartel__prendido {
+    color: #f6e4c8;
+    filter: drop-shadow(0 0 1px rgba(255, 240, 215, 0.8)) drop-shadow(0 0 3px rgba(242, 196, 139, 0.55))
+      drop-shadow(0 0 8px rgba(226, 140, 70, 0.28));
+  }
+  /* La luz que el cartel tira sobre la pared, cuando ya prendió todo. */
+  .cartel--reinicio::before,
+  .cartel--reinicio .tubo {
+    animation: none !important;
+  }
+  .cartel::before {
+    content: "";
+    position: absolute;
+    inset: -45% -70%;
+    background: radial-gradient(closest-side, rgba(242, 176, 110, 0.09), transparent);
+    opacity: 0;
+    animation: cartel-pared 0.9s ease-out forwards;
+    animation-delay: var(--listo, 1.2s);
+    pointer-events: none;
+  }
+  .cartel__prendido .tubo {
+    opacity: 0;
+    animation: cartel-prende 1.3s linear forwards;
+    animation-delay: var(--d, 0.2s);
+  }
+
+  /* A · De una: todo el cartel titila junto y queda. */
+  .cartel--a { --listo: 0.9s; }
+
+  /* B · Por tubos: cada tubo arranca a su tiempo; los ojos tardan en agarrar. */
+  .cartel--b, .cartel--c { --listo: 2.6s; }
+  .cartel--b .tubo--contorno, .cartel--c .tubo--contorno { --d: 0.2s; }
+  .cartel--b .tubo--cara, .cartel--c .tubo--cara { --d: 0.55s; }
+  .cartel--b .tubo--nariz, .cartel--c .tubo--nariz { --d: 0.8s; }
+  .cartel--b .tubo--boca, .cartel--c .tubo--boca { --d: 0.95s; }
+  .cartel--b .tubo--ojos, .cartel--c .tubo--ojos {
+    --d: 1.05s;
+    animation-name: cartel-perezoso;
+    animation-duration: 1.9s;
+  }
+  /* C · Por tubos, y los ojos siguen vivos: cada tanto pestañean solos. */
+  .cartel--c .tubo--ojos {
+    animation:
+      cartel-perezoso 1.9s linear 1.05s forwards,
+      cartel-zumbido 7s linear 5s infinite;
+  }
+
+  @keyframes cartel-prende {
+    0% { opacity: 0; }
+    6% { opacity: 0.85; }
+    9% { opacity: 0; }
+    22% { opacity: 0; }
+    24% { opacity: 1; }
+    27% { opacity: 0.15; }
+    31% { opacity: 0.9; }
+    34% { opacity: 0.3; }
+    46% { opacity: 1; }
+    100% { opacity: 1; }
+  }
+  @keyframes cartel-perezoso {
+    0% { opacity: 0; }
+    8% { opacity: 0.7; }
+    11% { opacity: 0; }
+    38% { opacity: 0; }
+    40% { opacity: 0.9; }
+    43% { opacity: 0.1; }
+    58% { opacity: 0.1; }
+    60% { opacity: 1; }
+    64% { opacity: 0.4; }
+    68% { opacity: 1; }
+    100% { opacity: 1; }
+  }
+  @keyframes cartel-zumbido {
+    0%, 90% { opacity: 1; }
+    91% { opacity: 0.25; }
+    92% { opacity: 1; }
+    94% { opacity: 0.5; }
+    95%, 100% { opacity: 1; }
+  }
+  @keyframes cartel-pared {
+    to { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cartel__prendido .tubo,
+    .cartel::before {
+      animation: none !important;
+      opacity: 1;
+    }
+  }
+
+  /* la lámina del cartel */
+  .cartel-variantes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .cartel-tile {
+    display: grid;
+    justify-items: center;
+    gap: 18px;
+    padding: 40px 20px 26px;
+    background: #1e1f21;
+    border: 1px solid rgba(232, 226, 208, 0.08);
+  }
+  .cartel-tile p {
+    margin: 0;
+    max-width: 300px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ceniza);
+    text-align: center;
+  }
+  .cartel-tile b {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--hueso);
+    margin-bottom: 6px;
+  }
+  .cartel-versiones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .cartel-version {
+    display: grid;
+    justify-items: center;
+    gap: 16px;
+    padding: 36px 20px 24px;
+  }
+  .cartel-version svg {
+    height: 170px;
+    width: auto;
+  }
 </style>
 
+%%CARA_DEFS%%
 <div class="b-wrap">
   <header class="b-head">
-    <div class="b-eyebrow">Falco · café de santoto · wireframes v7.10</div>
+    <div class="b-eyebrow">Falco · café de santoto · wireframes v7.15</div>
     <h1>La Cueva, con acento Persona</h1>
     <p>
       Todas las vistas, en escritorio (1440 px) y en celular (390 px), con los
@@ -1803,7 +2001,8 @@
       ><a href="#v-pedido">04 · Pedido por WhatsApp</a
       ><a href="#v-donde">05 · Dónde estamos</a
       ><a href="#v-corte">06 · Corte diagonal</a
-      ><a href="#v-sistema">07 · Sistema</a>
+      ><a href="#v-sistema">07 · Sistema</a
+      ><a href="#v-cartel">08 · El cartel</a>
     </nav>
   </header>
 
@@ -1845,7 +2044,7 @@
             style="left: -120px; top: -320px; width: 1100px; height: 860px"
           ></div>
           <div class="nav" style="height: 92px; padding: 0 72px">
-            <div class="logo"><b>Falco</b><span>café de santoto</span></div>
+            <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_D%%</a><div class="logo logo--centro"><b>Falco</b><span>café de santoto</span></div>
             <nav>
               <a href="#v-tienda">La tienda</a
               ><a href="#v-donde">Dónde estamos</a
@@ -2033,7 +2232,7 @@
                 z-index: 3;
               "
             >
-              <div class="logo"><b style="font-size: 32px">Falco</b></div>
+              <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_M%%</a><div class="logo logo--centro"><b style="font-size:32px">Falco</b></div>
               <div class="burger"><span>Cerrar</span></div>
             </div>
             <nav class="menu-list" aria-label="Menú de ejemplo">
@@ -2086,7 +2285,7 @@
             style="left: 170px; top: -260px; width: 1100px; height: 640px"
           ></div>
           <div class="nav" style="height: 92px; padding: 0 72px">
-            <div class="logo"><b>Falco</b><span>café de santoto</span></div>
+            <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_D%%</a><div class="logo logo--centro"><b>Falco</b><span>café de santoto</span></div>
             <nav>
               <a href="#v-tienda" class="on">La tienda</a
               ><a href="#v-donde">Dónde estamos</a
@@ -2152,8 +2351,7 @@
         <div class="frame" data-w="390">
           <div class="ab grainy m" style="width: 390px">
             <div class="nav" style="height: 70px; padding: 0 22px">
-              <div class="logo"><b style="font-size: 32px">Falco</b></div>
-              <div class="burger"><span>Menú</span></div>
+              <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_M%%</a><div class="logo logo--centro"><b style="font-size:32px">Falco</b></div><div class="burger"><span>Menú</span></div>
             </div>
             <div style="display: grid; gap: 18px; padding: 28px 22px 10px">
               <div>
@@ -2221,7 +2419,7 @@
             style="right: -160px; top: -180px; width: 900px; height: 700px"
           ></div>
           <div class="nav" style="height: 92px; padding: 0 72px">
-            <div class="logo"><b>Falco</b><span>café de santoto</span></div>
+            <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_D%%</a><div class="logo logo--centro"><b>Falco</b><span>café de santoto</span></div>
             <nav>
               <a href="#v-tienda">La tienda</a
               ><a href="#v-donde" class="on">Dónde estamos</a
@@ -2324,8 +2522,7 @@
         <div class="frame" data-w="390">
           <div class="ab grainy" style="width: 390px">
             <div class="nav" style="height: 70px; padding: 0 22px">
-              <div class="logo"><b style="font-size: 32px">Falco</b></div>
-              <div class="burger"><span>Menú</span></div>
+              <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_M%%</a><div class="logo logo--centro"><b style="font-size:32px">Falco</b></div><div class="burger"><span>Menú</span></div>
             </div>
             <div style="display: grid; gap: 22px; padding: 28px 22px 30px">
               <div>
@@ -2593,6 +2790,107 @@
       </div>
     </div>
   </section>
+
+  <!-- ============================== 08 EL CARTEL ============================== -->
+  <section class="b-view" id="v-cartel">
+    <div class="b-vhead">
+      <h2><small>08</small>El cartel · v7.15</h2>
+      <button class="b-replay" type="button" data-replay>Prender de nuevo</button>
+    </div>
+    <div class="b-notes">
+      <p class="b-note">
+        <b>La cara a la izquierda, Falco en el medio</b>El murciélago va a la
+        izquierda de la barra y pasa un poco el borde de abajo, como un cartel
+        colgado; lleva al inicio. El logo "Falco" queda centrado.
+      </p>
+      <p class="b-note">
+        <b>Se prende como un neón</b>Al cargar, el dibujo se ve apagado (vidrio
+        sin luz) y cada tubo arranca con uno o dos parpadeos hasta quedar fijo.
+        Cuando está todo prendido, aparece la luz que tira sobre la pared.
+      </p>
+      <p class="b-note">
+        <b>Junto con "Abierto ahora"</b>En la home, la cara se prende en el
+        mismo momento y con el mismo parpadeo que la placa de "Abierto ahora",
+        como si fueran del mismo circuito. En las páginas sin calendario se
+        prende sola al entrar. Con "reducir movimiento", aparece prendida.
+      </p>
+      <p class="b-note">
+        <b>Cinco tubos</b>Contorno con orejas, cara, nariz, boca y ojos. Salen
+        del mismo dibujo que mandaste, sin redibujar nada: el archivo está en
+        design/marca/cara-linea.svg. Con la A se prenden todos juntos; quedan
+        separados por si más adelante queremos otro efecto.
+      </p>
+    </div>
+
+    <div>
+      <div class="b-flabel"><span>Escritorio · 1440</span><span>La cara a la izquierda, Falco en el medio</span></div>
+      <div class="frame" data-w="1440">
+        <div class="ab grainy" style="width: 1440px; height: 260px">
+          <div class="glow" style="left: -120px; top: -320px; width: 1100px; height: 860px"></div>
+          <div class="nav" style="height: 92px; padding: 0 72px">
+            <a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_D%%</a><div class="logo logo--centro"><b>Falco</b><span>café de santoto</span></div>
+            <nav>
+              <a href="#v-tienda">La tienda</a
+              ><a href="#v-donde">Dónde estamos</a
+              ><a class="ig" href="#v-cartel">@falco.cafe</a>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="b-flabel"><span>Celular · 390</span><span>La cara a la izquierda, Falco en el medio</span></div>
+      <div class="frame" data-w="390">
+        <div class="ab grainy" style="width: 390px; height: 200px">
+          %%M_TOP%%
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="b-flabel"><span>Tres maneras de prenderse</span><span>Tocá cada una para verla de nuevo</span></div>
+      <div class="frame" data-w="1200">
+        <div class="ab" style="width: 1200px; padding: 40px">
+          <div class="cartel-variantes">
+            <div class="cartel-tile">
+              %%CARTEL_A%%
+              <p><b>A · De una (elegida)</b>Todo el cartel parpadea junto y queda. Rápido, menos de un segundo.</p>
+              <button class="b-replay" type="button" data-prender>Prender</button>
+            </div>
+            <div class="cartel-tile">
+              %%CARTEL_B%%
+              <p><b>B · Por tubos</b>Primero el contorno, después la cara, la nariz y la boca. Los ojos tardan en agarrar, como un tubo viejo. Unos dos segundos y medio.</p>
+              <button class="b-replay" type="button" data-prender>Prender</button>
+            </div>
+            <div class="cartel-tile">
+              %%CARTEL_C%%
+              <p><b>C · Por tubos, y los ojos vivos</b>Igual que B, y después los ojos pestañean solos cada tanto. Le da vida, pero es un movimiento que nunca termina.</p>
+              <button class="b-replay" type="button" data-prender>Prender</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="b-flabel"><span>Las dos versiones</span><span>El neón usa la de línea</span></div>
+      <div class="frame" data-w="1200">
+        <div class="ab" style="width: 1200px; padding: 40px">
+          <div class="cartel-versiones">
+            <div class="cartel-version" style="background: #292a2c; color: #e1c8ab">
+              <svg viewBox="47 36 365 445" fill="currentColor" aria-hidden="true">%%CARA_TUBOS%%</svg>
+              <p class="b-note" style="margin: 0; text-align: center"><b>Línea clara sobre oscuro</b>La del cartel. Las líneas son los tubos.</p>
+            </div>
+            <div class="cartel-version" style="background: #fff2e2; color: #2a2a2c">
+              %%CARA_LLENA%%
+              <p class="b-note" style="margin: 0; text-align: center; color: #555"><b style="color: #2a2a2c">Oscura sobre claro</b>Para fondos claros: una etiqueta, un sticker, el menú impreso. En el sitio no hay fondos claros, así que queda guardada.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>
 
 <script>
@@ -2683,7 +2981,22 @@
       el.classList.remove("go");
       void el.offsetWidth;
       el.classList.add("go");
+      // la cara de la barra se prende con la placa de "Abierto ahora"
+      var ab = el.closest(".ab");
+      if (ab)
+        ab.querySelectorAll(".cartel--sincro").forEach(function (c) {
+          c.classList.remove("prende");
+          void c.offsetWidth;
+          c.classList.add("prende");
+        });
     }
+    // en las láminas con calendario, la cara espera a la placa
+    document.querySelectorAll(".ab").forEach(function (ab) {
+      if (!ab.querySelector("[data-hud]")) return;
+      ab.querySelectorAll(".nav .cartel").forEach(function (c) {
+        c.classList.add("cartel--sincro");
+      });
+    });
 
     // ---- pentágono que se forma punta por punta ----
     var CX = 110,
@@ -2784,6 +3097,26 @@
           n.style.animation = "";
         });
         sec.querySelectorAll("[data-hud], svg.penta").forEach(play);
+        sec.querySelectorAll(".cartel").forEach(prenderCartel);
+      });
+    });
+
+    // ---- el cartel: volver a prenderlo ----
+    function prenderCartel(c) {
+      c.querySelectorAll(".tubo").forEach(function (t) {
+        t.style.animation = "none";
+      });
+      c.style.setProperty("--reinicio", "1");
+      c.classList.add("cartel--reinicio");
+      void c.offsetWidth;
+      c.classList.remove("cartel--reinicio");
+      c.querySelectorAll(".tubo").forEach(function (t) {
+        t.style.animation = "";
+      });
+    }
+    document.querySelectorAll("[data-prender]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        prenderCartel(b.closest(".cartel-tile").querySelector(".cartel"));
       });
     });
 

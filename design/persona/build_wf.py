@@ -5,11 +5,39 @@ Foto del E65S: dejar `e65s.png` (o .jpg / .webp) en esta carpeta y volver a corr
 Uso: python3 build_wf.py
 """
 import base64
+import re
 from pathlib import Path
 
 from build import CAFE, KITS, row
 
 HERE = Path(__file__).parent
+MARCA = HERE.parent / "marca"
+
+# ---- el cartel: la cara del murciélago como neón, en cinco tubos ----
+# Sale de ../marca/cara-linea.svg (la versión de línea, exportada de Illustrator):
+# cada <path class="tubo tubo--x"> es un tubo con sus huecos, así cada uno se
+# puede prender por su cuenta sin que cambie el dibujo.
+_CARA = (MARCA / "cara-linea.svg").read_text()
+CARA_VB = re.search(r'viewBox="([^"]+)"', _CARA).group(1)
+CARA_TUBOS = "".join(re.findall(r"<path [^>]+/>", _CARA))
+_TUBOS = re.findall(r'<path class="tubo tubo--(\w+)" d="([^"]+)"/>', _CARA)
+# El dibujo va una sola vez en la página; cada cartel lo reusa con <use>.
+CARA_DEFS = (
+    '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>'
+    + "".join(f'<path id="tubo-{k}" d="{d}"/>' for k, d in _TUBOS)
+    + "</defs></svg>"
+)
+CARA_USES = "".join(f'<use class="tubo tubo--{k}" href="#tubo-{k}"/>' for k, _ in _TUBOS)
+CARA_LLENA = (MARCA / "cara-llena.svg").read_text()
+
+
+def cartel(alto, variante="a"):
+    """El cartel de neón: los tubos apagados (vidrio) y encima los prendidos, que titilan al entrar."""
+    svg = lambda cls: f'<svg class="{cls}" viewBox="{CARA_VB}" aria-hidden="true">{CARA_USES}</svg>'
+    return (
+        f'<span class="cartel cartel--{variante}" style="height:{alto}px" role="img" aria-label="Falco">'
+        f'{svg("cartel__apagado")}{svg("cartel__prendido")}</span>'
+    )
 
 BAT = """<svg class="bat" viewBox="0 0 60 54" style="left:1128px; top:91px" aria-hidden="true">
   <g fill="#3a3c3e"><path d="M8,0 C4,14 6,26 14,32 C10,20 10,8 12,0 Z"/><path d="M52,0 C56,14 54,26 46,32 C50,20 50,8 48,0 Z"/>
@@ -43,7 +71,7 @@ PENTA_MINI = f"""<svg class="penta" data-values="{','.join(map(str, VALUES))}" v
 </svg>"""
 
 M_TOP = """<div class="glow" style="left:-60px; top:-200px; width:520px; height:520px"></div>
-<div class="nav" style="height:70px; padding:0 22px"><div class="logo"><b style="font-size:32px">Falco</b></div><div class="burger"><span>Menú</span></div></div>"""
+<div class="nav" style="height:70px; padding:0 22px"><a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_M%%</a><div class="logo logo--centro"><b style="font-size:32px">Falco</b></div><div class="burger"><span>Menú</span></div></div>"""
 
 M_DLG = """<div class="dlg sm">
   <span class="dlg-tag plate hi"><span>Falco</span></span>
@@ -193,7 +221,7 @@ def main():
     src = (HERE / "wireframes.src.html").read_text()
     src = src.replace("%%PEDIDO%%", (HERE / "pedido.section.html").read_text())
     d_tienda = f"""<div class="glow" style="left:170px; top:-260px; width:1100px; height:640px"></div>
-<div class="nav" style="height:92px; padding:0 72px"><div class="logo"><b>Falco</b><span>café de santoto</span></div>
+<div class="nav" style="height:92px; padding:0 72px"><a class="logo logo--cartel" href="#v-home" aria-label="Falco, al inicio">%%CARTEL_D%%</a><div class="logo logo--centro"><b>Falco</b><span>café de santoto</span></div>
 <nav><a href="#v-tienda" class="on">La tienda</a><a href="#v-donde">Dónde estamos</a><a class="ig" href="#v-home">@falco.cafe</a></nav></div>
 <div style="display:grid; gap:18px; padding:60px 72px 20px"><div><span class="plate hi"><span>La tienda</span></span></div>
 <div class="h-lg">Llevate Falco a casa</div></div>
@@ -216,6 +244,14 @@ def main():
         .replace("%%SEND_ICON%%", SEND_ICON)
         .replace("%%PENTA_MINI%%", PENTA_MINI)
         .replace("%%M_TOP%%", M_TOP)
+        .replace("%%CARTEL_M%%", cartel(70))
+        .replace("%%CARTEL_D%%", cartel(104))
+        .replace("%%CARTEL_A%%", cartel(150, "a"))
+        .replace("%%CARTEL_B%%", cartel(150, "b"))
+        .replace("%%CARTEL_C%%", cartel(150, "c"))
+        .replace("%%CARA_LLENA%%", CARA_LLENA)
+        .replace("%%CARA_TUBOS%%", CARA_USES)
+        .replace("%%CARA_DEFS%%", CARA_DEFS)
         .replace("%%M_DLG%%", M_DLG)
         .replace("%%TICKER_TOLVA%%", TICKER_TOLVA)
         .replace("%%PENTA%%", PENTA)

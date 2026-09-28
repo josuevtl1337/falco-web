@@ -9,6 +9,7 @@
     "preview": "wrangler dev",
     "typecheck": "wrangler types && astro check",
     "test": "vitest run",
+    "db:migrate": "wrangler d1 migrations apply falco --local",
     "db:reset": "node -e \"require('node:fs').rmSync('.wrangler/state/v3/d1',{recursive:true,force:true})\" && wrangler d1 migrations apply falco --local && wrangler d1 execute falco --local --file ../../packages/db/seed/seed.sql"
   },
   "dependencies": {

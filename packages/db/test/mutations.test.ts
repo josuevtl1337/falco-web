@@ -12,6 +12,7 @@ import {
   saveSpecialDay,
   saveWeekHours,
   setHopperCoffee,
+  setHopperCoffeeImage,
   updateHopperCoffee,
 } from "../src/mutations";
 import {
@@ -236,8 +237,36 @@ describe("la tolva", () => {
   });
 
   it("cualquier otro se borra", async () => {
-    expect(await deleteHopperCoffee(db, 3)).toEqual({ ok: true });
+    expect(await deleteHopperCoffee(db, 3)).toEqual({ ok: true, imageKey: null });
     expect((await listHopperCoffees(db)).map((c) => c.id)).not.toContain(3);
+  });
+
+  it("al borrarlo devuelve la clave de su foto, para sacarla del bucket", async () => {
+    await setHopperCoffeeImage(db, 3, "tolva/3-abc.webp", QUIEN);
+    expect(await deleteHopperCoffee(db, 3)).toEqual({ ok: true, imageKey: "tolva/3-abc.webp" });
+  });
+
+  it("la foto se guarda, la ve la home y se puede cambiar o quitar", async () => {
+    expect(await setHopperCoffeeImage(db, 1, "tolva/1-aaa.webp", QUIEN)).toEqual({
+      ok: true,
+      previousKey: null,
+    });
+    expect((await getHopperCoffee(db))?.imageKey).toBe("tolva/1-aaa.webp");
+    expect(await setHopperCoffeeImage(db, 1, "tolva/1-bbb.webp", QUIEN)).toEqual({
+      ok: true,
+      previousKey: "tolva/1-aaa.webp",
+    });
+    expect(await setHopperCoffeeImage(db, 1, null, QUIEN)).toEqual({
+      ok: true,
+      previousKey: "tolva/1-bbb.webp",
+    });
+    expect((await getHopperCoffee(db))?.imageKey).toBeUndefined();
+  });
+
+  it("la foto de un café que ya no existe lo dice", async () => {
+    const r = await setHopperCoffeeImage(db, 999, "tolva/999-x.webp", QUIEN);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toMatch(/ya no existe/);
   });
 
   it("no se puede poner en tolva un café que no existe", async () => {

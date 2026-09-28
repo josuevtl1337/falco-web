@@ -1,0 +1,169 @@
+---
+/**
+ * El paquete del café en tolva, girando despacio sobre su eje como en una
+ * vitrina. Es una foto plana, así que no da la vuelta entera (de canto
+ * desaparecería y el dorso se vería espejado): va y viene unos grados, con
+ * perspectiva, un brillo que cruza el paquete y la sombra en el piso
+ * acompañando el giro.
+ *
+ * Todo es CSS sobre transform y opacity: lo mueve la placa de video, sin
+ * JavaScript. Con "reducir movimiento" queda quieto, apenas girado.
+ */
+interface Props {
+  /** La clave de la foto en R2 (tolva/<id>-<hash>.webp). */
+  imageKey: string;
+  /** "grande" en la tarjeta de escritorio, "chica" en la hoja del celular. */
+  size?: "grande" | "chica";
+}
+
+const { imageKey, size = "grande" } = Astro.props;
+const src = `/fotos/${imageKey}`;
+---
+
+<figure class:list={["vitrina", `vitrina--${size}`]} aria-hidden="true" style={`--foto: url("${src}")`}>
+  <span class="vitrina__luz"></span>
+  <div class="vitrina__escena">
+    <div class="vitrina__giro">
+      <img src={src} alt="" decoding="async" />
+      <span class="vitrina__brillo"></span>
+    </div>
+  </div>
+  <span class="vitrina__sombra"></span>
+</figure>
+
+<style>
+  .vitrina {
+    --ancho: 200px;
+    --alto: 270px;
+    --giro: 9s;
+    position: relative;
+    display: grid;
+    justify-items: center;
+    width: var(--ancho);
+    margin: 0;
+    /* Deja lugar abajo para la sombra del piso. */
+    padding-bottom: 18px;
+  }
+
+  .vitrina--chica {
+    --ancho: 118px;
+    --alto: 160px;
+  }
+
+  /* El halo tibio detrás del paquete: la luz de la vitrina. */
+  .vitrina__luz {
+    position: absolute;
+    inset: 8% -20% 18%;
+    background: radial-gradient(closest-side, rgb(242 196 139 / 0.16), transparent);
+    pointer-events: none;
+  }
+
+  .vitrina__escena {
+    width: var(--ancho);
+    height: var(--alto);
+    perspective: 900px;
+  }
+
+  .vitrina__giro {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    animation:
+      vitrina-giro var(--giro) ease-in-out infinite alternate,
+      vitrina-flota calc(var(--giro) / 2) ease-in-out infinite alternate;
+  }
+
+  .vitrina__giro img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 14px 18px rgb(0 0 0 / 0.45));
+  }
+
+  /* Un reflejo que cruza el paquete mientras gira. La máscara es la misma
+     foto: el brillo sólo cae sobre el paquete, no sobre el fondo
+     transparente alrededor. */
+  .vitrina__brillo {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      rgb(255 255 255 / 0.2) 46%,
+      rgb(255 255 255 / 0.06) 54%,
+      transparent 68%
+    );
+    background-size: 260% 100%;
+    mask: var(--foto) center / contain no-repeat;
+    -webkit-mask: var(--foto) center / contain no-repeat;
+    animation: vitrina-brillo var(--giro) ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+
+  .vitrina__sombra {
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    width: 70%;
+    height: 14px;
+    translate: -50% 0;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(0 0 0 / 0.55), transparent);
+    animation: vitrina-sombra var(--giro) ease-in-out infinite alternate;
+  }
+
+  @keyframes vitrina-giro {
+    from {
+      transform: rotateY(-24deg);
+    }
+    to {
+      transform: rotateY(24deg);
+    }
+  }
+
+  /* `translate` y no `transform`: así no pisa el giro. */
+  @keyframes vitrina-flota {
+    from {
+      translate: 0 0;
+    }
+    to {
+      translate: 0 -6px;
+    }
+  }
+
+  @keyframes vitrina-brillo {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: 0% 0;
+    }
+  }
+
+  /* De frente la sombra es más ancha; girado, el paquete ocupa menos. */
+  @keyframes vitrina-sombra {
+    0% {
+      scale: 0.9 1;
+    }
+    50% {
+      scale: 1 1;
+    }
+    100% {
+      scale: 0.9 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vitrina__giro,
+    .vitrina__brillo,
+    .vitrina__sombra {
+      animation: none;
+    }
+
+    .vitrina__giro {
+      transform: rotateY(-12deg);
+    }
+  }
+</style>

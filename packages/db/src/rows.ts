@@ -14,6 +14,8 @@ export type CoffeeRow = {
   body: number;
   aroma: number;
   finish: number;
+  /** Sólo en hopper_coffees: coffees no tiene foto propia. */
+  image_key?: string | null;
 };
 
 export type ProductRow = {
@@ -62,6 +64,8 @@ export type Coffee = {
   description?: string;
   roaster: string;
   profile: TastingProfile;
+  /** La foto del café en tolva (clave de R2). Los cafés de la tienda no tienen. */
+  imageKey?: string;
 };
 
 export type ProductOption = {
@@ -108,6 +112,7 @@ export function toCoffee(row: CoffeeRow): Coffee {
     tastingNotes: maybe(row.tasting_notes),
     description: maybe(row.description),
     roaster: row.roaster,
+    imageKey: maybe(row.image_key ?? null),
     profile: {
       acidity: row.acidity,
       sweetness: row.sweetness,
