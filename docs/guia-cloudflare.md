@@ -69,20 +69,24 @@ La base arranca vacía. Las tablas y el contenido de partida se cargan en el pas
 
 ## 5. El login del admin (Cloudflare Access)
 
-1. En el menú: **Zero Trust**. La primera vez pide un **nombre de equipo**: poné `falco` (si está
-   tomado, `falcocafe` o parecido) y elegí el plan **Free** (hasta 50 personas, sin cargo).
-   Ese nombre es el **`ACCESS_TEAM`**. Si no te acordás: **Settings** → **Custom Pages** →
-   "Team domain" dice `<nombre>.cloudflareaccess.com`; va sólo `<nombre>`.
-2. **Access** → **Applications** → **Add an application** → **Self-hosted**.
+1. En el menú: **Zero Trust** (ahora se llama **Cloudflare One**). La primera vez pide un
+   **nombre de equipo**: poné `falco` (si está tomado, `falcocafe` o parecido) y elegí el plan
+   **Free** (hasta 50 personas, sin cargo). Ese nombre es el **`ACCESS_TEAM`**. Si no te acordás:
+   en la portada de Cloudflare One, recuadro **Account details** → **Team name**.
+2. Activá el login por código al mail: **Settings** → **Authentication** → **Login methods** →
+   **Add new** → **One-time PIN** → guardar. (Si ya figura en la lista, no hace falta.)
+3. **Access controls** → **Applications** → **Add an application** → **Self-hosted**.
    - Application name: `Admin Falco`
    - Session duration: `1 month` (para no pedir el código a cada rato en el celular)
    - Public hostname: subdominio `admin`, dominio `falcocafe.com.ar`
-3. **Policy**: nombre `Nosotros`, acción **Allow**, regla **Include** → **Emails** → tu mail y el
+4. **Policy**: nombre `Nosotros`, acción **Allow**, regla **Include** → **Emails** → tu mail y el
    de tu pareja.
-4. Login methods: **One-time PIN** (viene activado). Es un código que llega al mail: no hay
-   contraseñas que recordar.
-5. Guardá. En la lista de aplicaciones, abrí `Admin Falco` → pestaña **Overview** →
-   **Application Audience (AUD) Tag**. Copialo: es el **`ACCESS_AUD`**.
+5. Pestaña **Login methods**: en la lista elegí **sólo One-time PIN** (no "Cloudflare") y prendé
+   **Apply instant authentication**. Es un código que llega al mail: no hay contraseñas que
+   recordar.
+6. Guardá. El **Application Audience (AUD) Tag** está en la aplicación, pestaña **Additional
+   settings** (arriba, al lado de "Application details"); si no, buscalo con Ctrl + F → `AUD`. Es
+   un texto de unos 64 caracteres. Copialo: es el **`ACCESS_AUD`**.
 
 > El admin revisa ese login **otra vez** en cada pedido (`apps/admin/src/auth.ts`). Si alguien
 > llegara al admin sin pasar por Access, o con el login de otra aplicación, recibe "No tenés
@@ -114,7 +118,7 @@ Pestaña **Secrets** → **New repository secret**, dos veces:
 Pestaña **Variables** → **New repository variable**, tres veces (la cuarta, en el paso 9):
 
 - `D1_DATABASE_ID` = el id del paso 4
-- `ACCESS_TEAM` = el nombre del equipo del paso 5 (sólo el nombre, sin `.cloudflareaccess.com`)
+- `ACCESS_TEAM` = el nombre del equipo del paso 5 (sólo el nombre, sin `.cloudflareaccess.com`; por ejemplo `falcocafe`)
 - `ACCESS_AUD` = el AUD del paso 5
 
 ## 8. La primera publicación
