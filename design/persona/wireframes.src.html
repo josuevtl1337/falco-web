@@ -2,7 +2,7 @@
 <html lang="es">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Falco · Wireframes v7.16</title>
+<title>Falco · Wireframes v7.17</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
@@ -1791,7 +1791,8 @@
     pointer-events: none;
   }
   .t-fondo svg,
-  .t-fondo img {
+  .t-fondo img,
+  .t-fondo video {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -2060,7 +2061,7 @@
 %%CARA_DEFS%%
 <div class="b-wrap">
   <header class="b-head">
-    <div class="b-eyebrow">Falco · café de santoto · wireframes v7.16</div>
+    <div class="b-eyebrow">Falco · café de santoto · wireframes v7.17</div>
     <h1>La Cueva, con acento Persona</h1>
     <p>
       Todas las vistas, en escritorio (1440 px) y en celular (390 px), con los
@@ -2106,10 +2107,10 @@
         por una, hasta su valor. Los números cuentan a la par.
       </p>
       <p class="b-note">
-        <b>La tolva de fondo</b>Detrás de "En tolva ahora", una foto real de la
-        tolva del E65S con granos de café en primer plano. Se oscurece hacia el
-        texto para que se lea; a la derecha se ve más, junto al paquete. Mientras
-        no esté la foto, un dibujo marca la composición.
+        <b>El molino de fondo</b>Detrás de "En tolva ahora", un video corto en
+        loop de un molino llenando el portafiltro, sin sonido y un poco más lento.
+        Se oscurece hacia el texto; a la derecha se ve más. En el celular, la
+        imagen quieta. Es un video de muestra: el final sería el E65S del local.
       </p>
     </div>
     <div>
@@ -3180,6 +3181,16 @@
         sec.querySelectorAll("[data-hud], svg.penta").forEach(play);
         sec.querySelectorAll(".cartel").forEach(prenderCartel);
       });
+    });
+
+    // ---- el video de la tolva: sólo corre en pantalla, y nunca con reducir movimiento ----
+    document.querySelectorAll("[data-tolva-video]").forEach(function (v) {
+      v.playbackRate = 0.8;
+      if (reduce) return;
+      if (!("IntersectionObserver" in window)) { v.play(); return; }
+      new IntersectionObserver(function (es) {
+        es.forEach(function (e) { e.isIntersecting ? v.play().catch(function () {}) : v.pause(); });
+      }, { threshold: 0.2 }).observe(v);
     });
 
     // ---- el cartel: volver a prenderlo ----

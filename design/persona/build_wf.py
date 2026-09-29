@@ -189,6 +189,22 @@ def fondo_tolva(ancho=720, alto=520, semilla=7):
     dibujo que la reemplaza con la misma composición: la tolva desenfocada a la
     derecha y los granos nítidos abajo.
     """
+    # Primero el video (un molino moliendo, en loop), con su primer cuadro de
+    # póster. En la tarjeta chica del celular va sólo el póster: sin datos de más.
+    video, poster = HERE / "tolva-fondo.mp4", HERE / "tolva-fondo-poster.jpg"
+    if video.exists() and poster.exists():
+        p64 = base64.b64encode(poster.read_bytes()).decode()
+        if ancho < 480:
+            return f'<div class="t-fondo"><img src="data:image/jpeg;base64,{p64}" alt=""></div>'
+        v64 = base64.b64encode(video.read_bytes()).decode()
+        webm = HERE / "tolva-fondo.webm"
+        w = f'<source src="data:video/webm;base64,{base64.b64encode(webm.read_bytes()).decode()}" type="video/webm">' if webm.exists() else ""
+        return (
+            '<div class="t-fondo">'
+            f'<video data-tolva-video muted loop playsinline preload="auto" poster="data:image/jpeg;base64,{p64}">'
+            f'{w}<source src="data:video/mp4;base64,{v64}" type="video/mp4"></video>'
+            '<span class="t-fondo-tag">Video de muestra · molino moliendo (Coverr)</span></div>'
+        )
     for ext, mime in (("jpg", "image/jpeg"), ("jpeg", "image/jpeg"), ("webp", "image/webp"), ("png", "image/png")):
         f = HERE / f"tolva-fondo.{ext}"
         if f.exists():
