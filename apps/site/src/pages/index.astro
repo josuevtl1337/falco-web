@@ -911,7 +911,14 @@ const cafe = cafeJsonLd({
      * La lámina: gap 22px, padding 26px 22px.
      */
     .home {
-      gap: clamp(12px, 2.6dvh, 22px);
+      /* En un teléfono más alto que la lámina (un iPhone Pro o Pro Max) el
+         aire de más se reparte entre los bloques, en vez de quedar todo abajo:
+         cada píxel de alto por encima de la lámina suma 0,2px a cada hueco.
+         Abajo queda siempre lo que ocupa la barra de "Tu pedido". */
+      gap: min(
+        48px,
+        calc(clamp(12px, 2.6dvh, 22px) + max(0px, (100dvh - 754px) * 0.2))
+      );
       padding: clamp(14px, 3.1dvh, 26px) 22px;
     }
 
