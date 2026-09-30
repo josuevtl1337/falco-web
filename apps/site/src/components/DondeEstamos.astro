@@ -143,6 +143,16 @@ const dm = instagramDmUrl(instagramUrl);
 
   .donde__mapa {
     aspect-ratio: 620 / 430;
+    /* El mapa se pega a los bordes de su caja en vez de medir height: 100%.
+       Safari en iOS no resuelve ese porcentaje dentro de una caja flexible
+       (la del celular, flex: 1 1 0): el plano tomaba su alto natural y se
+       desbordaba encima de los horarios. */
+    position: relative;
+  }
+
+  .donde__mapa > :global(.mapa) {
+    position: absolute;
+    inset: 0;
   }
 
   .donde__acciones {

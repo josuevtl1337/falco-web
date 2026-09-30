@@ -163,6 +163,84 @@ def e65s():
             "<figcaption>Mahlkönig E65S</figcaption></figure>")
 
 
+def _granos(n, ancho, alto, semilla):
+    """Granos de café tostado en primer plano: elipses con la raya del medio."""
+    import random
+    r = random.Random(semilla)
+    out = []
+    for _ in range(n):
+        x, y = r.uniform(-20, ancho + 20), r.uniform(alto * 0.62, alto + 10)
+        e = 0.55 + (y - alto * 0.62) / (alto * 0.5)          # más cerca, más grande
+        rx, ry, a = 17 * e, 12 * e, r.uniform(0, 180)
+        tono = r.choice(["#3b2519", "#4a2e1d", "#2e1c13", "#553522"])
+        out.append(
+            f'<g transform="translate({x:.0f} {y:.0f}) rotate({a:.0f})">'
+            f'<ellipse rx="{rx:.1f}" ry="{ry:.1f}" fill="{tono}"/>'
+            f'<ellipse rx="{rx*0.8:.1f}" ry="{ry*0.55:.1f}" cx="{-rx*0.15:.1f}" cy="{-ry*0.25:.1f}" fill="#f2c48b" opacity=".10"/>'
+            f'<path d="M{-rx*0.75:.1f} 0 Q0 {ry*0.35:.1f} {rx*0.75:.1f} 0" stroke="#1a100a" stroke-width="{1.6*e:.1f}" fill="none"/></g>'
+        )
+    return "".join(out)
+
+
+def fondo_tolva(ancho=720, alto=520, semilla=7):
+    """La foto de fondo de "En tolva ahora": la tolva del E65S con granos adelante.
+
+    Si está design/persona/tolva-fondo.(jpg|webp|png), usa esa foto. Si no, un
+    dibujo que la reemplaza con la misma composición: la tolva desenfocada a la
+    derecha y los granos nítidos abajo.
+    """
+    # Primero el video (un molino moliendo, en loop), con su primer cuadro de
+    # póster. En la tarjeta chica del celular va sólo el póster: sin datos de más.
+    video, poster = HERE / "tolva-fondo.mp4", HERE / "tolva-fondo-poster.jpg"
+    if video.exists() and poster.exists():
+        p64 = base64.b64encode(poster.read_bytes()).decode()
+        if ancho < 480:
+            return f'<div class="t-fondo"><img src="data:image/jpeg;base64,{p64}" alt=""></div>'
+        v64 = base64.b64encode(video.read_bytes()).decode()
+        webm = HERE / "tolva-fondo.webm"
+        w = f'<source src="data:video/webm;base64,{base64.b64encode(webm.read_bytes()).decode()}" type="video/webm">' if webm.exists() else ""
+        return (
+            '<div class="t-fondo">'
+            f'<video data-tolva-video muted loop playsinline preload="auto" poster="data:image/jpeg;base64,{p64}">'
+            f'{w}<source src="data:video/mp4;base64,{v64}" type="video/mp4"></video>'
+            '<span class="t-fondo-tag">Video de muestra · molino moliendo (Coverr)</span></div>'
+        )
+    for ext, mime in (("jpg", "image/jpeg"), ("jpeg", "image/jpeg"), ("webp", "image/webp"), ("png", "image/png")):
+        f = HERE / f"tolva-fondo.{ext}"
+        if f.exists():
+            data = base64.b64encode(f.read_bytes()).decode()
+            return f'<div class="t-fondo"><img src="data:{mime};base64,{data}" alt=""></div>'
+    svg = f"""<svg viewBox="0 0 {ancho} {alto}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs>
+    <radialGradient id="tf-luz" cx="74%" cy="22%" r="65%"><stop offset="0" stop-color="#b98458"/><stop offset=".5" stop-color="#4a3424"/><stop offset="1" stop-color="#1c1a19"/></radialGradient>
+    <linearGradient id="tf-vidrio" x1="0" x2="1"><stop offset="0" stop-color="#e8e2d0" stop-opacity=".25"/><stop offset=".25" stop-color="#fff6e6" stop-opacity=".6"/><stop offset=".5" stop-color="#e8e2d0" stop-opacity=".15"/><stop offset=".85" stop-color="#fff6e6" stop-opacity=".45"/><stop offset="1" stop-color="#e8e2d0" stop-opacity=".2"/></linearGradient>
+    <filter id="tf-lejos"><feGaussianBlur stdDeviation="3.5"/></filter>
+    <filter id="tf-cerca"><feGaussianBlur stdDeviation=".6"/></filter>
+  </defs>
+  <rect width="{ancho}" height="{alto}" fill="url(#tf-luz)"/>
+  <g filter="url(#tf-lejos)">
+    <!-- la tolva: tapa, vidrio con granos adentro, cuello y el cuerpo del molino -->
+    <rect x="{ancho*0.56:.0f}" y="-10" width="{ancho*0.36:.0f}" height="30" rx="6" fill="#141414"/>
+    <path d="M{ancho*0.55:.0f} 18 L{ancho*0.93:.0f} 18 L{ancho*0.8:.0f} {alto*0.42:.0f} L{ancho*0.68:.0f} {alto*0.42:.0f} Z" fill="url(#tf-vidrio)" stroke="#e8e2d0" stroke-opacity=".35" stroke-width="2"/>
+    <path d="M{ancho*0.585:.0f} {alto*0.12:.0f} L{ancho*0.9:.0f} {alto*0.12:.0f} L{ancho*0.8:.0f} {alto*0.42:.0f} L{ancho*0.68:.0f} {alto*0.42:.0f} Z" fill="#6b4128" opacity=".95"/>
+    <rect x="{ancho*0.67:.0f}" y="{alto*0.42:.0f}" width="{ancho*0.14:.0f}" height="{alto*0.1:.0f}" fill="#1a1a1a"/>
+    <rect x="{ancho*0.56:.0f}" y="{alto*0.51:.0f}" width="{ancho*0.38:.0f}" height="{alto*0.5:.0f}" rx="10" fill="#202020"/>
+  </g>
+  <g filter="url(#tf-cerca)">{_granos(170, ancho, alto, semilla)}</g>
+</svg>"""
+    return f'<div class="t-fondo">{svg}<span class="t-fondo-tag">Foto real · tolva del E65S con granos adelante</span></div>'
+
+
+def vitrina():
+    """El paquete del café en tolva, como hoy en el sitio (Vitrina.astro)."""
+    f = HERE.parent / "marca" / "paquete-ejemplo.png"
+    if f.exists():
+        data = base64.b64encode(f.read_bytes()).decode()
+        return (f'<figure class="vitrina-wf"><img src="data:image/png;base64,{data}" alt="">'
+                "<figcaption>El paquete · gira en la vitrina</figcaption></figure>")
+    return '<figure class="vitrina-wf"><div class="e65s-slot"><b>El paquete</b><span>Foto del café en tolva</span></div></figure>'
+
+
 HOY = '<span class="plate hoy-tag"><span>Hoy</span></span>'
 ROWS = f"""<div class="rows">
   <div data-days="1,2,3,4,5,6"><span class="k">Lunes a sábado {HOY}</span><span class="v">[08:00] — [20:00]</span></div>
@@ -256,6 +334,9 @@ def main():
         .replace("%%TICKER_TOLVA%%", TICKER_TOLVA)
         .replace("%%PENTA%%", PENTA)
         .replace("%%E65S%%", e65s())
+        .replace("%%FONDO_TOLVA%%", fondo_tolva(525, 610, 7))
+        .replace("%%FONDO_TOLVA_M%%", fondo_tolva(400, 240, 3))
+        .replace("%%VITRINA%%", vitrina())
         .replace("%%HUD_ADDR%%", hud(addr=True))
         .replace("%%HUD_SM%%", hud(small=True))
         .replace("%%ROWS_M%%", ROWS_M)

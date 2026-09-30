@@ -144,8 +144,11 @@ const path = Astro.url.pathname;
   });
 
   import { conectarSeccionActiva } from "../scripts/seccion-activa";
+  import { conectarIrASeccion } from "../scripts/ir-a-seccion";
 
   conectarSeccionActiva();
+  // La tienda y "Dónde estamos" bajan suave, sin "#" en la dirección.
+  conectarIrASeccion();
 </script>
 
 <style>

@@ -2,7 +2,7 @@
 <html lang="es">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Falco · Wireframes v7.15</title>
+<title>Falco · Wireframes v7.17</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
@@ -1782,6 +1782,84 @@
     }
   }
 
+
+  /* ---- v7.16: la foto de la tolva detrás de "En tolva ahora" ---- */
+  .t-fondo {
+    position: absolute !important;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .t-fondo svg,
+  .t-fondo img,
+  .t-fondo video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 70% 60%;
+    display: block;
+  }
+  /* El texto va a la izquierda: ahí la foto se oscurece hasta el carbón; a la
+     derecha, donde está el paquete, se ve más. Abajo también baja, para el pie. */
+  .t-fondo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(60% 45% at 78% 18%, rgba(41, 42, 44, 0) 0%, rgba(41, 42, 44, 0.35) 100%),
+      linear-gradient(115deg, rgba(41, 42, 44, 0.95) 0%, rgba(41, 42, 44, 0.82) 40%, rgba(41, 42, 44, 0.12) 100%),
+      linear-gradient(0deg, rgba(35, 36, 38, 0.9) 0%, rgba(35, 36, 38, 0) 30%);
+  }
+  .t-fondo-tag {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    z-index: 1;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--hueso);
+    background: rgba(30, 31, 33, 0.75);
+    border: 1px dashed rgba(232, 226, 208, 0.35);
+    padding: 5px 8px;
+  }
+  .tolva > :not(.t-fondo),
+  .t-mini > :not(.t-fondo) {
+    position: relative;
+    z-index: 1;
+  }
+  .t-mini {
+    position: relative;
+    overflow: hidden;
+  }
+  .t-mini .t-fondo-tag {
+    display: none;
+  }
+  .vitrina-wf {
+    margin: 0;
+    display: grid;
+    justify-items: center;
+    align-self: center;
+    gap: 8px;
+  }
+  .vitrina-wf img {
+    width: 150px;
+    rotate: -8deg;
+    transform: perspective(600px) rotateY(-18deg);
+    filter: drop-shadow(0 16px 18px rgba(0, 0, 0, 0.55));
+  }
+  .m-slot .vitrina-wf img {
+    width: 96px;
+  }
+  .vitrina-wf figcaption {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ceniza);
+  }
+
   /* ---- el cartel: la cara del murciélago como neón (v7.11) ---- */
   /* En la barra cuelga: arranca arriba y pasa el borde de abajo, como un
      cartel colgado del techo. */
@@ -1983,7 +2061,7 @@
 %%CARA_DEFS%%
 <div class="b-wrap">
   <header class="b-head">
-    <div class="b-eyebrow">Falco · café de santoto · wireframes v7.15</div>
+    <div class="b-eyebrow">Falco · café de santoto · wireframes v7.17</div>
     <h1>La Cueva, con acento Persona</h1>
     <p>
       Todas las vistas, en escritorio (1440 px) y en celular (390 px), con los
@@ -2029,8 +2107,10 @@
         por una, hasta su valor. Los números cuentan a la par.
       </p>
       <p class="b-note">
-        <b>E65S</b>Foto real del molino del local, quieta. Mientras no esté la
-        foto, queda el lugar marcado.
+        <b>El molino de fondo</b>Detrás de "En tolva ahora", un video corto en
+        loop de un molino llenando el portafiltro, sin sonido y un poco más lento.
+        Se oscurece hacia el texto; a la derecha se ve más. En el celular, la
+        imagen quieta. Es un video de muestra: el final sería el E65S del local.
       </p>
     </div>
     <div>
@@ -2090,6 +2170,7 @@
               class="tolva r"
               style="padding: 28px 30px 26px; gap: 22px; animation-delay: 0.55s"
             >
+              %%FONDO_TOLVA%%
               <div>
                 <span class="plate hi"><span>En tolva ahora</span></span>
               </div>
@@ -2114,7 +2195,7 @@
                     <p class="info-v">Puerto Blest</p>
                   </div>
                 </div>
-                %%E65S%%
+                %%VITRINA%%
               </div>
               <div class="t-foot">
                 <span>Cambia cada vez que cambiamos el grano</span
@@ -2143,6 +2224,7 @@
             %%HUD_SM%%
             <div class="h-m" style="font-size:56px"><div class="w" style="animation-delay:.3s">café de</div><div class="w" style="animation-delay:.45s">santoto</div></div>
             <div class="t-mini">
+              %%FONDO_TOLVA_M%%
               <button class="t-mini-open" type="button" data-sheet aria-label="Ver el detalle del café en tolva">
                 <span class="t-mini-info">
                   <span class="plate hi"><span>En tolva ahora</span></span>
@@ -2179,7 +2261,7 @@
                 <div><span class="lbl">Origen</span><p class="info-v" style="font-size:15px">[Finca La Esperanza]<br>[Huila, Colombia]</p><p class="info-s">[Caturra] · [Lavado] · [1.750 msnm]</p></div>
                 <div><span class="lbl">Tostadero</span><p class="info-v" style="font-size:15px">Puerto Blest</p></div>
               </div>
-              <div class="m-slot">%%E65S%%</div>
+              <div class="m-slot">%%VITRINA%%</div>
             </div>
             <div><span class="lbl">A qué sabe</span>%%PENTA%%</div>
             <a class="btn a" href="#v-tienda" style="justify-self:start"><span>Llevate un cuarto</span></a>
@@ -3099,6 +3181,16 @@
         sec.querySelectorAll("[data-hud], svg.penta").forEach(play);
         sec.querySelectorAll(".cartel").forEach(prenderCartel);
       });
+    });
+
+    // ---- el video de la tolva: sólo corre en pantalla, y nunca con reducir movimiento ----
+    document.querySelectorAll("[data-tolva-video]").forEach(function (v) {
+      v.playbackRate = 0.8;
+      if (reduce) return;
+      if (!("IntersectionObserver" in window)) { v.play(); return; }
+      new IntersectionObserver(function (es) {
+        es.forEach(function (e) { e.isIntersecting ? v.play().catch(function () {}) : v.pause(); });
+      }, { threshold: 0.2 }).observe(v);
     });
 
     // ---- el cartel: volver a prenderlo ----
