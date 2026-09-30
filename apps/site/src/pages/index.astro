@@ -166,7 +166,7 @@ const cafe = cafeJsonLd({
       </header>
 
       <section class="presentacion zona-texto">
-        <h1 class="hero"><span>café de</span><span>santoto</span></h1>
+        <h1 class="hero">café de santoto</h1>
         <!-- Solo en tablet y escritorio: en el celular no se muestra. -->
         <p class="bajada">Hacemos el cafe que nos gusta tomar.</p>
         <!--
@@ -175,12 +175,14 @@ const cafe = cafeJsonLd({
         raíz de <Dialogo>, que lleva el scope de su propio componente.
       -->
         <div class="zona-cita">
-          <Dialogo>
-            <p>
-              Nuestra misión siempre fue la misma: traer el mundo del café a
-              Santo Tomé.
-            </p>
-          </Dialogo>
+          <a href="#tienda">
+            <Dialogo>
+              <p>
+                Nuestra misión siempre fue la misma: traer el mundo del café a
+                Santo Tomé. →
+              </p>
+            </Dialogo>
+          </a>
         </div>
       </section>
 
@@ -251,10 +253,9 @@ const cafe = cafeJsonLd({
                   Ver cómo es ›
                 </button>
               </div>
-
-              <div class="tolva-mini__penta">
-                <Pentagono profile={coffee.profile} labels={false} />
-              </div>
+              {coffee.imageKey && (
+                <Vitrina imageKey={coffee.imageKey} size="chica" />
+              )}
             </div>
 
             <a class="boton" href="#tienda">
@@ -878,7 +879,7 @@ const cafe = cafeJsonLd({
      celular en un teléfono de 740px de alto y lo agrandaría. */
   @media (min-width: 641px) and (max-height: 820px) {
     .hero {
-      font-size: min(21cqw, 10dvh);
+      font-size: min(18cqw, 10dvh);
     }
 
     .bajada {
@@ -915,10 +916,10 @@ const cafe = cafeJsonLd({
          aire de más se reparte entre los bloques, en vez de quedar todo abajo:
          cada píxel de alto por encima de la lámina suma 0,2px a cada hueco.
          Abajo queda siempre lo que ocupa la barra de "Tu pedido". */
-      gap: min(
+      /* gap: min(
         48px,
         calc(clamp(12px, 2.6dvh, 22px) + max(0px, (100dvh - 754px) * 0.2))
-      );
+      ); */
       padding: clamp(14px, 3.1dvh, 26px) 22px;
     }
 
@@ -959,9 +960,10 @@ const cafe = cafeJsonLd({
     .hero {
       order: 2;
       /* Lámina: 56px, interlineado 0,92 y -2,52px de tracking (-0,045em). */
-      font-size: min(14.4vw, 6.6dvh);
+      font-size: min(12vw, 6.6dvh);
       line-height: 0.92;
       letter-spacing: -0.045em;
+      justify-self: center;
     }
 
     .tolva-mini {
@@ -981,6 +983,7 @@ const cafe = cafeJsonLd({
     }
 
     .zona-cita {
+      padding-top: var(--space-md);
       order: 5;
     }
 
