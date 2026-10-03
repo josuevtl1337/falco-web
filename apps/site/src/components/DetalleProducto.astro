@@ -24,6 +24,7 @@ const porDefecto = disponibles[0]?.id;
 // Tiene moliendas y ninguna tiene stock: no hay nada que sumar. Sin esto el
 // botón seguía andando y sumaba el producto sin molienda.
 const sinStock = product.options.length > 0 && disponibles.length === 0;
+import TextoConFormato from "./TextoConFormato.astro";
 ---
 
 <div
@@ -52,7 +53,7 @@ const sinStock = product.options.length > 0 && disponibles.length === 0;
     <p class="detalle__meta">{product.detail}</p>
   </div>
 
-  {product.description && <p class="detalle__texto">{product.description}</p>}
+  {product.description && <TextoConFormato texto={product.description} />}
 
   {coffee && <Pentagono profile={coffee.profile} />}
 
@@ -154,12 +155,6 @@ const sinStock = product.options.length > 0 && disponibles.length === 0;
     color: var(--color-ceniza);
   }
 
-  .detalle__texto {
-    margin: 0;
-    font-size: 15px;
-    line-height: 1.5;
-    color: rgb(179, 180, 182);
-  }
 
   .detalle__opciones {
     margin: 0;
