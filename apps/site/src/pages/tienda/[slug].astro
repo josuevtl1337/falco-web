@@ -5,6 +5,7 @@ import Base from "../../layouts/Base.astro";
 import Nav from "../../components/Nav.astro";
 import BarraPedido from "../../components/BarraPedido.astro";
 import DetalleProducto from "../../components/DetalleProducto.astro";
+import { textoPlano } from "../../components/texto";
 
 const { slug } = Astro.params;
 const product = slug ? await getProductBySlug(env.DB, slug) : undefined;
@@ -31,7 +32,7 @@ const shelfLabel = product.shelf === "coffee" ? "Café" : "Kits y accesorios";
 -->
 <Base
   title={`${product.name} · Falco`}
-  description={product.description ?? product.detail}
+  description={product.description ? textoPlano(product.description) : product.detail}
   image={product.imageKey ? `/fotos/${product.imageKey}` : undefined}
 >
   <Nav slot="nav" />

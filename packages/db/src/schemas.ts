@@ -144,7 +144,7 @@ export const productInputSchema = z
       .transform((value) => value ?? undefined),
     name: requiredText(60),
     detail: requiredText(80),
-    description: optionalText(600),
+    description: optionalText(2000),
     priceCardArs: z
       .number({ invalid_type_error: "Poné el precio en pesos, sin centavos." })
       .int("Poné el precio en pesos, sin centavos.")
