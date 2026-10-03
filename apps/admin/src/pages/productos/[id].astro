@@ -109,7 +109,14 @@ const esRopa = valores.kind === "apparel";
     </div>
     <p class="nota aviso-precio" data-aviso-precio hidden>¿Seguro? Con tarjeta sale menos que en efectivo.</p>
 
-    <Campo etiqueta="Descripción (opcional)" name="description" value={valores.description} error={errores.description} largo />
+    <Campo
+      etiqueta="Descripción (opcional)"
+      name="description"
+      value={valores.description}
+      error={errores.description}
+      largo
+      ayuda="Cada renglón es un párrafo. Para una lista, empezá el renglón con un guion: - Dripper de vidrio. Para negrita, entre dos asteriscos: **Control total**."
+    />
 
     <div class="interruptores">
       <label class="tog"><span><b>Visible en la tienda</b><small>Apagado, no aparece en el sitio.</small></span><input class="sw" type="checkbox" name="isVisible" checked={valores.isVisible} /></label>

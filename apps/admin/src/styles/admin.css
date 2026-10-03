@@ -452,6 +452,10 @@ textarea.input {
   min-height: 88px;
   padding-block: 10px;
   resize: vertical;
+  /* Crece con lo que se escribe (una descripción con lista es larga); donde
+     el navegador no lo sabe hacer, queda el alto mínimo y se estira a mano. */
+  field-sizing: content;
+  max-height: 70vh;
 }
 
 .input[aria-invalid="true"] {

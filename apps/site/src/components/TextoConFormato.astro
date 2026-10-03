@@ -1,0 +1,57 @@
+---
+import { bloques } from "./texto";
+
+/** La descripción de un producto: párrafos, listas y negritas (texto.ts). */
+interface Props {
+  texto: string;
+}
+
+const lista = bloques(Astro.props.texto);
+---
+
+<div class="texto">
+  {
+    lista.map((b) =>
+      b.tipo === "parrafo" ? (
+        <p>{b.partes.map((p) => (p.negrita ? <strong>{p.texto}</strong> : p.texto))}</p>
+      ) : (
+        <ul>
+          {b.items.map((item) => (
+            <li>{item.map((p) => (p.negrita ? <strong>{p.texto}</strong> : p.texto))}</li>
+          ))}
+        </ul>
+      ),
+    )
+  }
+</div>
+
+<style>
+  .texto {
+    display: grid;
+    gap: 10px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: rgb(179, 180, 182);
+  }
+
+  .texto p,
+  .texto ul {
+    margin: 0;
+  }
+
+  .texto ul {
+    display: grid;
+    gap: 6px;
+    padding-left: 1.1em;
+  }
+
+  /* La viñeta en brasa, como el resto de los acentos de la tienda. */
+  .texto li::marker {
+    color: var(--color-brasa);
+  }
+
+  .texto strong {
+    font-weight: 600;
+    color: var(--color-hueso);
+  }
+</style>
