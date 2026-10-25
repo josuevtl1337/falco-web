@@ -74,12 +74,14 @@ const { product, shelfLabel, copy = false } = Astro.props;
        horizontal, no en una grilla que las estire. */
     width: 250px;
     flex: none;
+    /* La cara se estira al alto de la ficha, que en el riel es el de la más
+       alta de la fila: todas miden lo mismo. */
+    display: grid;
   }
 
   .ficha__cara {
     display: grid;
-    height: 100%;
-    align-content: start;
+    grid-template-rows: auto 1fr;
     text-decoration: none;
     color: var(--color-hueso);
     background: linear-gradient(168deg, var(--color-piedra), rgb(35, 36, 38));
@@ -120,8 +122,11 @@ const { product, shelfLabel, copy = false } = Astro.props;
     );
   }
 
+  /* El renglón del detalle se come el alto que sobra: así el precio queda
+     al pie en todas las fichas, tenga el nombre uno o dos renglones. */
   .ficha__cuerpo {
     display: grid;
+    grid-template-rows: auto auto 1fr auto auto;
     gap: 6px;
     padding: 16px 18px 14px;
   }
@@ -143,6 +148,7 @@ const { product, shelfLabel, copy = false } = Astro.props;
   }
 
   .ficha__detalle {
+    align-self: start;
     font-size: 13px;
     color: var(--color-ceniza);
   }

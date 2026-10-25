@@ -169,11 +169,13 @@ const shelvesWithRail = shelves.map((shelf, index) => {
   import { conectarPaneles } from "../scripts/paneles";
   import { conectarPantallaDePedido } from "../scripts/pedido-pantalla";
   import { conectarPedido } from "../scripts/pedido";
+  import { conectarRielTactil } from "../scripts/riel-tactil";
 
   conectarPaneles();
   conectarPantallaDePedido();
   conectarPedido();
   conectarBarraDePedido();
+  conectarRielTactil();
 </script>
 
 <style>
@@ -318,6 +320,9 @@ const shelvesWithRail = shelves.map((shelf, index) => {
    * donde arranca la copia.
    */
   .riel__tanda li {
+    /* flex para que la ficha se estire al alto de la fila: con un nombre de
+       dos renglones al lado, las de uno quedaban más bajas. */
+    display: flex;
     margin-right: 22px;
   }
 
@@ -337,10 +342,9 @@ const shelvesWithRail = shelves.map((shelf, index) => {
   }
 
   /*
-   * El movimiento va sólo donde hay puntero fino: en una pantalla táctil la
-   * ficha se corre debajo del dedo justo cuando vas a tocarla, y no hay "pasar
-   * el mouse" para frenarla. Ahí el riel se arrastra a mano, que es lo que la
-   * gente espera de una fila de productos en el celular.
+   * La animación va sólo donde hay puntero fino, que frena con el mouse
+   * encima. En una pantalla táctil el riel se mueve por el scroll (ver más
+   * abajo), así frena al tocarlo y se puede arrastrar.
    */
   @media (hover: hover) and (pointer: fine) {
     .riel--anda .riel__pista {
@@ -359,22 +363,26 @@ const shelvesWithRail = shelves.map((shelf, index) => {
     }
   }
 
-  /* Sin puntero fino (o sin riel que se mueva) la fila se arrastra con el
-     dedo, y la copia sobra: sería el catálogo repetido. */
-  @media (hover: none), (pointer: coarse) {
-    .riel__copia {
-      display: none;
-    }
-  }
-
   /* Un estante que no se mueve se arrastra a mano, siempre. */
   .riel:not(.riel--anda) {
     overflow-x: auto;
   }
 
+  /*
+   * En una pantalla táctil el riel también anda, pero no con la animación:
+   * una fila movida con `transform` no se arrastra con el dedo. Ahí lo mueve
+   * riel-tactil.ts por el scroll, así anda solo y además se desliza a mano.
+   * La copia queda, porque el bucle la necesita igual que en la compu.
+   */
   @media (hover: none), (pointer: coarse) {
     .riel {
       overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+
+    .riel::-webkit-scrollbar {
+      display: none;
     }
   }
 
