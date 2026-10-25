@@ -1,11 +1,10 @@
 ---
 import type { Coffee, ProductWithOptions } from "@falco/db";
 import { formatArs, ORDER_LIMITS } from "@falco/domain";
-import Pentagono from "./Pentagono.astro";
 
 interface Props {
   product: ProductWithOptions;
-  /** El café del producto, si lo tiene: de ahí sale el perfil de cata. */
+  /** El café del producto, si lo tiene: de ahí sale el país del cartel. */
   coffee?: Coffee;
   shelfLabel: string;
   /** En el modal el título es un h2; en su propia página, el h1. */
@@ -53,10 +52,6 @@ import TextoConFormato from "./TextoConFormato.astro";
     <p class="detalle__meta">{product.detail}</p>
   </div>
 
-  {product.description && <TextoConFormato texto={product.description} />}
-
-  {coffee && <Pentagono profile={coffee.profile} />}
-
   {
     product.options.length > 0 && (
       <fieldset class="detalle__opciones">
@@ -79,6 +74,9 @@ import TextoConFormato from "./TextoConFormato.astro";
     )
   }
 
+  <!-- Precio, cantidad y el botón: en una pantalla baja quedan pegados abajo
+       del panel mientras se scrollea, así sumar nunca obliga a buscar. -->
+  <div class="detalle__accion">
   <div class="detalle__compra">
     <p class="detalle__precio">
       <span>{formatArs(product.priceCashArs)} efectivo</span>
@@ -113,21 +111,36 @@ import TextoConFormato from "./TextoConFormato.astro";
         : "El stock se confirma por WhatsApp antes de retirar"
     }
   </p>
+  </div>
+
+  <!-- La ficha (origen, notas, productor) va después de la compra: quien
+       quiere pedir no tiene que scrollear por encima de ella. -->
+  {
+    product.description && (
+      <section class="detalle__ficha" aria-label="Ficha del producto">
+        <span class="detalle__meta">Ficha</span>
+        <TextoConFormato texto={product.description} />
+      </section>
+    )
+  }
 </div>
 
 <style>
+  /* 16:10, el formato de las fotos de la tienda: entran enteras y ocupan
+     menos alto, así la compra queda a la vista sin scrollear. */
   .detalle__foto {
     display: block;
     width: 100%;
-    max-height: 280px;
-    aspect-ratio: 4 / 3;
+    /* En una pantalla baja (notebook, iPhone SE) la foto cede alto. */
+    max-height: min(260px, 30dvh);
+    aspect-ratio: 16 / 10;
     object-fit: cover;
     border: 1px solid rgba(232, 226, 208, 0.12);
   }
 
   .detalle {
     display: grid;
-    gap: var(--space-lg);
+    gap: var(--space-md);
     justify-items: start;
     align-content: start;
   }
@@ -260,6 +273,74 @@ import TextoConFormato from "./TextoConFormato.astro";
 
   .detalle__sumar {
     width: 100%;
+  }
+
+  /*
+   * El bloque de compra. sticky + bottom: si el panel es más bajo que el
+   * detalle, queda fijo abajo mientras se scrollea; cuando su lugar entra en
+   * pantalla, vuelve a él. En una pantalla alta nunca se despega.
+   */
+  .detalle__accion {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: grid;
+    gap: var(--space-md);
+    width: 100%;
+    padding-block: var(--space-sm) var(--space-sm);
+    background: var(--color-carbon);
+    /* La ficha pasa por debajo: un degradé arriba en vez de un corte seco. */
+    box-shadow: 0 -18px 18px -6px var(--color-carbon);
+  }
+
+  /* En un teléfono bajo (iPhone SE) el bloque fijo se compacta: precio y
+     cantidad en un renglón, y la foto cede más alto para que la molienda se
+     vea sin scrollear. */
+  @media (max-height: 700px) and (max-width: 640px) {
+    .detalle {
+      gap: 12px;
+    }
+
+    .detalle__foto {
+      max-height: 17dvh;
+    }
+
+    .detalle__compra {
+      flex-wrap: nowrap;
+    }
+
+    .detalle__precio span:first-child {
+      font-size: 15px;
+    }
+
+    .detalle__accion {
+      gap: var(--space-sm);
+      padding-top: 4px;
+    }
+
+    .detalle__aviso {
+      letter-spacing: 0.04em;
+    }
+
+    /* "Elegí cómo lo querés": los botones ya lo dicen. Se oculta a la vista,
+       no al lector de pantalla. */
+    .detalle__opciones legend {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+
+  .detalle__ficha {
+    display: grid;
+    gap: var(--space-sm);
+    width: 100%;
+    margin-top: var(--space-sm);
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(232, 226, 208, 0.1);
   }
 
   .detalle__aviso {
