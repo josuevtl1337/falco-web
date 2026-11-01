@@ -4,9 +4,8 @@
  * primero que mira quien ya conoce los tostaderos, así que va encima de la
  * foto, en hueso para que no se pierda contra la placa tostada.
  *
- * En la ficha va abajo a la izquierda y sólo con el nombre: arriba está la
- * estrella de "Nuevo" y al medio el paquete. En el detalle hay lugar para
- * decir "Tostadero" y va arriba.
+ * En la ficha va en el cuerpo, abajo del peso, y sólo con el nombre. En el
+ * detalle va sobre la esquina de la foto y dice "Tostadero".
  */
 interface Props {
   roaster: string;
@@ -22,9 +21,6 @@ const { roaster, place } = Astro.props;
 
 <style>
   .sello-tostadero {
-    position: absolute;
-    left: 14px;
-    z-index: 2;
     gap: 6px;
     color: var(--color-carbon);
     pointer-events: none;
@@ -35,23 +31,18 @@ const { roaster, place } = Astro.props;
     box-shadow: 3px 3px 0 var(--color-tostado);
   }
 
+  /* El plato inclinado sobresale a la izquierda: el margen lo deja
+     alineado con el texto de la ficha. */
   .sello-tostadero--ficha {
-    bottom: 12px;
-  }
-
-  /* En el celular la foto de la ficha es más baja: el sello se achica para
-     no tapar el paquete. */
-  @media (max-width: 640px) {
-    .sello-tostadero--ficha {
-      bottom: 8px;
-      left: 10px;
-      padding: 4px var(--space-sm) 3px 6px;
-      font-size: 9px;
-    }
+    align-self: flex-start;
+    margin-left: 4px;
   }
 
   .sello-tostadero--detalle {
+    position: absolute;
     top: 12px;
+    left: 14px;
+    z-index: 2;
   }
 
   .sello-tostadero__etiqueta {
