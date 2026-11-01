@@ -2,6 +2,7 @@
 import type { ProductWithOptions } from "@falco/db";
 import { formatArs } from "@falco/domain";
 import { NEW_BADGE_STAR } from "./estrella";
+import SelloTostadero from "./SelloTostadero.astro";
 
 interface Props {
   product: ProductWithOptions;
@@ -12,9 +13,11 @@ interface Props {
    * de lo que se ve en pantalla es la copia), pero el tabulador la saltea.
    */
   copy?: boolean;
+  /** El tostadero, si el producto es un café: va sobre la foto. */
+  roaster?: string;
 }
 
-const { product, shelfLabel, copy = false } = Astro.props;
+const { product, shelfLabel, copy = false, roaster } = Astro.props;
 ---
 
 <article class="ficha">
@@ -37,10 +40,17 @@ const { product, shelfLabel, copy = false } = Astro.props;
     <!-- El hueco de la foto. Sin foto, en la lámina este espacio es un
          degradado con una luz arriba, que se lee como algo puesto a propósito
          y no como una imagen rota. Con foto, la foto lo tapa. -->
-    <span class="ficha__foto" aria-hidden="true">
+    <span class="ficha__foto">
+      {roaster && <SelloTostadero roaster={roaster} place="ficha" />}
       {
         product.imageKey && (
-          <img src={`/fotos/${product.imageKey}`} alt="" loading="lazy" decoding="async" />
+          <img
+            src={`/fotos/${product.imageKey}`}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            decoding="async"
+          />
         )
       }
     </span>

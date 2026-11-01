@@ -1,0 +1,72 @@
+---
+/**
+ * El tostadero del café, sobre la foto: Ruffo, Puerto Blest, Berkel. Es lo
+ * primero que mira quien ya conoce los tostaderos, así que va encima de la
+ * foto, en hueso para que no se pierda contra la placa tostada.
+ *
+ * En la ficha va abajo a la izquierda y sólo con el nombre: arriba está la
+ * estrella de "Nuevo" y al medio el paquete. En el detalle hay lugar para
+ * decir "Tostadero" y va arriba.
+ */
+interface Props {
+  roaster: string;
+  place: "ficha" | "detalle";
+}
+
+const { roaster, place } = Astro.props;
+---
+
+<span class:list={["chip", "sello-tostadero", `sello-tostadero--${place}`]}>
+  <span class="sello-tostadero__etiqueta">Tostadero</span>{" "}{roaster}
+</span>
+
+<style>
+  .sello-tostadero {
+    position: absolute;
+    left: 14px;
+    z-index: 2;
+    gap: 6px;
+    color: var(--color-carbon);
+    pointer-events: none;
+  }
+
+  .sello-tostadero::before {
+    background: var(--color-hueso);
+    box-shadow: 3px 3px 0 var(--color-tostado);
+  }
+
+  .sello-tostadero--ficha {
+    bottom: 12px;
+  }
+
+  /* En el celular la foto de la ficha es más baja: el sello se achica para
+     no tapar el paquete. */
+  @media (max-width: 640px) {
+    .sello-tostadero--ficha {
+      bottom: 8px;
+      left: 10px;
+      padding: 4px var(--space-sm) 3px 6px;
+      font-size: 9px;
+    }
+  }
+
+  .sello-tostadero--detalle {
+    top: 12px;
+  }
+
+  .sello-tostadero__etiqueta {
+    font-weight: 400;
+    opacity: 0.6;
+  }
+
+  /* En la ficha la palabra "Tostadero" sigue ahí para el lector de
+     pantalla, pero no se ve: el sello tiene que ser corto. */
+  .sello-tostadero--ficha .sello-tostadero__etiqueta {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+</style>
