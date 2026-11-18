@@ -34,6 +34,9 @@ const segundos = (duracion: string): number => {
   return Number.isFinite(valor) && valor > 0 ? valor : 52;
 };
 
+// Pantalla angosta: donde un riel `riel--anda-celu` también anda.
+const ANGOSTA = "(max-width: 640px)";
+
 const conectarRiel = (riel: HTMLElement): void => {
   const pista = riel.querySelector<HTMLElement>(".riel__pista");
   const tandaEl = riel.querySelector<HTMLElement>(
@@ -43,6 +46,11 @@ const conectarRiel = (riel: HTMLElement): void => {
   if (!pista || !tandaEl || !copia) return;
 
   const vuelta = pista.classList.contains("riel__pista--vuelta");
+  // Un riel de pocas fichas anda sólo en el celular: en una tablet entran
+  // todas y queda quieto. Se mira en cada cuadro porque la tablet puede girar.
+  const angosta = window.matchMedia(ANGOSTA);
+  const anda = () =>
+    riel.classList.contains("riel--anda") || angosta.matches;
   const duracion = segundos(riel.style.getPropertyValue("--riel-duracion"));
 
   // Se mide en cada cuadro que lo necesita: la ficha cambia de ancho al girar
@@ -66,7 +74,7 @@ const conectarRiel = (riel: HTMLElement): void => {
     const dt = anterior ? Math.min(ahora - anterior, 100) : 0;
     anterior = ahora;
 
-    if (!tocando && ahora >= quietoHasta) {
+    if (!tocando && ahora >= quietoHasta && anda()) {
       const medida = tanda();
       const velocidad = medida / duracion / 1000;
       pos = envolver(
@@ -110,7 +118,7 @@ const conectarRiel = (riel: HTMLElement): void => {
   riel.addEventListener(
     "scroll",
     () => {
-      if (Math.abs(riel.scrollLeft - pos) < 2) return;
+      if (!anda() || Math.abs(riel.scrollLeft - pos) < 2) return;
       pos = riel.scrollLeft;
       if (!tocando) quietoHasta = performance.now() + PAUSA_AL_SOLTAR;
       const envuelta = envolver(pos, tanda(), maximo());
@@ -134,7 +142,9 @@ export const conectarRielTactil = (): void => {
   const quieto = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (!tactil || quieto) return;
 
-  for (const riel of document.querySelectorAll<HTMLElement>(".riel--anda")) {
+  for (const riel of document.querySelectorAll<HTMLElement>(
+    ".riel--anda, .riel--anda-celu",
+  )) {
     conectarRiel(riel);
   }
 };
