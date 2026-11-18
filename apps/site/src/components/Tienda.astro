@@ -22,13 +22,18 @@ const roasterOf = (product: ProductWithOptions) =>
 // El ancho de una ficha más su separación, medido en la lámina (250 + 22).
 const CARD_STRIDE = 272;
 
-// Un riel que se mueve necesita que UNA tanda de fichas sea más ancha que la
-// pantalla: si no, al final del recorrido se ve la franja vacía (el mismo
-// problema que tuvo la cinta del pie). Con pocos productos la única forma de
-// llenarla sería repetir el mismo café ocho veces, que miente sobre el
-// catálogo. Así que con pocas fichas el estante se queda quieto y se arrastra
-// con el dedo; cuando haya más, el riel arranca solo.
-const MIN_MOVING_WIDTH = 1400;
+// Cuántas fichas hacen falta para que el riel ande solo: más de las que
+// entran quietas en la pantalla. En la compu entran cuatro; en el celular,
+// menos de dos. Con menos, el estante se queda quieto: moverlo sería pasear
+// las mismas fichas que ya se ven enteras.
+const MIN_MOVING_WIDE = 5;
+const MIN_MOVING_NARROW = 3;
+
+// Las copias de la tanda que siguen a la original. El bucle corre una tanda
+// entera, así que lo que se ve tiene que caber en lo que queda: con cinco
+// fichas (1360px) y una sola copia, en una pantalla más ancha se veía la
+// franja vacía al final. Con dos alcanza hasta 2720px.
+const COPIES = [1, 2];
 
 // El id del encabezado sale del título del estante, que trae espacios y
 // acentos: sin normalizar, el aria-labelledby apunta a un id que no existe y
@@ -46,7 +51,9 @@ const shelvesWithRail = shelves.map((shelf, index) => {
   return {
     ...shelf,
     id: slug(shelf.title),
-    moves: setWidth >= MIN_MOVING_WIDTH,
+    // En la compu y en el celular, o sólo en el celular.
+    moves: shelf.products.length >= MIN_MOVING_WIDE,
+    movesNarrow: shelf.products.length >= MIN_MOVING_NARROW,
     // Los dos estantes van en sentidos opuestos, como en la lámina.
     reversed: index % 2 === 1,
     // 52s y 58s en la lámina para tandas de cinco fichas: lo escalamos por el
@@ -109,7 +116,11 @@ const shelvesWithRail = shelves.map((shelf, index) => {
           </p>
         ) : (
           <div
-            class:list={["riel", shelf.moves && "riel--anda"]}
+            class:list={[
+              "riel",
+              shelf.moves && "riel--anda",
+              shelf.movesNarrow && !shelf.moves && "riel--anda-celu",
+            ]}
             style={`--riel-duracion:${shelf.duration};--riel-fichas:${shelf.products.length}`}
           >
             <div class:list={["riel__pista", shelf.reversed && "riel__pista--vuelta"]}>
@@ -126,27 +137,28 @@ const shelvesWithRail = shelves.map((shelf, index) => {
               </ul>
 
               {/*
-                La copia sólo existe para que el bucle no corte: el desplazamiento
+                Las copias sólo existen para que el bucle no corte: el desplazamiento
                 es exactamente el ancho de una tanda, así que al terminar la
                 segunda queda donde arrancó la primera. Va oculta para los
                 lectores de pantalla, que si no leerían el catálogo dos veces,
                 y fuera del tabulador. NO puede ser `inert`: la mitad de lo que
                 se ve en pantalla es esta copia, e inerte no se podía tocar.
               */}
-              {shelf.moves && (
-                <ul class="riel__tanda riel__copia" aria-hidden="true">
-                  {shelf.products.map((product) => (
-                    <li>
-                      <Ficha
-                        product={product}
-                        shelfLabel={shelf.title}
-                        roaster={roasterOf(product)}
-                        copy
-                      />
-                    </li>
-                  ))}
-                </ul>
-              )}
+              {shelf.movesNarrow &&
+                COPIES.map(() => (
+                  <ul class="riel__tanda riel__copia" aria-hidden="true">
+                    {shelf.products.map((product) => (
+                      <li>
+                        <Ficha
+                          product={product}
+                          shelfLabel={shelf.title}
+                          roaster={roasterOf(product)}
+                          copy
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                ))}
             </div>
           </div>
         )}
@@ -357,6 +369,9 @@ const shelvesWithRail = shelves.map((shelf, index) => {
    * La animación va sólo donde hay puntero fino, que frena con el mouse
    * encima. En una pantalla táctil el riel se mueve por el scroll (ver más
    * abajo), así frena al tocarlo y se puede arrastrar.
+   *
+   * `riel--anda` anda siempre; `riel--anda-celu`, sólo en pantalla angosta,
+   * donde con tres fichas ya no entran todas.
    */
   @media (hover: hover) and (pointer: fine) {
     .riel--anda .riel__pista {
@@ -375,31 +390,59 @@ const shelvesWithRail = shelves.map((shelf, index) => {
     }
   }
 
-  /* Un estante que no se mueve se arrastra a mano, siempre. */
-  .riel:not(.riel--anda) {
-    overflow-x: auto;
-  }
-
-  /*
-   * En una pantalla táctil el riel también anda, pero no con la animación:
-   * una fila movida con `transform` no se arrastra con el dedo. Ahí lo mueve
-   * riel-tactil.ts por el scroll, así anda solo y además se desliza a mano.
-   * La copia queda, porque el bucle la necesita igual que en la compu.
-   */
-  @media (hover: none), (pointer: coarse) {
-    .riel {
-      overflow-x: auto;
-      overscroll-behavior-x: contain;
-      scrollbar-width: none;
+  @media (hover: hover) and (pointer: fine) and (max-width: 640px) {
+    .riel--anda-celu .riel__pista {
+      animation: rielar var(--riel-duracion) linear infinite;
     }
 
-    .riel::-webkit-scrollbar {
+    .riel--anda-celu .riel__pista--vuelta {
+      animation-direction: reverse;
+    }
+
+    .riel--anda-celu:hover .riel__pista,
+    .riel--anda-celu:focus-within .riel__pista {
+      animation-play-state: paused;
+    }
+  }
+
+  /* Donde el riel no anda, las copias sobran: serían el catálogo repetido. */
+  @media (min-width: 641px) {
+    .riel--anda-celu .riel__copia {
       display: none;
     }
   }
 
+  /*
+   * La barra de scroll no se ve nunca: el riel anda solo o entra entero, y
+   * con el dedo o el trackpad se arrastra igual.
+   *
+   * Un estante que no se mueve se arrastra a mano. En una pantalla táctil el
+   * que anda también, pero no con la animación: una fila movida con
+   * `transform` no se arrastra con el dedo. Ahí lo mueve riel-tactil.ts por el
+   * scroll, así anda solo y además se desliza a mano.
+   */
+  .riel {
+    scrollbar-width: none;
+  }
+
+  .riel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .riel:not(.riel--anda) {
+    overflow-x: auto;
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    .riel {
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .riel--anda .riel__pista {
+    .riel--anda .riel__pista,
+    .riel--anda-celu .riel__pista {
       animation: none;
     }
 
