@@ -23,6 +23,7 @@ const porDefecto = disponibles[0]?.id;
 // Tiene moliendas y ninguna tiene stock: no hay nada que sumar. Sin esto el
 // botón seguía andando y sumaba el producto sin molienda.
 const sinStock = product.options.length > 0 && disponibles.length === 0;
+import SelloTostadero from "./SelloTostadero.astro";
 import TextoConFormato from "./TextoConFormato.astro";
 ---
 
@@ -34,14 +35,23 @@ import TextoConFormato from "./TextoConFormato.astro";
   data-tope={ORDER_LIMITS.maxUnitsPerProduct}
 >
   {
-    product.imageKey && (
-      <img
-        class="detalle__foto"
-        src={`/fotos/${product.imageKey}`}
-        alt={`${product.name}, ${product.detail}`}
-        loading="lazy"
-        decoding="async"
-      />
+    product.imageKey ? (
+      <div class="detalle__marco">
+        <img
+          class="detalle__foto"
+          src={`/fotos/${product.imageKey}`}
+          alt={`${product.name}, ${product.detail}`}
+          loading="lazy"
+          decoding="async"
+        />
+        {coffee && <SelloTostadero roaster={coffee.roaster} place="detalle" />}
+      </div>
+    ) : (
+      coffee && (
+        <div class="detalle__marco detalle__marco--sin-foto">
+          <SelloTostadero roaster={coffee.roaster} place="detalle" />
+        </div>
+      )
     )
   }
 
@@ -128,6 +138,16 @@ import TextoConFormato from "./TextoConFormato.astro";
 <style>
   /* 16:10, el formato de las fotos de la tienda: entran enteras y ocupan
      menos alto, así la compra queda a la vista sin scrollear. */
+  /* El marco de la foto existe para que el sello del tostadero se apoye en
+     su esquina. Sin foto, el sello queda solo en su renglón. */
+  .detalle__marco {
+    position: relative;
+  }
+
+  .detalle__marco--sin-foto {
+    min-height: 34px;
+  }
+
   .detalle__foto {
     display: block;
     width: 100%;

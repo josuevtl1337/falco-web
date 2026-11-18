@@ -2,6 +2,7 @@
 import type { ProductWithOptions } from "@falco/db";
 import { formatArs } from "@falco/domain";
 import { NEW_BADGE_STAR } from "./estrella";
+import SelloTostadero from "./SelloTostadero.astro";
 
 interface Props {
   product: ProductWithOptions;
@@ -12,9 +13,11 @@ interface Props {
    * de lo que se ve en pantalla es la copia), pero el tabulador la saltea.
    */
   copy?: boolean;
+  /** El tostadero, si el producto es un café: va sobre la foto. */
+  roaster?: string;
 }
 
-const { product, shelfLabel, copy = false } = Astro.props;
+const { product, shelfLabel, copy = false, roaster } = Astro.props;
 ---
 
 <article class="ficha">
@@ -49,6 +52,7 @@ const { product, shelfLabel, copy = false } = Astro.props;
       <span class="ficha__codigo">{shelfLabel}</span>
       <span class="ficha__nombre">{product.name}</span>
       <span class="ficha__detalle">{product.detail}</span>
+      {roaster && <SelloTostadero roaster={roaster} place="ficha" />}
 
       <span class="ficha__pie">
         <span><b>{formatArs(product.priceCashArs)}</b> efectivo</span>
@@ -122,11 +126,11 @@ const { product, shelfLabel, copy = false } = Astro.props;
     );
   }
 
-  /* El renglón del detalle se come el alto que sobra: así el precio queda
-     al pie en todas las fichas, tenga el nombre uno o dos renglones. */
+  /* El pie se come el alto que sobra (margin-top: auto): así el precio queda
+     abajo en todas las fichas, tenga el nombre uno o dos renglones. */
   .ficha__cuerpo {
-    display: grid;
-    grid-template-rows: auto auto 1fr auto auto;
+    display: flex;
+    flex-direction: column;
     gap: 6px;
     padding: 16px 18px 14px;
   }
@@ -147,8 +151,14 @@ const { product, shelfLabel, copy = false } = Astro.props;
     letter-spacing: -0.02em;
   }
 
+  /* El aire mínimo antes del pie va como margen del último renglón: el del
+     pie es `auto` y se estira. */
+  .ficha__detalle,
+  .ficha__cuerpo > :global(.sello-tostadero) {
+    margin-bottom: var(--space-sm);
+  }
+
   .ficha__detalle {
-    align-self: start;
     font-size: 13px;
     color: var(--color-ceniza);
   }
@@ -162,7 +172,7 @@ const { product, shelfLabel, copy = false } = Astro.props;
     justify-content: space-between;
     align-items: baseline;
     gap: 2px var(--space-sm);
-    margin-top: var(--space-sm);
+    margin-top: auto;
     padding-top: 11px;
     border-top: 1px solid rgba(232, 226, 208, 0.09);
     font-family: var(--font-mono);

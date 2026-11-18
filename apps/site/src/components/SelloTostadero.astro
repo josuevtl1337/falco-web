@@ -1,0 +1,63 @@
+---
+/**
+ * El tostadero del café, sobre la foto: Ruffo, Puerto Blest, Berkel. Es lo
+ * primero que mira quien ya conoce los tostaderos, así que va encima de la
+ * foto, en hueso para que no se pierda contra la placa tostada.
+ *
+ * En la ficha va en el cuerpo, abajo del peso, y sólo con el nombre. En el
+ * detalle va sobre la esquina de la foto y dice "Tostadero".
+ */
+interface Props {
+  roaster: string;
+  place: "ficha" | "detalle";
+}
+
+const { roaster, place } = Astro.props;
+---
+
+<span class:list={["chip", "sello-tostadero", `sello-tostadero--${place}`]}>
+  <span class="sello-tostadero__etiqueta">Tostadero</span>{" "}{roaster}
+</span>
+
+<style>
+  .sello-tostadero {
+    gap: 6px;
+    color: var(--color-carbon);
+    pointer-events: none;
+  }
+
+  .sello-tostadero::before {
+    background: var(--color-hueso);
+    box-shadow: 3px 3px 0 var(--color-tostado);
+  }
+
+  /* El plato inclinado sobresale a la izquierda: el margen lo deja
+     alineado con el texto de la ficha. */
+  .sello-tostadero--ficha {
+    align-self: flex-start;
+    margin-left: 4px;
+  }
+
+  .sello-tostadero--detalle {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    z-index: 2;
+  }
+
+  .sello-tostadero__etiqueta {
+    font-weight: 400;
+    opacity: 0.6;
+  }
+
+  /* En la ficha la palabra "Tostadero" sigue ahí para el lector de
+     pantalla, pero no se ve: el sello tiene que ser corto. */
+  .sello-tostadero--ficha .sello-tostadero__etiqueta {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+</style>
