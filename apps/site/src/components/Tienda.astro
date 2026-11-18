@@ -16,6 +16,9 @@ interface Props {
 
 const { shelves, coffees, db } = Astro.props;
 
+const roasterOf = (product: ProductWithOptions) =>
+  product.coffeeId ? coffees.get(product.coffeeId)?.roaster : undefined;
+
 // El ancho de una ficha más su separación, medido en la lámina (250 + 22).
 const CARD_STRIDE = 272;
 
@@ -124,7 +127,11 @@ const shelvesWithRail = shelves.map((shelf, index) => {
               <ul class="riel__tanda">
                 {shelf.products.map((product) => (
                   <li>
-                    <Ficha product={product} shelfLabel={shelf.title} />
+                    <Ficha
+                      product={product}
+                      shelfLabel={shelf.title}
+                      roaster={roasterOf(product)}
+                    />
                   </li>
                 ))}
               </ul>
@@ -142,7 +149,12 @@ const shelvesWithRail = shelves.map((shelf, index) => {
                   <ul class="riel__tanda riel__copia" aria-hidden="true">
                     {shelf.products.map((product) => (
                       <li>
-                        <Ficha product={product} shelfLabel={shelf.title} copy />
+                        <Ficha
+                          product={product}
+                          shelfLabel={shelf.title}
+                          roaster={roasterOf(product)}
+                          copy
+                        />
                       </li>
                     ))}
                   </ul>
