@@ -489,3 +489,31 @@ describe("0004: el puntaje SCA", () => {
     expect(run("UPDATE coffees SET sca_score = 120")).toThrow();
   });
 });
+
+describe("0006: el horario de la tarde", () => {
+  it("deja todos los días de 17 a 21, y los feriados abiertos igual", () => {
+    // Un feriado con dos tramos y uno cerrado, como los puede dejar el admin.
+    db.exec(`
+      INSERT INTO special_day_shifts (date, opens_at, closes_at) VALUES ('2026-12-25', '21:00', '23:00');
+      INSERT INTO special_days (date, note) VALUES ('2026-12-31', 'Cerrado');
+    `);
+    db.exec(read("../migrations/0006_horario_tarde.sql"));
+
+    const semana = db.prepare("SELECT weekday, opens_at, closes_at FROM business_hour_shifts ORDER BY weekday").all();
+    expect(semana).toEqual(
+      [0, 1, 2, 3, 4, 5, 6].map((weekday) => ({ weekday, opens_at: "17:00", closes_at: "21:00" })),
+    );
+    expect(db.prepare("SELECT opens_at, closes_at FROM special_day_shifts WHERE date = '2026-12-25'").all()).toEqual([
+      { opens_at: "17:00", closes_at: "21:00" },
+    ]);
+    expect(count("special_day_shifts")).toBe(20);
+    expect(one<{ n: number }>("SELECT count(*) AS n FROM special_day_shifts WHERE date = '2026-12-31'").n).toBe(0);
+  });
+
+  it("en una base vacía no hace nada", () => {
+    const vacia = new Database(":memory:");
+    vacia.pragma("foreign_keys = ON");
+    vacia.exec(MIGRATION);
+    expect(() => vacia.exec(read("../migrations/0006_horario_tarde.sql"))).not.toThrow();
+  });
+});
