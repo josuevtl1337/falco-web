@@ -1,7 +1,7 @@
 # La carga inicial de la base de producción: la estructura y el contenido de
 # partida (packages/db/seed/seed.sql). Se corre UNA vez, a mano, desde la
-# pestaña Actions. Si la base ya tiene productos, no hace nada: nunca pisa
-# datos reales.
+# pestaña Actions. Si la base ya tiene cualquier dato, no hace nada: nunca
+# pisa datos reales.
 name: Carga inicial
 
 on:
@@ -41,9 +41,12 @@ jobs:
       - name: Cargar el contenido de partida, sólo si la base está vacía
         working-directory: apps/site
         run: |
-          productos=$(npx wrangler d1 execute falco --remote --json --command "SELECT count(*) AS n FROM products" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s)[0].results[0].n))')
-          if [ "$productos" != "0" ]; then
-            echo "::error::La base ya tiene $productos productos: no se carga nada para no pisar datos reales."
+          # Cualquier fila en cualquiera de estas tablas es algo cargado a mano
+          # (por ejemplo, un café de tolva desde el admin): no se pisa nada.
+          consulta="SELECT (SELECT count(*) FROM products) + (SELECT count(*) FROM coffees) + (SELECT count(*) FROM hopper_coffees) + (SELECT count(*) FROM settings) + (SELECT count(*) FROM business_hours) + (SELECT count(*) FROM special_days) AS n"
+          filas=$(npx wrangler d1 execute falco --remote --json --command "$consulta" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s)[0].results[0].n))')
+          if [ "$filas" != "0" ]; then
+            echo "::error::La base ya tiene datos ($filas filas entre productos, cafés, tolva, ajustes y horarios): no se carga nada para no pisarlos. Si son pruebas, borralas desde el admin y volvé a correrlo."
             exit 1
           fi
           npx wrangler d1 execute falco --remote --file ../../packages/db/seed/seed.sql
