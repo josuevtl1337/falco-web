@@ -3,6 +3,8 @@ import { allRows, type WritableDb, type WritableStatement } from "./queries";
 import { slugify } from "./slug";
 import {
   coffeeInputSchema,
+  menuCategoryInputSchema,
+  menuItemInputSchema,
   productInputSchema,
   productOptionInputSchema,
   settingsSchema,
@@ -722,4 +724,185 @@ export async function setProductImage(
   if (changes === 0)
     return fail("La foto cambió mientras tanto. Recargá la página y probá de nuevo.");
   return { ok: true, previousKey: current.image_key };
+}
+
+// --- La carta del local ---------------------------------------------------
+
+export type MenuCategoryDraft = z.input<typeof menuCategoryInputSchema>;
+export type MenuItemDraft = z.input<typeof menuItemInputSchema>;
+
+const GONE_CATEGORY = "Esa categoría ya no existe. Puede que alguien la haya borrado.";
+const GONE_ITEM = "Ese ítem ya no existe. Puede que alguien lo haya borrado.";
+
+/** UPDATE con `WHERE` que puede no tocar nada: cuántas filas cambió. */
+const changesOf = (result: unknown): number | undefined => {
+  const r = result as { changes?: number; meta?: { changes?: number } } | undefined;
+  // D1 cuenta las filas en meta.changes; better-sqlite3, en changes.
+  return r?.meta?.changes ?? r?.changes;
+};
+
+/** Crea (`id` undefined) o edita una categoría. Las nuevas van al final. */
+export async function saveMenuCategory(
+  db: WritableDb,
+  id: number | undefined,
+  draft: MenuCategoryDraft,
+  by: string,
+): Promise<MutationResult<{ id: number }>> {
+  const parsed = menuCategoryInputSchema.safeParse(draft);
+  if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error) };
+  const data = parsed.data;
+
+  if (await exists(db, "SELECT 1 FROM menu_categories WHERE name = ? COLLATE NOCASE AND id IS NOT ?", data.name, id ?? null))
+    return { ok: false, errors: { name: "Ya hay una categoría con ese nombre." } };
+
+  if (id === undefined) {
+    const row = await db
+      .prepare(
+        `INSERT INTO menu_categories (name, note, is_visible, sort_order, updated_by)
+         VALUES (?, ?, ?, (SELECT coalesce(max(sort_order), 0) + 1 FROM menu_categories), ?)
+         RETURNING id`,
+      )
+      .bind(data.name, data.note ?? null, data.isVisible ? 1 : 0, by)
+      .first<{ id: number }>();
+    if (!row) return fail("No se pudo guardar la categoría. Probá de nuevo.");
+    return { ok: true, id: row.id };
+  }
+
+  const result = await db
+    .prepare(
+      `UPDATE menu_categories SET name = ?, note = ?, is_visible = ?, updated_at = ${NOW}, updated_by = ?
+       WHERE id = ?`,
+    )
+    .bind(data.name, data.note ?? null, data.isVisible ? 1 : 0, by, id)
+    .run();
+  if (changesOf(result) === 0) return fail(GONE_CATEGORY);
+  return { ok: true, id };
+}
+
+/**
+ * Borra una categoría vacía. Con ítems adentro no: borrarlos de rebote es
+ * fácil de hacer sin querer, y moverlos a otra categoría es un minuto.
+ */
+export async function deleteMenuCategory(db: WritableDb, id: number): Promise<MutationResult> {
+  if (!(await exists(db, "SELECT 1 FROM menu_categories WHERE id = ?", id))) return fail(GONE_CATEGORY);
+  if (await exists(db, "SELECT 1 FROM menu_items WHERE category_id = ?", id))
+    return fail("Todavía tiene ítems. Movelos a otra categoría o borralos primero.");
+  await db.prepare("DELETE FROM menu_categories WHERE id = ?").bind(id).run();
+  return { ok: true };
+}
+
+/**
+ * Crea (`id` undefined) o edita un ítem. Uno nuevo, o uno que cambia de
+ * categoría, va al final de la suya.
+ */
+export async function saveMenuItem(
+  db: WritableDb,
+  id: number | undefined,
+  draft: MenuItemDraft,
+  by: string,
+): Promise<MutationResult<{ id: number }>> {
+  const parsed = menuItemInputSchema.safeParse(draft);
+  if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error) };
+  const data = parsed.data;
+
+  if (!(await exists(db, "SELECT 1 FROM menu_categories WHERE id = ?", data.categoryId)))
+    return { ok: false, errors: { categoryId: "Esa categoría ya no existe. Elegí otra." } };
+
+  const last = "(SELECT coalesce(max(sort_order), 0) + 1 FROM menu_items WHERE category_id = ?)";
+  const values = [data.categoryId, data.name, data.description ?? null, data.priceArs, data.isVisible ? 1 : 0];
+
+  if (id === undefined) {
+    const row = await db
+      .prepare(
+        `INSERT INTO menu_items (category_id, name, description, price_ars, is_visible, sort_order, updated_by)
+         VALUES (?, ?, ?, ?, ?, ${last}, ?) RETURNING id`,
+      )
+      .bind(...values, data.categoryId, by)
+      .first<{ id: number }>();
+    if (!row) return fail("No se pudo guardar el ítem. Probá de nuevo.");
+    return { ok: true, id: row.id };
+  }
+
+  const result = await db
+    .prepare(
+      `UPDATE menu_items SET category_id = ?, name = ?, description = ?, price_ars = ?, is_visible = ?,
+         sort_order = CASE WHEN category_id = ? THEN sort_order ELSE ${last} END,
+         updated_at = ${NOW}, updated_by = ?
+       WHERE id = ?`,
+    )
+    .bind(...values, data.categoryId, data.categoryId, by, id)
+    .run();
+  if (changesOf(result) === 0) return fail(GONE_ITEM);
+  return { ok: true, id };
+}
+
+/** Borra un ítem y devuelve su foto, para que quien lo borró la saque de R2. */
+export async function deleteMenuItem(
+  db: WritableDb,
+  id: number,
+): Promise<MutationResult<{ imageKey: string | null }>> {
+  const row = await db
+    .prepare("DELETE FROM menu_items WHERE id = ? RETURNING image_key")
+    .bind(id)
+    .first<{ image_key: string | null }>();
+  if (!row) return fail(GONE_ITEM);
+  return { ok: true, imageKey: row.image_key };
+}
+
+/** La foto de un ítem: igual que setProductImage. */
+export async function setMenuItemImage(
+  db: WritableDb,
+  id: number,
+  key: string | null,
+  by: string,
+): Promise<MutationResult<{ previousKey: string | null }>> {
+  const current = await db
+    .prepare("SELECT image_key FROM menu_items WHERE id = ?")
+    .bind(id)
+    .first<{ image_key: string | null }>();
+  if (!current) return fail(GONE_ITEM);
+
+  const result = await db
+    .prepare(
+      `UPDATE menu_items SET image_key = ?, updated_at = ${NOW}, updated_by = ?
+       WHERE id = ? AND image_key IS ?`,
+    )
+    .bind(key, by, id, current.image_key)
+    .run();
+  if (changesOf(result) === 0)
+    return fail("La foto cambió mientras tanto. Recargá la página y probá de nuevo.");
+  return { ok: true, previousKey: current.image_key };
+}
+
+/**
+ * El orden nuevo de una lista de la carta: las categorías (`categoryId`
+ * undefined) o los ítems de una categoría. Igual que reorderShelf, tiene que
+ * traer exactamente los que hay.
+ */
+export async function reorderMenu(
+  db: WritableDb,
+  categoryId: number | undefined,
+  ids: number[],
+  by: string,
+): Promise<MutationResult> {
+  const table = categoryId === undefined ? "menu_categories" : "menu_items";
+  const current = (
+    await allRows<{ id: number }>(
+      categoryId === undefined
+        ? db.prepare("SELECT id FROM menu_categories")
+        : db.prepare("SELECT id FROM menu_items WHERE category_id = ?").bind(categoryId),
+    )
+  ).map((r) => r.id);
+  const same =
+    ids.length === current.length && new Set(ids).size === ids.length && ids.every((x) => current.includes(x));
+  if (!same) return fail("La lista cambió mientras la ordenabas. Recargá la página y probá de nuevo.");
+
+  await db.batch(
+    ids.map((x, index) =>
+      db
+        .prepare(`UPDATE ${table} SET sort_order = ?, updated_at = ${NOW}, updated_by = ? WHERE id = ?`)
+        .bind(index + 1, by, x),
+    ),
+  );
+  return { ok: true };
 }

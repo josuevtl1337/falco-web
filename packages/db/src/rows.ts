@@ -44,6 +44,25 @@ export type ProductOptionRow = {
   sort_order: number;
 };
 
+export type MenuCategoryRow = {
+  id: number;
+  name: string;
+  note: string | null;
+  is_visible: number;
+  sort_order: number;
+};
+
+export type MenuItemRow = {
+  id: number;
+  category_id: number;
+  name: string;
+  description: string | null;
+  price_ars: number;
+  image_key: string | null;
+  is_visible: number;
+  sort_order: number;
+};
+
 export type TastingProfile = {
   acidity: number;
   sweetness: number;
@@ -94,6 +113,27 @@ export type Product = {
 };
 
 export type ProductWithOptions = Product & { options: ProductOption[] };
+
+export type MenuItem = {
+  id: number;
+  categoryId: number;
+  name: string;
+  description?: string;
+  priceArs: number;
+  imageKey?: string;
+  isVisible: boolean;
+  sortOrder: number;
+};
+
+export type MenuCategory = {
+  id: number;
+  name: string;
+  note?: string;
+  isVisible: boolean;
+  sortOrder: number;
+};
+
+export type MenuCategoryWithItems = MenuCategory & { items: MenuItem[] };
 
 // SQLite guarda los booleanos como 0 y 1, y las columnas vacías como NULL.
 // El resto del código habla en booleanos y en undefined.
@@ -148,6 +188,29 @@ export function toProductOption(row: ProductOptionRow): ProductOption {
     id: row.id,
     label: row.label,
     isAvailable: bool(row.is_available),
+    sortOrder: row.sort_order,
+  };
+}
+
+export function toMenuCategory(row: MenuCategoryRow): MenuCategory {
+  return {
+    id: row.id,
+    name: row.name,
+    note: maybe(row.note),
+    isVisible: bool(row.is_visible),
+    sortOrder: row.sort_order,
+  };
+}
+
+export function toMenuItem(row: MenuItemRow): MenuItem {
+  return {
+    id: row.id,
+    categoryId: row.category_id,
+    name: row.name,
+    description: maybe(row.description),
+    priceArs: row.price_ars,
+    imageKey: maybe(row.image_key),
+    isVisible: bool(row.is_visible),
     sortOrder: row.sort_order,
   };
 }

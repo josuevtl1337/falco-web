@@ -1,7 +1,10 @@
 ---
 import { CARA_TRAZO, CARA_VIEWBOX } from "./cara";
 
+// "La carta" va primera y destacada: es lo que más se busca desde el local
+// (el QR de la mesa) y desde Google. Es una página, no una sección de la home.
 const links = [
+  { href: "/carta", label: "La carta", featured: true },
   { href: "/#tienda", label: "La tienda" },
   { href: "/#donde-estamos", label: "Dónde estamos" },
   {
@@ -13,11 +16,12 @@ const links = [
 
 // El menú del celular suma "Inicio", que en la barra no hace falta porque el
 // logo ya lleva ahí. Los números son los de la lámina: ordenan la lectura y
-// dicen cuántas opciones hay, que son cuatro y nada más.
+// dicen cuántas opciones hay, que son cinco y nada más.
 const menuLinks = [
   { href: "/", label: "Inicio", index: "01" },
-  { href: "/#tienda", label: "Tienda", index: "02" },
-  { href: "/#donde-estamos", label: "Dónde", index: "03" },
+  { href: "/carta", label: "Carta", index: "02", page: true },
+  { href: "/#tienda", label: "Tienda", index: "03" },
+  { href: "/#donde-estamos", label: "Dónde", index: "04" },
   {
     href: "https://www.instagram.com/falco.cafe/",
     label: "@falco.cafe",
@@ -60,8 +64,11 @@ const path = Astro.url.pathname;
         <li>
           <a
             href={link.href}
-            class={link.boxed ? "nav__caja" : "nav__seccion"}
-            data-seccion={link.boxed ? undefined : link.href}
+            class={
+              link.featured ? "nav__carta" : link.boxed ? "nav__caja" : "nav__seccion"
+            }
+            data-seccion={link.boxed || link.featured ? undefined : link.href}
+            aria-current={link.featured && path === link.href ? "page" : undefined}
           >
             {link.label}
           </a>
@@ -70,9 +77,20 @@ const path = Astro.url.pathname;
     }
   </ul>
 
-  <button class="nav__burger" type="button" data-menu-abrir aria-haspopup="dialog">
-    <span>Menú</span>
-  </button>
+  <!-- En el celular las opciones se esconden en el menú, salvo la carta:
+       es lo que busca quien escanea el QR de la mesa o entra al local. -->
+  <div class="nav__movil">
+    <a
+      class="nav__carta-movil"
+      href="/carta"
+      aria-current={path === "/carta" ? "page" : undefined}
+    >
+      <span>Carta</span>
+    </a>
+    <button class="nav__burger" type="button" data-menu-abrir aria-haspopup="dialog">
+      <span>Menú</span>
+    </button>
+  </div>
 </nav>
 
 <!--
@@ -111,7 +129,7 @@ const path = Astro.url.pathname;
             href={link.href}
             class={path === link.href ? "menu__activo" : undefined}
             aria-current={path === link.href ? "page" : undefined}
-            data-seccion={link.index === "↗" ? undefined : link.href}
+            data-seccion={link.index === "↗" || link.page ? undefined : link.href}
           >
             <small aria-hidden="true">{link.index}</small>
             {link.label}
@@ -185,9 +203,40 @@ const path = Astro.url.pathname;
   }
 
   .nav > ul,
-  .nav__burger {
+  .nav__movil {
     grid-column: 3;
     justify-self: end;
+  }
+
+  .nav__movil {
+    display: none;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  /* "Carta" en el celular: el mismo cartel que "Menú" pero en línea, para que
+     se lean como dos botones hermanos y el lleno siga siendo el del menú. */
+  .nav a.nav__carta-movil {
+    display: inline-flex;
+    align-items: center;
+    height: 46px;
+    min-height: 0;
+    padding-inline: var(--space-sm);
+    border: 1px solid var(--color-hueso);
+    color: var(--color-hueso);
+    font-size: var(--text-nano);
+    letter-spacing: 0.08em;
+    transform: skewX(-12deg);
+  }
+
+  .nav__carta-movil span {
+    display: block;
+    transform: skewX(12deg);
+  }
+
+  .nav a.nav__carta-movil[aria-current] {
+    background: var(--color-tostado);
+    border-color: var(--color-tostado);
   }
 
   .cara-defs {
@@ -335,6 +384,33 @@ const path = Astro.url.pathname;
     }
   }
 
+  /*
+   * "La carta": el único botón lleno de la barra, hueso sobre carbón con la
+   * sombra tostada, como los botones del sitio. Se ve de lejos sin gritar.
+   */
+  .nav a.nav__carta {
+    position: relative;
+    z-index: 0;
+    padding-inline: var(--space-md);
+    color: var(--color-carbon);
+    font-weight: 600;
+  }
+
+  .nav__carta::before {
+    content: "";
+    position: absolute;
+    inset: 6px 0;
+    z-index: -1;
+    background: var(--color-hueso);
+    box-shadow: 4px 4px 0 var(--color-tostado);
+    transform: skewX(-12deg);
+  }
+
+  .nav__carta:hover::before,
+  .nav__carta[aria-current]::before {
+    box-shadow: 4px 4px 0 var(--color-brasa);
+  }
+
   .nav__caja {
     border: 1px solid var(--color-tostado);
     padding-inline: var(--space-md);
@@ -396,6 +472,10 @@ const path = Astro.url.pathname;
 
     .nav > ul {
       display: none;
+    }
+
+    .nav__movil {
+      display: flex;
     }
 
     .nav__burger {

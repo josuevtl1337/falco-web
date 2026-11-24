@@ -1,10 +1,16 @@
 import type { DayHours, Shift, SpecialDay, WeekHours } from "@falco/domain";
 import {
   toCoffee,
+  toMenuCategory,
+  toMenuItem,
   toProduct,
   toProductOption,
   type Coffee,
   type CoffeeRow,
+  type MenuCategoryRow,
+  type MenuCategoryWithItems,
+  type MenuItem,
+  type MenuItemRow,
   type ProductOptionRow,
   type ProductRow,
   type ProductWithOptions,
@@ -278,4 +284,54 @@ export async function getUpcomingSpecialDays(
       });
   }
   return [...byDate.values()];
+}
+
+/**
+ * La carta con todas sus categorías e ítems, en el orden del admin. Dos
+ * consultas y no una por categoría.
+ */
+async function menu(
+  db: ReadableDb,
+  onlyVisible: boolean,
+): Promise<MenuCategoryWithItems[]> {
+  const where = onlyVisible ? " WHERE is_visible = 1" : "";
+  const categories = await allRows<MenuCategoryRow>(
+    db.prepare(`SELECT * FROM menu_categories${where} ORDER BY sort_order, id`),
+  );
+  const items = await allRows<MenuItemRow>(
+    db.prepare(`SELECT * FROM menu_items${where} ORDER BY sort_order, id`),
+  );
+  return categories.map((row) => ({
+    ...toMenuCategory(row),
+    items: items
+      .filter((item) => item.category_id === row.id)
+      .map(toMenuItem),
+  }));
+}
+
+/**
+ * La carta que ve el público: sólo lo visible, y sin categorías vacías (una
+ * pestaña que no lleva a nada confunde más de lo que ayuda).
+ */
+export async function listMenu(
+  db: ReadableDb,
+): Promise<MenuCategoryWithItems[]> {
+  return (await menu(db, true)).filter((category) => category.items.length > 0);
+}
+
+/** Toda la carta, también lo oculto: lo que ve el admin. */
+export async function listMenuForAdmin(
+  db: ReadableDb,
+): Promise<MenuCategoryWithItems[]> {
+  return menu(db, false);
+}
+
+export async function getMenuItemForAdmin(
+  db: ReadableDb,
+  id: number,
+): Promise<MenuItem | undefined> {
+  const row = await firstRow<MenuItemRow>(
+    db.prepare("SELECT * FROM menu_items WHERE id = ?").bind(id),
+  );
+  return row ? toMenuItem(row) : undefined;
 }

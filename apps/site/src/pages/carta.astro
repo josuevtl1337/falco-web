@@ -1,0 +1,429 @@
+---
+import { env } from "cloudflare:workers";
+import { getSettings, listMenu, slugify } from "@falco/db";
+import { formatArs } from "@falco/domain";
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.astro";
+import Pie from "../components/Pie.astro";
+import { cartaRedirect } from "../scripts/carta";
+import { jsonForScript, menuJsonLd } from "../seo";
+
+const [menu, settings] = await Promise.all([listMenu(env.DB), getSettings(env.DB)]);
+
+// Mientras la carta del admin esté vacía, /carta sigue llevando al PDF de
+// siempre: los QR de las mesas no quedan apuntando a una página en blanco.
+if (menu.length === 0) return cartaRedirect(settings.menu_url);
+
+const categories = menu.map((category) => ({
+  ...category,
+  anchor: `carta-${slugify(category.name) || category.id}`,
+}));
+const site = Astro.site ?? Astro.url;
+---
+
+<!--
+  La carta del local, la de la barra: categorías arriba, que quedan pegadas
+  al scrollear, un buscador, y cada ítem con su precio y su foto si la tiene.
+  Es la dirección de los QR de las mesas, así que se piensa primero para el
+  celular.
+-->
+<Base
+  title="La carta · Falco"
+  description="La carta de Falco, café de especialidad en Santo Tomé: café, filtrados y lo que sale de la barra, con sus precios."
+>
+  <Nav slot="nav" />
+  <script
+    slot="head"
+    type="application/ld+json"
+    set:html={jsonForScript(menuJsonLd(site, categories))}
+  />
+
+  <div class="carta">
+    <header class="carta__cabeza">
+      <span class="chip chip--fill chip--shadow">La carta</span>
+      <h1 class="carta__titulo">Lo que sale de la barra</h1>
+      <p class="carta__bajada">Se pide en el mostrador · Iriondo 2153, Santo Tomé</p>
+    </header>
+
+    <div class="carta__barra" data-carta-barra>
+      <label class="carta__buscar">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="6.5"></circle>
+          <path d="m16 16 4 4"></path>
+        </svg>
+        <input
+          type="search"
+          placeholder="Buscar en la carta"
+          aria-label="Buscar en la carta"
+          autocomplete="off"
+          enterkeyhint="search"
+          data-carta-buscar
+        />
+      </label>
+
+      <nav class="carta__pestanas" aria-label="Categorías de la carta">
+        {
+          categories.map((category) => (
+            <a href={`#${category.anchor}`} data-carta-pestana>
+              {category.name}
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+
+    {
+      categories.map((category) => (
+        <section
+          class="carta__seccion"
+          id={category.anchor}
+          aria-labelledby={`${category.anchor}-titulo`}
+          data-carta-seccion
+        >
+          <header class="carta__seccion-cabeza">
+            <h2 id={`${category.anchor}-titulo`}>{category.name}</h2>
+            {category.note && <p>{category.note}</p>}
+          </header>
+
+          <ul class="carta__lista">
+            {category.items.map((item) => (
+              <li
+                class:list={["plato", item.imageKey && "plato--foto"]}
+                data-carta-item={[category.name, item.name, item.description]
+                  .filter(Boolean)
+                  .join(" · ")}
+              >
+                <div class="plato__texto">
+                  <h3 class="plato__nombre">{item.name}</h3>
+                  {item.description && (
+                    <p class="plato__desc">{item.description}</p>
+                  )}
+                  <p class="plato__precio">{formatArs(item.priceArs)}</p>
+                </div>
+                {item.imageKey && (
+                  <img
+                    class="plato__foto"
+                    src={`/fotos/${item.imageKey}`}
+                    alt={item.name}
+                    width="112"
+                    height="112"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+
+    <p class="carta__vacio" data-carta-vacio hidden>
+      No encontramos nada con “<span data-carta-consulta></span>”. Preguntanos en
+      la barra: capaz lo tenemos fuera de carta.
+    </p>
+  </div>
+
+  <Pie
+    slot="pie"
+    instagramUrl={settings.instagram_url}
+    whatsapp={settings.whatsapp_number}
+  />
+</Base>
+
+<script>
+  import { conectarCarta } from "../scripts/carta-pagina";
+  conectarCarta();
+</script>
+
+<style>
+  .carta {
+    --ancho-carta: 1120px;
+    --alto-barra: 112px;
+    display: grid;
+    gap: var(--space-xl);
+    width: 100%;
+    max-width: calc(var(--ancho-carta) + 2 * var(--space-xxl));
+    margin-inline: auto;
+    padding: var(--space-xl) var(--space-xxl) var(--space-xxl);
+  }
+
+  .carta__cabeza {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-md);
+  }
+
+  .carta__titulo {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(34px, 5vw, 64px);
+    line-height: 1;
+    letter-spacing: -0.035em;
+  }
+
+  .carta__bajada {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ceniza);
+  }
+
+  /*
+   * El buscador y las pestañas quedan pegados abajo de la barra al
+   * scrollear: en una carta larga, saltar de "Café" a "Pastelería" tiene que
+   * estar siempre a un toque. El fondo tapa lo que pasa por detrás.
+   */
+  .carta__barra {
+    position: sticky;
+    top: var(--alto-nav);
+    z-index: 5;
+    display: grid;
+    gap: var(--space-sm);
+    margin-inline: calc(-1 * var(--space-md));
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-carbon);
+    box-shadow: 0 12px 16px -12px rgb(0 0 0 / 0.6);
+  }
+
+  .carta__buscar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: var(--touch-min);
+    padding-inline: 14px;
+    border: 1px solid rgba(232, 226, 208, 0.18);
+    background: var(--color-sombra);
+  }
+
+  .carta__buscar:focus-within {
+    border-color: var(--color-brasa);
+  }
+
+  .carta__buscar svg {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: var(--color-ceniza);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+  }
+
+  .carta__buscar input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 0;
+    border: 0;
+    background: none;
+    color: var(--color-hueso);
+    font: inherit;
+    font-size: 16px;
+    outline: none;
+  }
+
+  .carta__buscar input::placeholder {
+    color: var(--color-ceniza);
+  }
+
+  .carta__pestanas {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* Que la sombra de la pestaña prendida no se recorte. */
+    padding: 2px 6px 6px 2px;
+  }
+
+  .carta__pestanas::-webkit-scrollbar {
+    display: none;
+  }
+
+  .carta__pestanas a {
+    position: relative;
+    isolation: isolate;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    min-height: 38px;
+    padding: 0 16px;
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--color-hueso);
+    white-space: nowrap;
+  }
+
+  /* El mismo plato inclinado que los chips del sitio. */
+  .carta__pestanas a::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border: 1px solid rgba(232, 226, 208, 0.22);
+    transform: skewX(var(--angle-plate));
+  }
+
+  .carta__pestanas a[aria-current]::before {
+    border-color: var(--color-tostado);
+    background: var(--color-tostado);
+    box-shadow: 3px 3px 0 var(--color-hueso);
+  }
+
+  .carta__pestanas a:focus-visible {
+    outline: 2px solid var(--color-brasa);
+    outline-offset: 2px;
+  }
+
+  .carta__seccion {
+    display: grid;
+    gap: var(--space-md);
+    /* Al saltar desde una pestaña, el título queda debajo de la barra. */
+    scroll-margin-top: calc(var(--alto-nav) + var(--alto-barra) + 12px);
+  }
+
+  .carta__seccion-cabeza {
+    display: grid;
+    gap: 4px;
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid rgba(232, 226, 208, 0.12);
+  }
+
+  .carta__seccion-cabeza h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(26px, 3vw, 36px);
+    letter-spacing: -0.03em;
+  }
+
+  .carta__seccion-cabeza p {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-brasa);
+  }
+
+  .carta__lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
+    gap: 12px var(--space-lg);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Un ítem: el texto a la izquierda, el precio abajo y la foto a la
+     derecha si la tiene. */
+  .plato {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-md);
+    align-items: center;
+    min-height: 96px;
+    padding: 14px 16px;
+    background: linear-gradient(168deg, var(--color-piedra), rgb(35, 36, 38));
+    border: 1px solid rgba(232, 226, 208, 0.1);
+  }
+
+  .plato--foto {
+    grid-template-columns: minmax(0, 1fr) 112px;
+    padding-right: 10px;
+  }
+
+  .plato__texto {
+    display: grid;
+    gap: 4px;
+  }
+
+  .plato__nombre {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 19px;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .plato__desc {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--color-ceniza);
+  }
+
+  .plato__precio {
+    margin: 4px 0 0;
+    font-family: var(--font-mono);
+    font-size: 15px;
+    color: var(--color-brasa);
+  }
+
+  .plato__foto {
+    display: block;
+    width: 112px;
+    height: 112px;
+    object-fit: cover;
+    border: 1px solid rgba(232, 226, 208, 0.12);
+  }
+
+  .carta__vacio {
+    margin: 0;
+    color: var(--color-ceniza);
+  }
+
+  @media (max-width: 899px) {
+    .carta {
+      gap: var(--space-lg);
+      padding: var(--space-lg) var(--space-md) var(--space-xl);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .carta__titulo {
+      font-size: 34px;
+    }
+
+    /* En el celular la carta se lee de corrido: tarjetas bajas, una debajo
+       de otra, para ver varias por pantalla. */
+    .carta__lista {
+      gap: 8px;
+    }
+
+    .plato {
+      min-height: 0;
+      padding: 12px 14px;
+    }
+
+    .plato__nombre {
+      font-size: 17px;
+    }
+
+    .plato__desc {
+      font-size: 13px;
+    }
+
+    .plato__precio {
+      margin-top: 2px;
+      font-size: 14px;
+    }
+
+    .plato--foto {
+      grid-template-columns: minmax(0, 1fr) 88px;
+      padding-right: 8px;
+    }
+
+    .plato__foto {
+      width: 88px;
+      height: 88px;
+    }
+  }
+</style>

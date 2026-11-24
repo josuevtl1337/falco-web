@@ -445,3 +445,28 @@ describe("0002: la foto de la tolva", () => {
     );
   });
 });
+
+describe("0003: la carta del local", () => {
+  beforeEach(() => {
+    db.exec(read("../migrations/0002_hopper_photo.sql"));
+    db.exec(read("../migrations/0003_menu.sql"));
+  });
+
+  it("crea las tablas y acepta la carta de ejemplo", () => {
+    db.exec(read("../seed/menu.sql"));
+    expect(count("menu_categories")).toBe(4);
+    expect(count("menu_items")).toBeGreaterThan(10);
+  });
+
+  it("un ítem tiene que ser de una categoría que exista, con precio no negativo", () => {
+    expect(run("INSERT INTO menu_items (category_id, name, price_ars) VALUES (99, 'X', 10)")).toThrow();
+    db.exec("INSERT INTO menu_categories (id, name) VALUES (1, 'Café')");
+    expect(run("INSERT INTO menu_items (category_id, name, price_ars) VALUES (1, 'X', -1)")).toThrow();
+    expect(run("INSERT INTO menu_items (category_id, name, price_ars) VALUES (1, '  ', 10)")).toThrow();
+  });
+
+  it("no repite el nombre de una categoría", () => {
+    db.exec("INSERT INTO menu_categories (name) VALUES ('Café')");
+    expect(run("INSERT INTO menu_categories (name) VALUES ('Café')")).toThrow();
+  });
+});

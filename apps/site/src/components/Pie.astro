@@ -9,7 +9,7 @@ const { instagramUrl, whatsapp } = Astro.props;
 const year = new Date().getFullYear();
 const links = [
   { href: "/#tienda", label: "La tienda" },
-  { href: "/carta", label: "La carta", external: true },
+  { href: "/carta", label: "La carta" },
   instagramUrl && { href: instagramUrl, label: "Instagram", external: true },
   whatsapp && {
     href: `https://wa.me/${whatsapp}`,

@@ -1,0 +1,127 @@
+---
+import { env } from "cloudflare:workers";
+import { deleteMenuCategory, listMenuForAdmin, saveMenuCategory } from "@falco/db";
+import Admin from "../../../layouts/Admin.astro";
+import Campo from "../../../components/Campo.astro";
+import { conAviso } from "../../../avisos";
+import { CATEGORIA_VACIA, categoriaAForm, leerCategoria, type CategoriaForm } from "../../../carta";
+
+const nueva = Astro.params.id === "nueva";
+const id = Number(Astro.params.id);
+const categoria = !nueva && Number.isInteger(id) ? (await listMenuForAdmin(env.DB)).find((c) => c.id === id) : undefined;
+if (!nueva && !categoria) return Astro.redirect("/carta", 303);
+
+let valores: CategoriaForm = categoria ? categoriaAForm(categoria) : CATEGORIA_VACIA;
+let errores: Record<string, string> = {};
+let problema = "";
+
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  if (form.get("accion") === "borrar" && categoria) {
+    const r = await deleteMenuCategory(env.DB, categoria.id);
+    if (r.ok) return Astro.redirect(conAviso("/carta", "carta-borrado", categoria.name), 303);
+    problema = r.reason ?? "No se pudo borrar.";
+  } else {
+    const leido = leerCategoria(form);
+    valores = leido.valores;
+    const r = await saveMenuCategory(env.DB, categoria?.id, leido.borrador, Astro.locals.email);
+    if (r.ok) return Astro.redirect(conAviso("/carta", "carta", valores.name), 303);
+    errores = r.errors;
+    problema = r.reason ?? "";
+  }
+}
+
+const hayErrores = Object.keys(errores).length > 0;
+const titulo = nueva ? "Nueva categoría" : categoria?.name ?? "Categoría";
+---
+
+<Admin titulo={titulo} pestana="carta">
+  <Fragment slot="barra">
+    <a class="atras" href="/carta">‹ Carta</a>
+  </Fragment>
+
+  <h1>{titulo}</h1>
+
+  {
+    (problema || hayErrores) && (
+      <div class="aviso aviso--error" role="alert">
+        <div>
+          <b>{problema ? "No se pudo." : "Falta revisar algunos campos."}</b>
+          <small>{problema || "Están marcados abajo. No se guardó nada."}</small>
+        </div>
+      </div>
+    )
+  }
+
+  <form class="form" method="post">
+    <Campo etiqueta="Nombre" name="name" value={valores.name} error={errores.name} required maxlength={40} ayuda="Café · Filtrados · Pastelería" />
+    <Campo
+      etiqueta="Nota (opcional)"
+      name="note"
+      value={valores.note}
+      error={errores.note}
+      maxlength={80}
+      ayuda="Una línea debajo del título, por ejemplo: Leche vegetal +$800"
+    />
+    <label class="tog">
+      <span><b>Visible en la carta</b><small>Apagada, la categoría entera no aparece en el sitio.</small></span>
+      <input class="sw" type="checkbox" name="isVisible" checked={valores.isVisible} />
+    </label>
+    <div class="guardar">
+      <button class="btn btn--pri btn--ancho" type="submit">{nueva ? "Crear la categoría" : "Guardar"}</button>
+    </div>
+  </form>
+
+  {
+    categoria && (
+      <>
+        <button class="btn btn--peligro btn--ancho" type="button" data-abrir-borrar>Borrar esta categoría</button>
+        <dialog class="confirmar" data-borrar>
+          <form method="post">
+            <h2>¿Borrar {categoria.name}?</h2>
+            <p>
+              {categoria.items.length > 0
+                ? "Primero tenés que mover sus ítems a otra categoría o borrarlos."
+                : "Sale de la carta. No se puede deshacer."}
+            </p>
+            {categoria.items.length === 0 && (
+              <button class="btn btn--peligro btn--ancho" type="submit" name="accion" value="borrar">Sí, borrar</button>
+            )}
+            <button class="btn btn--sec btn--ancho" type="submit" formmethod="dialog">Cancelar</button>
+          </form>
+        </dialog>
+      </>
+    )
+  }
+</Admin>
+
+<script>
+  import { conectarConfirmar } from "../../../scripts/confirmar";
+  conectarConfirmar();
+</script>
+
+<style>
+  .tog {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 56px;
+    border-top: 1px solid var(--linea);
+    cursor: pointer;
+  }
+
+  .tog span {
+    display: grid;
+  }
+
+  .tog b {
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .tog small {
+    font-size: 12.5px;
+    color: var(--color-ceniza);
+  }
+</style>

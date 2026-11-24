@@ -13,12 +13,13 @@ export function applyMigrations(real: Database.Database): void {
   for (const name of files) real.exec(sql(`../migrations/${name}`));
 }
 
-/** Una base en memoria con las migraciones y el seed, como la local del sitio. */
+/** Una base en memoria con las migraciones y los seeds, como la local del sitio. */
 export function seededDatabase(): Database.Database {
   const real = new Database(":memory:");
   real.pragma("foreign_keys = ON");
   applyMigrations(real);
   real.exec(sql("../seed/seed.sql"));
+  real.exec(sql("../seed/menu.sql"));
   return real;
 }
 

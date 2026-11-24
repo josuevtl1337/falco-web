@@ -173,6 +173,27 @@ export const productOptionInputSchema = z.object({
   sortOrder: z.number().int().default(0),
 });
 
+const priceArs = z
+  .number({ invalid_type_error: "Poné el precio en pesos, sin centavos." })
+  .int("Poné el precio en pesos, sin centavos.")
+  .min(0, "El precio no puede ser negativo.");
+
+/** Una categoría de la carta del local: "Café", "Pastelería". */
+export const menuCategoryInputSchema = z.object({
+  name: requiredText(40),
+  note: optionalText(80),
+  isVisible: z.boolean().default(true),
+});
+
+/** Un ítem de la carta del local: un precio solo, el de la barra. */
+export const menuItemInputSchema = z.object({
+  categoryId: z.number().int().positive("Elegí una categoría."),
+  name: requiredText(60),
+  description: optionalText(200),
+  priceArs: priceArs,
+  isVisible: z.boolean().default(true),
+});
+
 export const settingsSchema = z.object({
   hopperCoffeeId: z.number().int().positive().nullable(),
   whatsappNumber: z
@@ -192,3 +213,5 @@ export type CoffeeInput = z.infer<typeof coffeeInputSchema>;
 export type ProductInput = z.infer<typeof productInputSchema>;
 export type ProductOptionInput = z.infer<typeof productOptionInputSchema>;
 export type SettingsInput = z.infer<typeof settingsSchema>;
+export type MenuCategoryInput = z.infer<typeof menuCategoryInputSchema>;
+export type MenuItemInput = z.infer<typeof menuItemInputSchema>;

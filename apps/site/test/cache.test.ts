@@ -9,8 +9,8 @@ describe("la caché de las páginas", () => {
     );
   });
 
-  it("la carta nunca se cachea", () => {
-    expect(cacheHeaderFor("/carta")).toBe("no-store");
+  it("la carta se cachea como las demás páginas: un precio nuevo tarda un minuto", () => {
+    expect(cacheHeaderFor("/carta")).toBe("public, max-age=0, s-maxage=60");
   });
 
   it("el 404 no se cachea, para que una página nueva se vea enseguida", () => {
