@@ -124,6 +124,12 @@ export const coffeeInputSchema = z.object({
   tastingNotes: optionalText(120),
   description: optionalText(400),
   roaster: requiredText(60).default("Puerto Blest"),
+  scaScore: z
+    .number({ invalid_type_error: "Poné el puntaje con números, por ejemplo 86.5." })
+    .min(60, "El puntaje SCA va de 60 a 100.")
+    .max(100, "El puntaje SCA va de 60 a 100.")
+    .nullish()
+    .transform((value) => value ?? undefined),
   acidity: profileValue,
   sweetness: profileValue,
   body: profileValue,

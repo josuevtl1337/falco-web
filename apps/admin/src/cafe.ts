@@ -11,8 +11,9 @@ export function leerCafe(form: FormData, prefijo = ""): CoffeeDraft {
   const PERFIL = ["acidity", "sweetness", "body", "aroma", "finish"];
   const texto = (campo: string) =>
     String(form.get(PERFIL.includes(campo) ? campo : `${prefijo}${campo}`) ?? "");
+  // "86,5" y "86.5" son lo mismo: en castellano el decimal va con coma.
   const numero = (campo: string) => {
-    const valor = texto(campo).trim();
+    const valor = texto(campo).trim().replace(",", ".");
     return valor === "" ? undefined : Number(valor);
   };
   return {
@@ -25,6 +26,7 @@ export function leerCafe(form: FormData, prefijo = ""): CoffeeDraft {
     tastingNotes: texto("tastingNotes"),
     description: texto("description"),
     roaster: texto("roaster") || "Puerto Blest",
+    scaScore: numero("scaScore"),
     acidity: numero("acidity") as number,
     sweetness: numero("sweetness") as number,
     body: numero("body") as number,
@@ -44,6 +46,7 @@ export type CafeForm = {
   tastingNotes: string;
   description: string;
   roaster: string;
+  scaScore: string;
   perfil: { acidity: number; sweetness: number; body: number; aroma: number; finish: number };
 };
 
@@ -57,6 +60,7 @@ export const CAFE_VACIO: CafeForm = {
   tastingNotes: "",
   description: "",
   roaster: "Puerto Blest",
+  scaScore: "",
   perfil: { acidity: 3, sweetness: 3, body: 3, aroma: 3, finish: 3 },
 };
 
@@ -71,6 +75,7 @@ export function cafeAForm(cafe: Coffee): CafeForm {
     tastingNotes: cafe.tastingNotes ?? "",
     description: cafe.description ?? "",
     roaster: cafe.roaster,
+    scaScore: cafe.scaScore === undefined ? "" : String(cafe.scaScore).replace(".", ","),
     perfil: { ...cafe.profile },
   };
 }
@@ -87,6 +92,7 @@ export function borradorAForm(borrador: CoffeeDraft): CafeForm {
     tastingNotes: borrador.tastingNotes ?? "",
     description: borrador.description ?? "",
     roaster: borrador.roaster ?? "Puerto Blest",
+    scaScore: borrador.scaScore == null || Number.isNaN(borrador.scaScore) ? "" : String(borrador.scaScore).replace(".", ","),
     perfil: {
       acidity: perfil(borrador.acidity),
       sweetness: perfil(borrador.sweetness),
