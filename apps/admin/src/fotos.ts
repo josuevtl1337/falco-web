@@ -22,7 +22,7 @@ export function validarFoto(tipo: string, tamanio: number): string | null {
 }
 
 /** Dónde vive cada foto en R2: el sitio sólo sirve estas carpetas. */
-export type CarpetaDeFotos = "productos" | "tolva" | "carta";
+export type CarpetaDeFotos = "productos" | "tolva" | "carta" | "instagram";
 
 /**
  * `<carpeta>/<id>-<hash>.<ext>`: el hash del contenido hace que cada foto

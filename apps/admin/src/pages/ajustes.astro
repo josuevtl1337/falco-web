@@ -1,22 +1,38 @@
 ---
 import { env } from "cloudflare:workers";
-import { getSettings, saveSettings } from "@falco/db";
+import { getSettings, saveInstagramPost, saveSettings } from "@falco/db";
 import Admin from "../layouts/Admin.astro";
 import Campo from "../components/Campo.astro";
+import SeccionFoto from "../components/SeccionFoto.astro";
 import { conAviso } from "../avisos";
 
+const ajustes = await getSettings(env.DB);
 let errores: Record<string, string> = {};
-let valores = await getSettings(env.DB).then((s) => ({
-  whatsappNumber: s.whatsapp_number ?? "",
-  menuUrl: s.menu_url ?? "",
-  instagramUrl: s.instagram_url ?? "",
-}));
+let valores = {
+  whatsappNumber: ajustes.whatsapp_number ?? "",
+  menuUrl: ajustes.menu_url ?? "",
+  instagramUrl: ajustes.instagram_url ?? "",
+};
+// La publicación de Instagram que muestra la home en la compu: va en su propio
+// formulario, así un link mal pegado no frena el guardado de los demás.
+let errores_ig: Record<string, string> = {};
+let post = {
+  url: ajustes.instagram_post_url ?? "",
+  caption: ajustes.instagram_post_caption ?? "",
+};
+const sitio = (env as unknown as { SITE_URL?: string }).SITE_URL ?? "https://falcocafe.com.ar";
 // Los links de prueba usan siempre lo GUARDADO, no lo que se está escribiendo:
 // sirven para confirmar que lo que quedó en la base anda.
 const guardado = { ...valores };
 
 if (Astro.request.method === "POST") {
   const form = await Astro.request.formData();
+  if (form.get("seccion") === "instagram") {
+    post = { url: String(form.get("url") ?? ""), caption: String(form.get("caption") ?? "") };
+    const r = await saveInstagramPost(env.DB, post, Astro.locals.email);
+    if (r.ok) return Astro.redirect(conAviso("/ajustes", "instagram"), 303);
+    errores_ig = r.errors;
+  } else {
   valores = {
     whatsappNumber: String(form.get("whatsappNumber") ?? ""),
     menuUrl: String(form.get("menuUrl") ?? ""),
@@ -25,6 +41,7 @@ if (Astro.request.method === "POST") {
   const resultado = await saveSettings(env.DB, valores, Astro.locals.email);
   if (resultado.ok) return Astro.redirect(conAviso("/ajustes", "ajustes"), 303);
   errores = resultado.errors;
+  }
 }
 ---
 
@@ -78,4 +95,55 @@ if (Astro.request.method === "POST") {
       <button class="btn btn--pri btn--ancho" type="submit">Guardar ajustes</button>
     </div>
   </form>
+
+  <section class="ig" aria-labelledby="ig-titulo">
+    <h2 class="k" id="ig-titulo">Instagram en la home</h2>
+    <p class="nota">
+      La publicación que se ve en la home, en la compu, al lado del título. Tocándola se abre en Instagram.
+      Cuando publiques algo nuevo, cambiá el link y la foto. Sin link o sin foto, la home muestra el café en tolva.
+    </p>
+    <form class="form" method="post">
+      <input type="hidden" name="seccion" value="instagram" />
+      <Campo
+        etiqueta="Link de la publicación"
+        name="url"
+        value={post.url}
+        error={errores_ig.url}
+        type="url"
+        inputmode="url"
+        ayuda="En Instagram: los tres puntitos de la publicación › Copiar enlace."
+      />
+      <Campo
+        etiqueta="Texto (opcional)"
+        name="caption"
+        value={post.caption}
+        error={errores_ig.caption}
+        maxlength={220}
+        largo
+        ayuda="El comienzo del texto de la publicación. Se muestra debajo de la foto."
+      />
+      <div class="guardar">
+        <button class="btn btn--sec btn--ancho" type="submit">Guardar la publicación</button>
+      </div>
+    </form>
+    <SeccionFoto
+      accion="/ajustes/instagram-foto"
+      imageKey={ajustes.instagram_post_image}
+      alt="La foto de la publicación"
+      sitio={sitio}
+      sinFoto="Todavía no hay foto: la home muestra el café en tolva."
+      primero=""
+      ayuda="La primera foto de la publicación, sin captura de pantalla. Se achica sola antes de subir."
+    />
+  </section>
 </Admin>
+
+<style>
+  .ig {
+    display: grid;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--linea);
+  }
+</style>

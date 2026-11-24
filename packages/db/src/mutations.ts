@@ -3,6 +3,7 @@ import { allRows, type WritableDb, type WritableStatement } from "./queries";
 import { slugify } from "./slug";
 import {
   coffeeInputSchema,
+  instagramPostSchema,
   menuCategoryInputSchema,
   menuItemInputSchema,
   productInputSchema,
@@ -100,6 +101,47 @@ export async function saveSettings(
     ),
   );
   return { ok: true };
+}
+
+/* ------------------------------------------------- Instagram en la home */
+
+export type InstagramPostDraft = z.input<typeof instagramPostSchema>;
+
+/** El link y el texto de la publicación. Sin texto, la fila se borra. */
+export async function saveInstagramPost(
+  db: WritableDb,
+  input: InstagramPostDraft,
+  by: string,
+): Promise<MutationResult> {
+  const parsed = instagramPostSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error) };
+  await db.batch([
+    upsertSetting(db, "instagram_post_url", parsed.data.url, by),
+    parsed.data.caption
+      ? upsertSetting(db, "instagram_post_caption", parsed.data.caption, by)
+      : db.prepare("DELETE FROM settings WHERE key = 'instagram_post_caption'"),
+  ]);
+  return { ok: true };
+}
+
+/**
+ * La foto de la publicación: guarda la clave nueva (o la saca, con null) y
+ * devuelve la anterior para que quien la subió la borre de R2.
+ */
+export async function setInstagramPostImage(
+  db: WritableDb,
+  key: string | null,
+  by: string,
+): Promise<MutationResult<{ previousKey: string | null }>> {
+  const current = await db
+    .prepare("SELECT value FROM settings WHERE key = 'instagram_post_image'")
+    .first<{ value: string }>();
+  await db.batch([
+    key
+      ? upsertSetting(db, "instagram_post_image", key, by)
+      : db.prepare("DELETE FROM settings WHERE key = 'instagram_post_image'"),
+  ]);
+  return { ok: true, previousKey: current?.value ?? null };
 }
 
 /* --------------------------------------------------------------- Horarios */

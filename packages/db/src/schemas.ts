@@ -200,6 +200,15 @@ export const menuItemInputSchema = z.object({
   isVisible: z.boolean().default(true),
 });
 
+/** La publicación de Instagram que muestra la home en la compu. */
+export const instagramPostSchema = z.object({
+  url: httpsUrl.refine(
+    (value) => /^https:\/\/(www\.)?instagram\.com\//.test(value),
+    "Pegá el link de la publicación, el que empieza con https://www.instagram.com/",
+  ),
+  caption: optionalText(220),
+});
+
 export const settingsSchema = z.object({
   hopperCoffeeId: z.number().int().positive().nullable(),
   whatsappNumber: z
@@ -219,5 +228,6 @@ export type CoffeeInput = z.infer<typeof coffeeInputSchema>;
 export type ProductInput = z.infer<typeof productInputSchema>;
 export type ProductOptionInput = z.infer<typeof productOptionInputSchema>;
 export type SettingsInput = z.infer<typeof settingsSchema>;
+export type InstagramPostInput = z.infer<typeof instagramPostSchema>;
 export type MenuCategoryInput = z.infer<typeof menuCategoryInputSchema>;
 export type MenuItemInput = z.infer<typeof menuItemInputSchema>;

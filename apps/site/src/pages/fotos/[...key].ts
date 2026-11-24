@@ -4,12 +4,12 @@ import { env } from "cloudflare:workers";
 /**
  * Las fotos de los productos, desde R2. La clave cambia con cada foto (lleva
  * el hash del contenido), así que se puede cachear para siempre: una foto
- * nueva es otra dirección. Sólo se sirve lo que está en productos/, tolva/ y
- * carta/.
+ * nueva es otra dirección. Sólo se sirve lo que está en productos/, tolva/,
+ * carta/ e instagram/.
  */
 export const GET: APIRoute = async ({ params }) => {
   const key = params.key ?? "";
-  if (!/^(productos|tolva|carta)\/[\w-]+\.(webp|jpg)$/.test(key)) return new Response(null, { status: 404 });
+  if (!/^(productos|tolva|carta|instagram)\/[\w-]+\.(webp|jpg)$/.test(key)) return new Response(null, { status: 404 });
 
   const foto = await env.PHOTOS.get(key);
   if (!foto) return new Response(null, { status: 404, headers: { "cache-control": "no-store" } });

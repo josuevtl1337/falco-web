@@ -65,6 +65,19 @@ export async function getSettings(db: ReadableDb): Promise<SettingsMap> {
   return settings;
 }
 
+export type InstagramPost = { url: string; imageKey: string; caption?: string };
+
+/**
+ * La publicación de Instagram de la home, de los ajustes. Sin link o sin foto
+ * no hay nada que mostrar.
+ */
+export function instagramPostOf(settings: SettingsMap): InstagramPost | undefined {
+  const url = settings.instagram_post_url;
+  const imageKey = settings.instagram_post_image;
+  if (!url || !imageKey) return undefined;
+  return { url, imageKey, caption: settings.instagram_post_caption };
+}
+
 export async function getHopperCoffee(
   db: ReadableDb,
 ): Promise<Coffee | undefined> {
