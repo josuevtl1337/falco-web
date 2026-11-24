@@ -8,8 +8,10 @@ import {
   setProductImage,
   deleteHopperCoffee,
   deleteSpecialDay,
+  saveInstagramPost,
   saveSettings,
   saveSpecialDay,
+  setInstagramPostImage,
   saveWeekHours,
   setHopperCoffee,
   setHopperCoffeeImage,
@@ -19,6 +21,7 @@ import {
   getHopperCoffee,
   getSettings,
   getWeekHours,
+  instagramPostOf,
   listHopperCoffees,
   listShelfForAdmin,
 } from "../src/queries";
@@ -500,5 +503,40 @@ describe("la foto de un producto", () => {
     expect(segunda).toEqual({ ok: true, previousKey: "productos/2-aaa.webp" });
     const quitar = await setProductImage(db, 2, null, QUIEN);
     expect(quitar).toEqual({ ok: true, previousKey: "productos/2-bbb.webp" });
+  });
+});
+
+describe("la publicación de Instagram de la home", () => {
+  it("guarda el link y el texto; sin texto, lo borra", async () => {
+    const url = "https://www.instagram.com/p/abc123/";
+    expect(await saveInstagramPost(db, { url, caption: "Así estuvo el primer añito" }, QUIEN)).toEqual({ ok: true });
+    let s = await getSettings(db);
+    expect(s.instagram_post_url).toBe(url);
+    expect(s.instagram_post_caption).toBe("Así estuvo el primer añito");
+    await saveInstagramPost(db, { url, caption: "" }, QUIEN);
+    s = await getSettings(db);
+    expect(s.instagram_post_caption).toBeUndefined();
+  });
+
+  it("sólo acepta links de Instagram", async () => {
+    const r = await saveInstagramPost(db, { url: "https://www.facebook.com/falco" }, QUIEN);
+    expect(r.ok).toBe(false);
+  });
+
+  it("la foto devuelve la anterior para borrarla, y se puede quitar", async () => {
+    expect(await setInstagramPostImage(db, "instagram/1-a.webp", QUIEN)).toEqual({ ok: true, previousKey: null });
+    expect(await setInstagramPostImage(db, "instagram/1-b.webp", QUIEN)).toEqual({
+      ok: true,
+      previousKey: "instagram/1-a.webp",
+    });
+    expect(await setInstagramPostImage(db, null, QUIEN)).toEqual({ ok: true, previousKey: "instagram/1-b.webp" });
+    expect((await getSettings(db)).instagram_post_image).toBeUndefined();
+  });
+
+  it("la home la muestra sólo con link y foto", () => {
+    expect(instagramPostOf({ instagram_post_url: "https://www.instagram.com/p/x/" })).toBeUndefined();
+    expect(
+      instagramPostOf({ instagram_post_url: "https://www.instagram.com/p/x/", instagram_post_image: "instagram/1-a.webp" }),
+    ).toEqual({ url: "https://www.instagram.com/p/x/", imageKey: "instagram/1-a.webp", caption: undefined });
   });
 });

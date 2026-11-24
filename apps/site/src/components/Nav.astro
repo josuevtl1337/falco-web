@@ -31,6 +31,10 @@ const menuLinks = [
 
 const path = Astro.url.pathname;
 
+// En la home del celular la carta ya tiene su bloque grande: la barra no la
+// repite.
+const conCartaMovil = path !== "/";
+
 // En la carta (fondo papel) la cara cuelga sobre el claro y no se distingue:
 // ahí la barra lleva sólo el logo, a la izquierda.
 const sinCara = path === "/carta";
@@ -95,13 +99,17 @@ const sinCara = path === "/carta";
   <!-- En el celular las opciones se esconden en el menú, salvo la carta:
        es lo que busca quien escanea el QR de la mesa o entra al local. -->
   <div class="nav__movil">
-    <a
-      class="nav__carta-movil"
-      href="/carta"
-      aria-current={path === "/carta" ? "page" : undefined}
-    >
-      <span>Carta</span>
-    </a>
+    {
+      conCartaMovil && (
+        <a
+          class="nav__carta-movil"
+          href="/carta"
+          aria-current={path === "/carta" ? "page" : undefined}
+        >
+          <span>Carta</span>
+        </a>
+      )
+    }
     <button class="nav__burger" type="button" data-menu-abrir aria-haspopup="dialog">
       <span>Menú</span>
     </button>
@@ -342,8 +350,9 @@ const sinCara = path === "/carta";
     /* En un renglón: si no entran, la columna crece y el logo se corre. */
     flex-wrap: nowrap;
     align-items: center;
-    /* 40px entre opciones, medido en la lámina. */
-    gap: var(--space-xl);
+    /* 40px entre opciones, medido en la lámina; en una notebook se aprieta
+       para que ninguna opción se parta en dos renglones. */
+    gap: clamp(var(--space-md), 2.6vw, var(--space-xl));
     margin: 0;
     padding: 0;
   }
@@ -360,6 +369,7 @@ const sinCara = path === "/carta";
     letter-spacing: 0.18em;
     text-transform: uppercase;
     text-decoration: none;
+    white-space: nowrap;
     color: var(--color-ceniza);
   }
 
