@@ -38,6 +38,7 @@ const site = Astro.site ?? Astro.url;
     set:html={jsonForScript(menuJsonLd(site, categories))}
   />
 
+  <div class="carta-hoja">
   <div class="carta">
     <header class="carta__cabeza">
       <span class="chip chip--fill chip--shadow">La carta</span>
@@ -94,11 +95,16 @@ const site = Astro.site ?? Astro.url;
                   .join(" · ")}
               >
                 <div class="plato__texto">
-                  <h3 class="plato__nombre">{item.name}</h3>
+                  {/* Como en la carta impresa: el nombre, una línea de
+                      puntos y el precio en el mismo renglón. */}
+                  <div class="plato__linea">
+                    <h3 class="plato__nombre">{item.name}</h3>
+                    <span class="plato__puntos" aria-hidden="true" />
+                    <span class="plato__precio">{formatArs(item.priceArs)}</span>
+                  </div>
                   {item.description && (
                     <p class="plato__desc">{item.description}</p>
                   )}
-                  <p class="plato__precio">{formatArs(item.priceArs)}</p>
                 </div>
                 {item.imageKey && (
                   <img
@@ -123,6 +129,7 @@ const site = Astro.site ?? Astro.url;
       la barra: capaz lo tenemos fuera de carta.
     </p>
   </div>
+  </div>
 
   <Pie
     slot="pie"
@@ -137,6 +144,23 @@ const site = Astro.site ?? Astro.url;
 </script>
 
 <style>
+  /*
+   * La carta va en modo claro, como la impresa: papel, texto carbón y el
+   * tostado para los precios y las etiquetas. Es la única página clara del
+   * sitio; la barra y el pie siguen oscuros y la enmarcan.
+   */
+  .carta-hoja {
+    --papel: #ebe4d1;
+    --papel-claro: #f4efe2;
+    --tinta: #292a2c;
+    /* Gris tibio para lo secundario: el ceniza del sitio sobre papel no
+       llega a 4.5:1; este da 5.6:1. */
+    --tinta-suave: #5c574d;
+    --raya: rgba(41, 42, 44, 0.16);
+    background: var(--papel);
+    color: var(--tinta);
+  }
+
   .carta {
     --ancho-carta: 1120px;
     --alto-barra: 112px;
@@ -169,12 +193,12 @@ const site = Astro.site ?? Astro.url;
     font-size: var(--text-micro);
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--color-ceniza);
+    color: var(--tinta-suave);
   }
 
   /*
    * El buscador y las pestañas quedan pegados abajo de la barra al
-   * scrollear: en una carta larga, saltar de "Café" a "Pastelería" tiene que
+   * scrollear: en una carta larga, saltar de "Clásicos" a "Salados" tiene que
    * estar siempre a un toque. El fondo tapa lo que pasa por detrás.
    */
   .carta__barra {
@@ -185,8 +209,8 @@ const site = Astro.site ?? Astro.url;
     gap: var(--space-sm);
     margin-inline: calc(-1 * var(--space-md));
     padding: var(--space-sm) var(--space-md);
-    background: var(--color-carbon);
-    box-shadow: 0 12px 16px -12px rgb(0 0 0 / 0.6);
+    background: var(--papel);
+    border-bottom: 1px solid var(--raya);
   }
 
   .carta__buscar {
@@ -195,12 +219,13 @@ const site = Astro.site ?? Astro.url;
     gap: 10px;
     min-height: var(--touch-min);
     padding-inline: 14px;
-    border: 1px solid rgba(232, 226, 208, 0.18);
-    background: var(--color-sombra);
+    border: 1px solid rgba(41, 42, 44, 0.35);
+    background: var(--papel-claro);
   }
 
   .carta__buscar:focus-within {
-    border-color: var(--color-brasa);
+    border-color: var(--color-tostado);
+    box-shadow: 3px 3px 0 var(--color-tostado);
   }
 
   .carta__buscar svg {
@@ -208,7 +233,7 @@ const site = Astro.site ?? Astro.url;
     width: 18px;
     height: 18px;
     fill: none;
-    stroke: var(--color-ceniza);
+    stroke: var(--tinta-suave);
     stroke-width: 1.8;
     stroke-linecap: round;
   }
@@ -219,14 +244,14 @@ const site = Astro.site ?? Astro.url;
     padding: 10px 0;
     border: 0;
     background: none;
-    color: var(--color-hueso);
+    color: var(--tinta);
     font: inherit;
     font-size: 16px;
     outline: none;
   }
 
   .carta__buscar input::placeholder {
-    color: var(--color-ceniza);
+    color: var(--tinta-suave);
   }
 
   .carta__pestanas {
@@ -256,7 +281,7 @@ const site = Astro.site ?? Astro.url;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     text-decoration: none;
-    color: var(--color-hueso);
+    color: var(--tinta);
     white-space: nowrap;
   }
 
@@ -266,18 +291,22 @@ const site = Astro.site ?? Astro.url;
     position: absolute;
     inset: 0;
     z-index: -1;
-    border: 1px solid rgba(232, 226, 208, 0.22);
+    border: 1px solid rgba(41, 42, 44, 0.3);
     transform: skewX(var(--angle-plate));
+  }
+
+  .carta__pestanas a[aria-current] {
+    color: var(--color-hueso);
   }
 
   .carta__pestanas a[aria-current]::before {
     border-color: var(--color-tostado);
     background: var(--color-tostado);
-    box-shadow: 3px 3px 0 var(--color-hueso);
+    box-shadow: 3px 3px 0 var(--tinta);
   }
 
   .carta__pestanas a:focus-visible {
-    outline: 2px solid var(--color-brasa);
+    outline: 2px solid var(--color-tostado);
     outline-offset: 2px;
   }
 
@@ -292,15 +321,16 @@ const site = Astro.site ?? Astro.url;
     display: grid;
     gap: 4px;
     padding-bottom: var(--space-sm);
-    border-bottom: 1px solid rgba(232, 226, 208, 0.12);
+    border-bottom: 2px solid var(--tinta);
   }
 
   .carta__seccion-cabeza h2 {
     margin: 0;
     font-family: var(--font-display);
     font-weight: 500;
-    font-size: clamp(26px, 3vw, 36px);
-    letter-spacing: -0.03em;
+    font-size: clamp(28px, 3.4vw, 40px);
+    line-height: 1;
+    letter-spacing: -0.035em;
   }
 
   .carta__seccion-cabeza p {
@@ -309,75 +339,87 @@ const site = Astro.site ?? Astro.url;
     font-size: var(--text-micro);
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-brasa);
+    color: var(--color-tostado);
   }
 
+  /* Dos columnas en la compu, como las dos páginas de la carta impresa. */
   .carta__lista {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
-    gap: 12px var(--space-lg);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr));
+    gap: 0 var(--space-xl);
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  /* Un ítem: el texto a la izquierda, el precio abajo y la foto a la
-     derecha si la tiene. */
+  /* Un ítem: renglones de carta, no tarjetas. La foto, si la tiene, a la
+     derecha. */
   .plato {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-md);
     align-items: center;
-    min-height: 96px;
-    padding: 14px 16px;
-    background: linear-gradient(168deg, var(--color-piedra), rgb(35, 36, 38));
-    border: 1px solid rgba(232, 226, 208, 0.1);
+    padding: 12px 0;
+    border-bottom: 1px solid var(--raya);
   }
 
   .plato--foto {
-    grid-template-columns: minmax(0, 1fr) 112px;
-    padding-right: 10px;
+    grid-template-columns: minmax(0, 1fr) 84px;
   }
 
   .plato__texto {
     display: grid;
-    gap: 4px;
+    gap: 3px;
+  }
+
+  .plato__linea {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
   }
 
   .plato__nombre {
     margin: 0;
     font-family: var(--font-display);
-    font-weight: 500;
-    font-size: 19px;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+  }
+
+  .plato__puntos {
+    flex: 1;
+    min-width: 16px;
+    border-bottom: 2px dotted rgba(41, 42, 44, 0.3);
+    transform: translateY(-4px);
+  }
+
+  .plato__precio {
+    flex: none;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--tinta);
   }
 
   .plato__desc {
     margin: 0;
     font-size: 14px;
     line-height: 1.4;
-    color: var(--color-ceniza);
-  }
-
-  .plato__precio {
-    margin: 4px 0 0;
-    font-family: var(--font-mono);
-    font-size: 15px;
-    color: var(--color-brasa);
+    color: var(--tinta-suave);
   }
 
   .plato__foto {
     display: block;
-    width: 112px;
-    height: 112px;
+    width: 84px;
+    height: 84px;
     object-fit: cover;
-    border: 1px solid rgba(232, 226, 208, 0.12);
+    border: 1px solid var(--raya);
   }
 
   .carta__vacio {
     margin: 0;
-    color: var(--color-ceniza);
+    color: var(--tinta-suave);
   }
 
   @media (max-width: 899px) {
@@ -392,38 +434,16 @@ const site = Astro.site ?? Astro.url;
       font-size: 34px;
     }
 
-    /* En el celular la carta se lee de corrido: tarjetas bajas, una debajo
-       de otra, para ver varias por pantalla. */
-    .carta__lista {
-      gap: 8px;
-    }
-
-    .plato {
-      min-height: 0;
-      padding: 12px 14px;
-    }
-
     .plato__nombre {
-      font-size: 17px;
+      font-size: 16px;
+    }
+
+    .plato__precio {
+      font-size: 14px;
     }
 
     .plato__desc {
       font-size: 13px;
-    }
-
-    .plato__precio {
-      margin-top: 2px;
-      font-size: 14px;
-    }
-
-    .plato--foto {
-      grid-template-columns: minmax(0, 1fr) 88px;
-      padding-right: 8px;
-    }
-
-    .plato__foto {
-      width: 88px;
-      height: 88px;
     }
   }
 </style>
