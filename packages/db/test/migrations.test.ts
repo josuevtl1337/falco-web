@@ -452,10 +452,15 @@ describe("0003: la carta del local", () => {
     db.exec(read("../migrations/0003_menu.sql"));
   });
 
-  it("crea las tablas y acepta la carta de ejemplo", () => {
-    db.exec(read("../seed/menu.sql"));
-    expect(count("menu_categories")).toBe(4);
-    expect(count("menu_items")).toBeGreaterThan(10);
+  it("crea las tablas, y 0005 carga la carta de verano entera", () => {
+    expect(count("menu_categories")).toBe(0);
+    db.exec(read("../migrations/0005_carta_verano.sql"));
+    expect(count("menu_categories")).toBe(11);
+    expect(count("menu_items")).toBe(38);
+    // Cada ítem quedó en una categoría que existe.
+    expect(
+      one<{ n: number }>("SELECT count(*) AS n FROM menu_items WHERE category_id IS NULL").n,
+    ).toBe(0);
   });
 
   it("un ítem tiene que ser de una categoría que exista, con precio no negativo", () => {
