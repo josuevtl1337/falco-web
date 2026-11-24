@@ -15,6 +15,7 @@ import Calendario from "../components/Calendario.astro";
 import Dialogo from "../components/Dialogo.astro";
 import DondeEstamos from "../components/DondeEstamos.astro";
 import { dayMoment } from "../components/fecha";
+import { notasDe } from "../components/ficha-cafe";
 import Nav from "../components/Nav.astro";
 import Origen from "../components/Origen.astro";
 import { placeLabel } from "../components/origen";
@@ -30,6 +31,8 @@ const nowAR = toArgentina(now);
 const specials = await getUpcomingSpecialDays(env.DB, nowAR.date, 30);
 const status = getOpenStatus(now, week, specials);
 const coffee = await getHopperCoffee(env.DB);
+// Las notas de cata como etiquetas, en la hoja de "Ver cómo es".
+const tastingNotes = notasDe(coffee?.tastingNotes, 5);
 const settings = await getSettings(env.DB);
 
 // Los estantes son lo que sigue abajo de la primera pantalla: la home termina
@@ -339,6 +342,13 @@ const cafe = cafeJsonLd({
 
         <div class="hoja__sabor">
           <span class="chip chip--fill">A qué sabe</span>
+          {tastingNotes.length > 0 && (
+            <ul class="hoja__notas" aria-label="Notas de cata">
+              {tastingNotes.map((nota) => (
+                <li>{nota}</li>
+              ))}
+            </ul>
+          )}
           <Pentagono profile={coffee.profile} />
         </div>
 
@@ -667,6 +677,8 @@ const cafe = cafeJsonLd({
     margin: auto 0 0;
     max-height: 88dvh;
     overflow-y: auto;
+    /* El pentágono y sus etiquetas no pueden abrir un scroll de costado. */
+    overflow-x: hidden;
     gap: var(--space-lg);
     padding: var(--space-sm) var(--space-lg) var(--space-xl);
     border: 0;
@@ -740,6 +752,23 @@ const cafe = cafeJsonLd({
     font-size: var(--text-body);
   }
 
+  /* Las notas, las mismas etiquetas que en las fichas de la tienda. */
+  .hoja__notas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .hoja__notas li {
+    padding: 5px 10px;
+    background: var(--color-sombra);
+    font-size: 13px;
+    color: var(--color-hueso);
+  }
+
   .hoja__molino {
     display: grid;
     justify-items: center;
@@ -760,6 +789,46 @@ const cafe = cafeJsonLd({
     text-transform: uppercase;
     text-align: center;
     color: var(--color-ceniza);
+  }
+
+  /*
+   * Desde 720px la hoja deja de subir desde abajo a todo el ancho: es un
+   * modal angosto y centrado, con la sombra dura tostada de las cajas de la
+   * marca. En una pantalla ancha, una hoja de punta a punta dejaba todo
+   * desparramado y vacío al medio.
+   */
+  @media (min-width: 720px) {
+    .hoja {
+      width: min(600px, calc(100vw - 2 * var(--space-xl)));
+      margin: auto;
+      max-height: min(86dvh, 760px);
+      padding: var(--space-lg) var(--space-xl) var(--space-xl);
+      border: 1px solid rgba(232, 226, 208, 0.16);
+      box-shadow: 9px 9px 0 var(--color-tostado);
+    }
+
+    .hoja[open] {
+      animation: hojaAparece 0.38s var(--ease-persona) both;
+    }
+
+    .hoja__tirador {
+      display: none;
+    }
+
+    .hoja__grid {
+      grid-template-columns: minmax(0, 1fr) 140px;
+    }
+
+    .hoja__molino img {
+      max-width: 140px;
+    }
+  }
+
+  @keyframes hojaAparece {
+    from {
+      opacity: 0;
+      transform: translateY(14px) scale(0.98);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

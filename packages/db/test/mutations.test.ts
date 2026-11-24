@@ -208,6 +208,14 @@ describe("los feriados", () => {
 });
 
 describe("la tolva", () => {
+  it("guarda el puntaje SCA y lo devuelve en el café", async () => {
+    const r = await createHopperCoffee(db, { ...cafe, scaScore: 87.25 }, QUIEN);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    await setHopperCoffee(db, r.id, QUIEN);
+    expect((await getHopperCoffee(db))?.scaScore).toBe(87.25);
+  });
+
   it("un café nuevo se crea y se puede poner en tolva", async () => {
     const r = await createHopperCoffee(db, cafe, QUIEN);
     expect(r.ok).toBe(true);

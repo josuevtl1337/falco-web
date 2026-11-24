@@ -43,6 +43,13 @@ describe("el formulario de producto", () => {
     expect(borrador.coffee).toBeDefined();
   });
 
+  it("el puntaje SCA acepta coma decimal; vacío queda sin valor", () => {
+    const con = leerProducto(form([["kind", "coffee"], ["coffee-scaScore", "86,5"]]));
+    expect(con.borrador.coffee?.scaScore).toBe(86.5);
+    const sin = leerProducto(form([["kind", "coffee"], ["coffee-scaScore", ""]]));
+    expect(sin.borrador.coffee?.scaScore).toBeUndefined();
+  });
+
   it("un accesorio no manda origen aunque el formulario lo traiga", () => {
     const { borrador } = leerProducto(form([["kind", "gear"], ["coffee-name", "X"]]));
     expect(borrador.coffee).toBeUndefined();

@@ -1,8 +1,8 @@
 ---
-import type { ProductWithOptions } from "@falco/db";
+import type { Coffee, ProductWithOptions } from "@falco/db";
 import { formatArs } from "@falco/domain";
 import { NEW_BADGE_STAR } from "./estrella";
-import SelloTostadero from "./SelloTostadero.astro";
+import { nombreSinPais, notasDe, origenDe, puntajeSca } from "./ficha-cafe";
 
 interface Props {
   product: ProductWithOptions;
@@ -13,21 +13,29 @@ interface Props {
    * de lo que se ve en pantalla es la copia), pero el tabulador la saltea.
    */
   copy?: boolean;
-  /** El tostadero, si el producto es un café: va sobre la foto. */
-  roaster?: string;
+  /**
+   * El café del producto, si es un café. Con él la ficha es la "de papel":
+   * la foto del paquete sobre fondo claro con el tostadero y el puntaje, el
+   * origen arriba del nombre y las notas como etiquetas.
+   */
+  coffee?: Coffee;
 }
 
-const { product, shelfLabel, copy = false, roaster } = Astro.props;
+const { product, shelfLabel, copy = false, coffee } = Astro.props;
+
+const origen = coffee && origenDe(coffee, product.name);
+const nombre = coffee ? nombreSinPais(product.name, coffee.country) : product.name;
+const notas = notasDe(coffee?.tastingNotes);
 ---
 
-<article class="ficha">
+<article class:list={["ficha", coffee && "ficha--cafe"]}>
   <a
     class="ficha__cara"
     href={`/tienda/${product.slug}`}
     tabindex={copy ? -1 : undefined}
   >
     {
-      product.isNew && (
+      product.isNew && !coffee && (
         <span
           class="ficha__nuevo"
           style={`clip-path: polygon(${NEW_BADGE_STAR})`}
@@ -40,19 +48,44 @@ const { product, shelfLabel, copy = false, roaster } = Astro.props;
     <!-- El hueco de la foto. Sin foto, en la lámina este espacio es un
          degradado con una luz arriba, que se lee como algo puesto a propósito
          y no como una imagen rota. Con foto, la foto lo tapa. -->
-    <span class="ficha__foto" aria-hidden="true">
+    <span class="ficha__foto">
       {
         product.imageKey && (
           <img src={`/fotos/${product.imageKey}`} alt="" loading="lazy" decoding="async" />
         )
       }
+      {
+        coffee && (
+          <>
+            <span class="ficha__tostadero">
+              <span class="sr-only">Tostadero </span>
+              {coffee.roaster}
+            </span>
+            {coffee.scaScore !== undefined && (
+              <span class="ficha__sca">
+                <b>{puntajeSca(coffee.scaScore)}</b> <span>SCA</span>
+                <span class="sr-only"> puntos</span>
+              </span>
+            )}
+            {product.isNew && <span class="ficha__placa-nuevo">Nuevo</span>}
+          </>
+        )
+      }
     </span>
 
     <span class="ficha__cuerpo">
-      <span class="ficha__codigo">{shelfLabel}</span>
-      <span class="ficha__nombre">{product.name}</span>
+      <span class="ficha__codigo">{origen ?? shelfLabel}</span>
+      <span class="ficha__nombre">{nombre}</span>
       <span class="ficha__detalle">{product.detail}</span>
-      {roaster && <SelloTostadero roaster={roaster} place="ficha" />}
+      {
+        notas.length > 0 && (
+          <span class="ficha__notas">
+            {notas.map((nota) => (
+              <span>{nota}</span>
+            ))}
+          </span>
+        )
+      }
 
       <span class="ficha__pie">
         <span><b>{formatArs(product.priceCashArs)}</b> efectivo</span>
@@ -154,8 +187,12 @@ const { product, shelfLabel, copy = false, roaster } = Astro.props;
   /* El aire mínimo antes del pie va como margen del último renglón: el del
      pie es `auto` y se estira. */
   .ficha__detalle,
-  .ficha__cuerpo > :global(.sello-tostadero) {
+  .ficha__notas {
     margin-bottom: var(--space-sm);
+  }
+
+  .ficha__detalle:has(+ .ficha__notas) {
+    margin-bottom: 4px;
   }
 
   .ficha__detalle {
@@ -228,6 +265,115 @@ const { product, shelfLabel, copy = false, roaster } = Astro.props;
     animation: wobble 2.4s ease-in-out infinite;
   }
 
+  /*
+   * La ficha de un café: el paquete sobre papel, como una foto de estudio.
+   * Las fotos se suben ya con ese fondo (1200 × 1000, la proporción de este
+   * hueco); el degradé de acá es el mismo, así una foto que todavía no lo
+   * tiene, o que tarda en cargar, no deja un hueco oscuro.
+   */
+  .ficha--cafe .ficha__foto {
+    height: 210px;
+    background: radial-gradient(
+      closest-side at 50% 42%,
+      #f4efe2,
+      #ebe4d1 70%,
+      #ddd4bd
+    );
+    border-bottom: 0;
+  }
+
+  .ficha--cafe .ficha__foto::before {
+    content: none;
+  }
+
+  .ficha__tostadero,
+  .ficha__sca,
+  .ficha__placa-nuevo {
+    position: absolute;
+    z-index: 2;
+  }
+
+  .ficha__tostadero {
+    left: 12px;
+    bottom: 10px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-carbon);
+  }
+
+  .ficha__sca {
+    right: 12px;
+    bottom: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    padding: 5px 8px 4px;
+    background: var(--color-carbon);
+    font-family: var(--font-mono);
+    font-size: 8px;
+    letter-spacing: 0.16em;
+    color: var(--color-hueso);
+  }
+
+  .ficha__sca b {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0;
+    color: var(--color-brasa);
+  }
+
+  /* "Nuevo" en la ficha de papel: una placa tostada dentro de la foto. La
+     estrella de hueso se perdía contra el fondo claro. */
+  .ficha__placa-nuevo {
+    right: 14px;
+    top: 14px;
+    padding: 5px 10px 4px;
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-hueso);
+    isolation: isolate;
+  }
+
+  .ficha__placa-nuevo::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--color-tostado);
+    box-shadow: 3px 3px 0 var(--color-carbon);
+    transform: skewX(-12deg);
+  }
+
+  /* Para el lector de pantalla: "Tostadero Berkel", "86 SCA puntos". */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .ficha__notas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .ficha__notas span {
+    padding: 4px 8px;
+    background: var(--color-sombra);
+    font-size: 12px;
+    color: var(--color-hueso);
+  }
+
   .ficha__cara:focus-visible {
     outline: 2px solid var(--color-brasa);
     outline-offset: 3px;
@@ -240,6 +386,14 @@ const { product, shelfLabel, copy = false, roaster } = Astro.props;
 
     .ficha__foto {
       height: 112px;
+    }
+
+    .ficha--cafe .ficha__foto {
+      height: 172px;
+    }
+
+    .ficha__notas span {
+      font-size: 11px;
     }
 
     .ficha__nombre {

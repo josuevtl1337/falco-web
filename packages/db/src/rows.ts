@@ -9,6 +9,7 @@ export type CoffeeRow = {
   tasting_notes: string | null;
   description: string | null;
   roaster: string;
+  sca_score?: number | null;
   acidity: number;
   sweetness: number;
   body: number;
@@ -63,6 +64,8 @@ export type Coffee = {
   tastingNotes?: string;
   description?: string;
   roaster: string;
+  /** El puntaje SCA, si el tostadero lo informa. */
+  scaScore?: number;
   profile: TastingProfile;
   /** La foto del café en tolva (clave de R2). Los cafés de la tienda no tienen. */
   imageKey?: string;
@@ -112,6 +115,7 @@ export function toCoffee(row: CoffeeRow): Coffee {
     tastingNotes: maybe(row.tasting_notes),
     description: maybe(row.description),
     roaster: row.roaster,
+    scaScore: maybe(row.sca_score ?? null),
     imageKey: maybe(row.image_key ?? null),
     profile: {
       acidity: row.acidity,

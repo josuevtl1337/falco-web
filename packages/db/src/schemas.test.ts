@@ -177,6 +177,14 @@ describe("coffeeInputSchema", () => {
     expect(result.roaster).toBe("Puerto Blest");
   });
 
+  it("el puntaje SCA es opcional y va de 60 a 100, con decimales", () => {
+    expect(coffeeInputSchema.parse(valid).scaScore).toBeUndefined();
+    expect(coffeeInputSchema.parse({ ...valid, scaScore: 86.5 }).scaScore).toBe(86.5);
+    expect(firstError(coffeeInputSchema.safeParse({ ...valid, scaScore: 101 }))).toBe(
+      "El puntaje SCA va de 60 a 100.",
+    );
+  });
+
   it("los valores del pentágono van de 1 a 5", () => {
     expect(firstError(coffeeInputSchema.safeParse({ ...valid, body: 6 }))).toBe(
       "Tiene que ser un número del 1 al 5.",
