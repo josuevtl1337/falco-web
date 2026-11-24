@@ -445,3 +445,17 @@ describe("0002: la foto de la tolva", () => {
     );
   });
 });
+
+describe("0004: el puntaje SCA", () => {
+  beforeEach(() => {
+    db.exec(read("../migrations/0002_hopper_photo.sql"));
+    db.exec(read("../migrations/0004_coffee_sca.sql"));
+  });
+
+  it("es opcional en las dos tablas de cafés y va de 0 a 100", () => {
+    expect(one<{ sca_score: number | null }>("SELECT sca_score FROM coffees LIMIT 1").sca_score).toBeNull();
+    run("UPDATE hopper_coffees SET sca_score = 86.5 WHERE id = 1")();
+    expect(one<{ sca_score: number }>("SELECT sca_score FROM hopper_coffees WHERE id = 1").sca_score).toBe(86.5);
+    expect(run("UPDATE coffees SET sca_score = 120")).toThrow();
+  });
+});
