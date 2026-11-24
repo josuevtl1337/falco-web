@@ -1,0 +1,239 @@
+---
+import { env } from "cloudflare:workers";
+import { listMenuForAdmin, reorderMenu } from "@falco/db";
+import { formatArs } from "@falco/domain";
+import Admin from "../../layouts/Admin.astro";
+import { conAviso } from "../../avisos";
+
+/**
+ * La carta del local: las categorías en el orden en que salen en
+ * falcocafe.com.ar/carta, cada una con sus ítems. Se ordenan arrastrando o
+ * con las flechas, igual que los estantes de la tienda.
+ */
+
+let problema = "";
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  // "categorias" ordena las categorías; un número, los ítems de esa categoría.
+  const lista = String(form.get("lista") ?? "");
+  const categoryId = lista === "categorias" ? undefined : Number(lista);
+  const carta = await listMenuForAdmin(env.DB);
+  let ids =
+    categoryId === undefined
+      ? carta.map((c) => c.id)
+      : (carta.find((c) => c.id === categoryId)?.items ?? []).map((i) => i.id);
+
+  const accion = form.get("accion");
+  if (accion === "ordenar") {
+    ids = String(form.get("ids") ?? "").split(",").filter(Boolean).map(Number);
+  } else {
+    const id = Number(form.get("id"));
+    const i = ids.indexOf(id);
+    const j = accion === "subir" ? i - 1 : i + 1;
+    if (i >= 0 && j >= 0 && j < ids.length) [ids[i], ids[j]] = [ids[j]!, ids[i]!];
+  }
+
+  const r =
+    categoryId !== undefined && !Number.isInteger(categoryId)
+      ? { ok: false as const, reason: "No se encontró esa categoría." }
+      : await reorderMenu(env.DB, categoryId, ids, Astro.locals.email);
+  if (r.ok) return Astro.redirect(conAviso("/carta", "carta-orden"), 303);
+  problema = r.reason ?? "No se pudo guardar el orden.";
+}
+
+const carta = await listMenuForAdmin(env.DB);
+const sitio = (env as unknown as { SITE_URL?: string }).SITE_URL ?? "https://falcocafe.com.ar";
+const totalItems = carta.reduce((n, c) => n + c.items.length, 0);
+---
+
+<Admin titulo="Carta" pestana="carta">
+  <Fragment slot="barra">
+    <h1>Carta</h1>
+    <a class="btn btn--pri" href="/carta/categoria/nueva">+ Categoría</a>
+  </Fragment>
+
+  {problema && <div class="aviso aviso--error" role="alert"><div><b>No se guardó el orden.</b><small>{problema}</small></div></div>}
+
+  {
+    totalItems === 0 ? (
+      <p class="nota">
+        Todavía no hay nada en la carta, así que <a class="enlace" href={`${sitio}/carta`} target="_blank" rel="noopener">falcocafe.com.ar/carta</a> sigue
+        llevando al PDF de Ajustes. Apenas cargues el primer ítem visible, pasa a mostrar esta carta.
+      </p>
+    ) : (
+      <p class="nota">
+        Así sale en <a class="enlace" href={`${sitio}/carta`} target="_blank" rel="noopener">falcocafe.com.ar/carta ↗</a>. Arrastrá desde las
+        rayitas o usá las flechas para ordenar.
+      </p>
+    )
+  }
+
+  {
+    carta.length > 1 && (
+      <section class="grupo" aria-labelledby="orden-categorias">
+        <h2 class="k grupo__titulo" id="orden-categorias">
+          <span>Orden de las categorías</span>
+          <span>{carta.length}</span>
+        </h2>
+        <ul class="lista" data-ordenable="categorias">
+          {carta.map((c, i) => (
+            <li class="item fila" data-id={c.id}>
+              <button class="asa" type="button" data-asa aria-label={`Arrastrar ${c.name} para ordenarla`}>
+                <i /><i /><i />
+              </button>
+              <a class="item__txt" href={`/carta/categoria/${c.id}`}>
+                <b>{c.name}</b>
+                <small>{c.items.length === 1 ? "1 ítem" : `${c.items.length} ítems`}{c.note && ` · ${c.note}`}</small>
+                {!c.isVisible && <span class="chips"><span class="chip">Oculta</span></span>}
+              </a>
+              <form method="post" class="mover">
+                <input type="hidden" name="lista" value="categorias" />
+                <input type="hidden" name="id" value={c.id} />
+                <button class="mover__btn" type="submit" name="accion" value="subir" disabled={i === 0} aria-label={`Subir ${c.name}`}>↑</button>
+                <button class="mover__btn" type="submit" name="accion" value="bajar" disabled={i === carta.length - 1} aria-label={`Bajar ${c.name}`}>↓</button>
+              </form>
+            </li>
+          ))}
+        </ul>
+        <form method="post" hidden data-orden-form="categorias">
+          <input type="hidden" name="lista" value="categorias" />
+          <input type="hidden" name="accion" value="ordenar" />
+          <input type="hidden" name="ids" />
+        </form>
+      </section>
+    )
+  }
+
+  {
+    carta.map((c) => (
+      <section class="grupo" aria-labelledby={`categoria-${c.id}`}>
+        <h2 class="k grupo__titulo" id={`categoria-${c.id}`}>
+          <a class="grupo__nombre" href={`/carta/categoria/${c.id}`}>{c.name} ›</a>
+          <span>{c.isVisible ? c.items.length : "Oculta"}</span>
+        </h2>
+        {c.items.length === 0 ? (
+          <p class="nota">Esta categoría está vacía: en el sitio no aparece hasta que tenga algo.</p>
+        ) : (
+          <ul class="lista" data-ordenable={c.id}>
+            {c.items.map((item, i) => (
+              <li class="item fila" data-id={item.id}>
+                <button class="asa" type="button" data-asa aria-label={`Arrastrar ${item.name} para ordenarlo`}>
+                  <i /><i /><i />
+                </button>
+                <a class="item__txt" href={`/carta/${item.id}`}>
+                  <b>{item.name}</b>
+                  <small>{formatArs(item.priceArs)}{item.description && ` · ${item.description}`}</small>
+                  {(!item.isVisible || item.imageKey) && (
+                    <span class="chips">
+                      {!item.isVisible && <span class="chip">Oculto</span>}
+                      {item.imageKey && <span class="chip">Con foto</span>}
+                    </span>
+                  )}
+                </a>
+                <form method="post" class="mover">
+                  <input type="hidden" name="lista" value={c.id} />
+                  <input type="hidden" name="id" value={item.id} />
+                  <button class="mover__btn" type="submit" name="accion" value="subir" disabled={i === 0} aria-label={`Subir ${item.name}`}>↑</button>
+                  <button class="mover__btn" type="submit" name="accion" value="bajar" disabled={i === c.items.length - 1} aria-label={`Bajar ${item.name}`}>↓</button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        )}
+        <form method="post" hidden data-orden-form={c.id}>
+          <input type="hidden" name="lista" value={c.id} />
+          <input type="hidden" name="accion" value="ordenar" />
+          <input type="hidden" name="ids" />
+        </form>
+        <a class="btn btn--sec btn--ancho" href={`/carta/nuevo?categoria=${c.id}`}>+ Ítem en {c.name}</a>
+      </section>
+    ))
+  }
+
+  {carta.length === 0 && <p class="nota">Empezá por una categoría, por ejemplo “Café” o “Pastelería”.</p>}
+</Admin>
+
+<script>
+  import { conectarOrden } from "../../scripts/ordenar";
+  conectarOrden();
+</script>
+
+<style>
+  .grupo {
+    display: grid;
+    gap: 8px;
+  }
+
+  .grupo__titulo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 400;
+    letter-spacing: 0.16em;
+  }
+
+  .grupo__nombre {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .fila {
+    gap: 8px;
+    padding-left: 4px;
+  }
+
+  .fila.arrastrando {
+    opacity: 0.85;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    position: relative;
+    z-index: 2;
+  }
+
+  .asa {
+    flex: none;
+    display: grid;
+    align-content: center;
+    gap: 3px;
+    width: 36px;
+    height: 44px;
+    padding: 0 10px;
+    border: 0;
+    background: none;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .asa i {
+    display: block;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--color-ceniza);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 2px;
+  }
+
+  .mover {
+    display: flex;
+    flex: none;
+  }
+
+  .mover__btn {
+    width: 36px;
+    height: 44px;
+    border: 0;
+    background: none;
+    color: var(--color-ceniza);
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .mover__btn:disabled {
+    opacity: 0.25;
+    cursor: default;
+  }
+</style>

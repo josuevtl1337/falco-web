@@ -1,0 +1,164 @@
+---
+import { env } from "cloudflare:workers";
+import { deleteMenuItem, getMenuItemForAdmin, listMenuForAdmin, saveMenuItem } from "@falco/db";
+import Admin from "../../layouts/Admin.astro";
+import Campo from "../../components/Campo.astro";
+import SeccionFoto from "../../components/SeccionFoto.astro";
+import { conAviso } from "../../avisos";
+import { borrarSinRomper } from "../../subir-foto";
+import { itemAForm, itemVacio, leerItem, type ItemForm } from "../../carta";
+
+const nuevo = Astro.params.id === "nuevo";
+const id = Number(Astro.params.id);
+const item = !nuevo && Number.isInteger(id) ? await getMenuItemForAdmin(env.DB, id) : undefined;
+if (!nuevo && !item) return Astro.redirect("/carta", 303);
+
+const categorias = await listMenuForAdmin(env.DB);
+if (categorias.length === 0) return Astro.redirect("/carta/categoria/nueva", 303);
+
+const desde = Number(Astro.url.searchParams.get("categoria"));
+let valores: ItemForm = item ? itemAForm(item) : itemVacio(categorias.find((c) => c.id === desde)?.id ?? categorias[0]?.id);
+let errores: Record<string, string> = {};
+let problema = "";
+
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  if (form.get("accion") === "borrar" && item) {
+    const r = await deleteMenuItem(env.DB, item.id);
+    if (r.ok) {
+      // Su foto ya no la usa nadie.
+      if (r.imageKey) await borrarSinRomper(r.imageKey);
+      return Astro.redirect(conAviso("/carta", "carta-borrado", item.name), 303);
+    }
+    problema = r.reason ?? "No se pudo borrar.";
+  } else {
+    const leido = leerItem(form);
+    valores = leido.valores;
+    const r = await saveMenuItem(env.DB, item?.id, leido.borrador, Astro.locals.email);
+    if (r.ok) {
+      // Uno nuevo vuelve a su ficha para poder subirle la foto.
+      const destino = item ? "/carta" : `/carta/${r.id}`;
+      return Astro.redirect(conAviso(destino, "carta", valores.name), 303);
+    }
+    errores = r.errors;
+    problema = r.reason ?? "";
+  }
+}
+
+const hayErrores = Object.keys(errores).length > 0;
+const sitio = (env as unknown as { SITE_URL?: string }).SITE_URL ?? "https://falcocafe.com.ar";
+const titulo = nuevo ? "Nuevo ítem" : valores.name || item?.name || "Ítem";
+---
+
+<Admin titulo={titulo} pestana="carta">
+  <Fragment slot="barra">
+    <a class="atras" href="/carta">‹ Carta</a>
+    {item?.isVisible && <a class="enlace" href={`${sitio}/carta`} target="_blank" rel="noopener">Ver la carta ↗</a>}
+  </Fragment>
+
+  <h1>{titulo}</h1>
+
+  {
+    (problema || hayErrores) && (
+      <div class="aviso aviso--error" role="alert">
+        <div>
+          <b>{problema ? "No se pudo." : "Falta revisar algunos campos."}</b>
+          <small>{problema || "Están marcados abajo. No se guardó nada."}</small>
+        </div>
+      </div>
+    )
+  }
+
+  <form class="form" method="post">
+    <div class="campo">
+      <label for="campo-categoryId">Categoría</label>
+      <select class="input" id="campo-categoryId" name="categoryId" aria-invalid={errores.categoryId ? "true" : undefined}>
+        {categorias.map((c) => <option value={c.id} selected={String(c.id) === valores.categoryId}>{c.name}</option>)}
+      </select>
+      {errores.categoryId && <span class="error">{errores.categoryId}</span>}
+    </div>
+
+    <div class="dos">
+      <Campo etiqueta="Nombre" name="name" value={valores.name} error={errores.name} required maxlength={60} ayuda="Flat white" />
+      <Campo etiqueta="Precio ($)" name="priceArs" value={valores.priceArs} error={errores.priceArs} inputmode="numeric" required />
+    </div>
+
+    <Campo
+      etiqueta="Descripción (opcional)"
+      name="description"
+      value={valores.description}
+      error={errores.description}
+      maxlength={200}
+      ayuda="Una línea: Doble shot y leche texturizada fina"
+    />
+
+    <label class="tog">
+      <span><b>Visible en la carta</b><small>Apagado, no aparece. Sirve para lo que se agotó o es de temporada.</small></span>
+      <input class="sw" type="checkbox" name="isVisible" checked={valores.isVisible} />
+    </label>
+
+    <div class="guardar">
+      <button class="btn btn--pri btn--ancho" type="submit">{nuevo ? "Crear el ítem" : "Guardar"}</button>
+    </div>
+  </form>
+
+  <SeccionFoto
+    accion={item && `/carta/${item.id}/foto`}
+    imageKey={item?.imageKey}
+    alt={`La foto de ${item?.name ?? "este ítem"}`}
+    sitio={sitio}
+    sinFoto="Sin foto: en la carta se ve solo el texto. Es opcional."
+    primero="Primero creá el ítem; después le subís la foto desde acá."
+  />
+
+  {
+    item && (
+      <>
+        <button class="btn btn--peligro btn--ancho" type="button" data-abrir-borrar>Borrar este ítem</button>
+        <dialog class="confirmar" data-borrar>
+          <form method="post">
+            <h2>¿Borrar {item.name}?</h2>
+            <p>Sale de la carta. No se puede deshacer. Si sólo se agotó, apagá “Visible”.</p>
+            <button class="btn btn--peligro btn--ancho" type="submit" name="accion" value="borrar">Sí, borrar</button>
+            <button class="btn btn--sec btn--ancho" type="submit" formmethod="dialog">Cancelar</button>
+          </form>
+        </dialog>
+      </>
+    )
+  }
+</Admin>
+
+<script>
+  import { conectarConfirmar } from "../../scripts/confirmar";
+  conectarConfirmar();
+</script>
+
+<style>
+  select.input {
+    appearance: auto;
+  }
+
+  .tog {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 56px;
+    border-top: 1px solid var(--linea);
+    cursor: pointer;
+  }
+
+  .tog span {
+    display: grid;
+  }
+
+  .tog b {
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .tog small {
+    font-size: 12.5px;
+    color: var(--color-ceniza);
+  }
+</style>

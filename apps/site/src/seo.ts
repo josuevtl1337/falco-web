@@ -1,3 +1,4 @@
+import type { MenuCategoryWithItems } from "@falco/db";
 import type { SpecialDay, WeekHours } from "@falco/domain";
 
 /**
@@ -109,6 +110,41 @@ export function cafeJsonLd({ site, week, specials, instagramUrl }: CafeInfo) {
     },
     openingHoursSpecification: openingHours(week, specials),
     ...(instagramUrl ? { sameAs: [instagramUrl] } : {}),
+  };
+}
+
+/**
+ * La carta para Google: secciones con sus ítems y el precio en pesos. Es la
+ * misma que se ve en /carta, y queda colgada del local con su @id.
+ */
+export function menuJsonLd(
+  site: URL,
+  categories: readonly MenuCategoryWithItems[],
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Menu",
+    name: "La carta de Falco",
+    url: new URL("/carta", site).toString(),
+    inLanguage: "es-AR",
+    hasMenuSection: categories.map((category) => ({
+      "@type": "MenuSection",
+      name: category.name,
+      ...(category.note ? { description: category.note } : {}),
+      hasMenuItem: category.items.map((item) => ({
+        "@type": "MenuItem",
+        name: item.name,
+        ...(item.description ? { description: item.description } : {}),
+        ...(item.imageKey
+          ? { image: new URL(`/fotos/${item.imageKey}`, site).toString() }
+          : {}),
+        offers: {
+          "@type": "Offer",
+          price: item.priceArs,
+          priceCurrency: "ARS",
+        },
+      })),
+    })),
   };
 }
 

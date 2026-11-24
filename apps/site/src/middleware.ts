@@ -1,12 +1,13 @@
 import type { MiddlewareHandler } from "astro";
 
-const NO_STORE = new Set(["/carta", "/404"]);
+const NO_STORE = new Set(["/404"]);
 
 /**
  * max-age=0 para el navegador y s-maxage=60 para el borde: la persona siempre
  * revalida, pero una caché compartida puede responder sin pegarle a D1 durante
- * un minuto. La carta nunca se cachea (el link cambia cuando Falco sube otra)
- * y el 404 tampoco, para que una página nueva se vea enseguida.
+ * un minuto, también la carta: un precio nuevo del admin tarda eso en verse.
+ * El 404 nunca se cachea, para que una página nueva se vea enseguida. (Cuando
+ * /carta redirige al PDF, la redirección pone su propio no-store.)
  */
 export function cacheHeaderFor(pathname: string, status = 200): string {
   if (status === 404 || NO_STORE.has(pathname)) return "no-store";
@@ -16,7 +17,7 @@ export function cacheHeaderFor(pathname: string, status = 200): string {
 /**
  * www.falcocafe.com.ar lleva a falcocafe.com.ar, con la misma ruta: una sola
  * dirección para Google y para los links compartidos. 301 porque es para
- * siempre (a diferencia de /carta, que redirige con 302).
+ * siempre (a diferencia de /carta cuando lleva al PDF, que redirige con 302).
  */
 export function apexRedirect(url: URL): string | null {
   if (!url.hostname.startsWith("www.")) return null;

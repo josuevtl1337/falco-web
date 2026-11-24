@@ -1,5 +1,5 @@
 /**
- * Las fotos (de los productos y de la tolva): qué se acepta y con qué nombre
+ * Las fotos (de los productos, de la tolva y de la carta): qué se acepta y con qué nombre
  * se guardan.
  *
  * El navegador ya las achica y las pasa a WebP (scripts/achicar-foto.ts). Si
@@ -22,7 +22,7 @@ export function validarFoto(tipo: string, tamanio: number): string | null {
 }
 
 /** Dónde vive cada foto en R2: el sitio sólo sirve estas carpetas. */
-export type CarpetaDeFotos = "productos" | "tolva";
+export type CarpetaDeFotos = "productos" | "tolva" | "carta";
 
 /**
  * `<carpeta>/<id>-<hash>.<ext>`: el hash del contenido hace que cada foto

@@ -2,7 +2,7 @@
 import "../styles/admin.css";
 import { avisoDe } from "../avisos";
 
-export type Pestana = "inicio" | "tolva" | "productos" | "horarios" | "ajustes";
+export type Pestana = "inicio" | "tolva" | "carta" | "productos" | "horarios" | "ajustes";
 
 interface Props {
   /** El título de la pestaña del navegador y, si no hay slot "barra", de la barra. */
@@ -17,6 +17,7 @@ const aviso = avisoDe(Astro.url);
 const PESTANAS: { id: Pestana; href: string; nombre: string; icono: string }[] = [
   { id: "inicio", href: "/", nombre: "Inicio", icono: "M4 11 12 4l8 7v9h-5v-6H9v6H4z" },
   { id: "tolva", href: "/tolva", nombre: "Tolva", icono: "M5 4h14l-3 8h-8zM9 12l1 8h4l1-8" },
+  { id: "carta", href: "/carta", nombre: "Carta", icono: "M6 4h12v16H6zM9 8h6M9 12h6M9 16h4" },
   { id: "productos", href: "/productos", nombre: "Productos", icono: "M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2" },
   { id: "horarios", href: "/horarios", nombre: "Horarios", icono: "M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM12 8v4l3 2" },
   { id: "ajustes", href: "/ajustes", nombre: "Ajustes", icono: "M4 7h10M18 7h2M4 17h4M12 17h8M14 5v4M8 15v4" },

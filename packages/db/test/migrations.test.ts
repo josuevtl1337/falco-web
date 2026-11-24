@@ -446,6 +446,36 @@ describe("0002: la foto de la tolva", () => {
   });
 });
 
+describe("0003: la carta del local", () => {
+  beforeEach(() => {
+    db.exec(read("../migrations/0002_hopper_photo.sql"));
+    db.exec(read("../migrations/0003_menu.sql"));
+  });
+
+  it("crea las tablas, y 0005 carga la carta de verano entera", () => {
+    expect(count("menu_categories")).toBe(0);
+    db.exec(read("../migrations/0005_carta_verano.sql"));
+    expect(count("menu_categories")).toBe(11);
+    expect(count("menu_items")).toBe(38);
+    // Cada ítem quedó en una categoría que existe.
+    expect(
+      one<{ n: number }>("SELECT count(*) AS n FROM menu_items WHERE category_id IS NULL").n,
+    ).toBe(0);
+  });
+
+  it("un ítem tiene que ser de una categoría que exista, con precio no negativo", () => {
+    expect(run("INSERT INTO menu_items (category_id, name, price_ars) VALUES (99, 'X', 10)")).toThrow();
+    db.exec("INSERT INTO menu_categories (id, name) VALUES (1, 'Café')");
+    expect(run("INSERT INTO menu_items (category_id, name, price_ars) VALUES (1, 'X', -1)")).toThrow();
+    expect(run("INSERT INTO menu_items (category_id, name, price_ars) VALUES (1, '  ', 10)")).toThrow();
+  });
+
+  it("no repite el nombre de una categoría", () => {
+    db.exec("INSERT INTO menu_categories (name) VALUES ('Café')");
+    expect(run("INSERT INTO menu_categories (name) VALUES ('Café')")).toThrow();
+  });
+});
+
 describe("0004: el puntaje SCA", () => {
   beforeEach(() => {
     db.exec(read("../migrations/0002_hopper_photo.sql"));
