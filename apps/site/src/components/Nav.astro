@@ -30,6 +30,10 @@ const menuLinks = [
 ];
 
 const path = Astro.url.pathname;
+
+// En la carta (fondo papel) la cara cuelga sobre el claro y no se distingue:
+// ahí la barra lleva sólo el logo, a la izquierda.
+const sinCara = path === "/carta";
 ---
 
 <!-- El dibujo de la cara va una sola vez; los carteles lo reusan con <use>. -->
@@ -37,22 +41,33 @@ const path = Astro.url.pathname;
   <defs><path id="cara-falco" d={CARA_TRAZO}></path></defs>
 </svg>
 
-<nav class="nav" aria-label="Principal">
+<nav class:list={["nav", sinCara && "nav--sin-cara"]} aria-label="Principal">
   <!--
     La cara del murciélago es el cartel de neón de la barra: los tubos
     apagados (vidrio sin luz) y encima los prendidos, que parpadean al cargar
     con el mismo parpadeo y en el mismo momento que "Abierto ahora".
   -->
-  <a class="nav__cara" href="/" aria-label="Falco, ir al inicio">
-    <span class="cartel" aria-hidden="true">
-      <svg class="cartel__apagado" viewBox={CARA_VIEWBOX}><use href="#cara-falco"></use></svg>
-      <svg class="cartel__prendido" viewBox={CARA_VIEWBOX}><use href="#cara-falco"></use></svg>
-    </span>
-  </a>
+  {
+    !sinCara && (
+      <a class="nav__cara" href="/" aria-label="Falco, ir al inicio">
+        <span class="cartel" aria-hidden="true">
+          <svg class="cartel__apagado" viewBox={CARA_VIEWBOX}><use href="#cara-falco"></use></svg>
+          <svg class="cartel__prendido" viewBox={CARA_VIEWBOX}><use href="#cara-falco"></use></svg>
+        </span>
+      </a>
+    )
+  }
 
   <!-- El logo, al centro. También lleva al inicio, pero ya lo anuncia la cara:
-       fuera del orden del teclado y del lector de pantalla. -->
-  <a class="nav__logo" href="/" tabindex="-1" aria-hidden="true">
+       fuera del orden del teclado y del lector de pantalla. Sin cara, es él
+       el enlace al inicio. -->
+  <a
+    class="nav__logo"
+    href="/"
+    tabindex={sinCara ? undefined : -1}
+    aria-hidden={sinCara ? undefined : "true"}
+    aria-label={sinCara ? "Falco, ir al inicio" : undefined}
+  >
     <!-- 150 × 61 mantiene la proporción 2,48:1 del logo y evita que la página
          salte mientras carga. -->
     <img src="/logo-falco.svg" alt="" width="150" height="61" />
@@ -200,6 +215,11 @@ const path = Astro.url.pathname;
     display: inline-flex;
     min-width: 0;
     grid-column: 2;
+  }
+
+  .nav--sin-cara .nav__logo {
+    grid-column: 1;
+    justify-self: start;
   }
 
   .nav > ul,
